@@ -1,15 +1,14 @@
-import React from "react";
-import { Image } from "react-native";
-import { theme } from "./ui/theme";
+import React from 'react';
+import { Image } from 'react-native';
+import { theme } from './ui/theme';
 
 const SimpleLogo = () => {
   return (
     <Image
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      source={require("../assets/images/splash-icon.png")}
+      source={require('../assets/images/splash-icon.png')}
       style={{
         // maxWidth: 300,
-        resizeMode: "contain",
+        resizeMode: 'contain',
         height: 100,
         width: 100,
         borderWidth: 1,

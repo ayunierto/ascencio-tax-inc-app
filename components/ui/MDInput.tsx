@@ -8,8 +8,6 @@ import {
   TextInputProps, // Import standard TextInputProps
   ViewStyle, // Import style types
   TextStyle,
-  NativeSyntheticEvent,
-  TextInputFocusEventData,
 } from 'react-native';
 
 interface BasicMaterialInputProps extends TextInputProps {
@@ -38,22 +36,14 @@ const BasicMaterialInput: React.FC<BasicMaterialInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   // Handlers to update the focus state
-  const _handleFocus = (
-    event: NativeSyntheticEvent<TextInputFocusEventData>
-  ) => {
+  const _handleFocus = (event: any) => {
     setIsFocused(true);
-    if (onFocus) {
-      onFocus(event); // Call the original onFocus prop if provided
-    }
+    onFocus?.(event); // Call the original onFocus prop if provided
   };
 
-  const _handleBlur = (
-    event: NativeSyntheticEvent<TextInputFocusEventData>
-  ) => {
+  const _handleBlur = (event: any) => {
     setIsFocused(false);
-    if (onBlur) {
-      onBlur(event); // Call the original onBlur prop if provided
-    }
+    onBlur?.(event); // Call the original onBlur prop if provided
   };
 
   // Determine the color and thickness of the bottom border based on state and error prop

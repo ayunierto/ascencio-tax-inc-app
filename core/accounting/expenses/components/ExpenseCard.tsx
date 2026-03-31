@@ -1,49 +1,62 @@
-import React from "react";
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-
-import { ExpenseResponse } from "@/core/accounting/expenses/interfaces";
-import { useExpenseCard } from "@/core/accounting/expenses/hooks/useExpenseCard";
-import { Card } from "@/components/ui/Card/Card";
-import { theme } from "@/components/ui/theme";
-import { SimpleCardHeader } from "@/components/ui/Card/SimpleCardHeader";
-import { SimpleCardHeaderTitle } from "@/components/ui/Card/SimpleCardHeaderTitle";
-import { CardContent } from "@/components/ui/Card/CardContent";
+import { Card, CardContent, theme } from '@/components/ui';
+import { ThemedText } from '@/components/ui/ThemedText';
+import { Button, ButtonIcon } from '@/components/ui/Button';
+import { DeleteConfirmationDialog } from '@/core/components';
+import { useExpenseCard } from '@/core/accounting/expenses/hooks/useExpenseCard';
+import { ExpenseResponse } from '@/core/accounting/expenses/interfaces';
 
 interface ExpenseCardProps {
   expense: ExpenseResponse;
+  isLoading: boolean;
+  handleDelete: (expenseId: string) => void;
 }
 
-const ExpenseCard = ({ expense }: ExpenseCardProps) => {
+const ExpenseCard = ({
+  expense,
+  isLoading,
+  handleDelete,
+}: ExpenseCardProps) => {
+  const { t } = useTranslation();
   const { dateToLocaleDateTimeString } = useExpenseCard();
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/accounting/receipts/expense/${expense.id}`)}
-      style={{ marginBottom: 10 }}
+      onPress={() => router.push(`/(app)/expenses/${expense.id}`)}
+      disabled={isLoading}
+      activeOpacity={0.7}
     >
       <Card>
-        <CardContent>
-          <SimpleCardHeader>
-            <Ionicons
-              name={"receipt-outline"}
-              size={20}
-              color={theme.foreground}
-            />
-            <SimpleCardHeaderTitle>{expense.merchant}</SimpleCardHeaderTitle>
-          </SimpleCardHeader>
-          <View style={styles.metricItem}>
-            <Text style={styles.metricLabel}>Date</Text>
-            <Text style={styles.metricValue}>{`${dateToLocaleDateTimeString(
-              expense.date
-            )}`}</Text>
+        <CardContent style={styles.cardContent}>
+          <View style={{ flex: 1 }}>
+            <ThemedText
+              numberOfLines={1}
+              style={{ fontWeight: 'bold', marginBottom: 4 }}
+            >
+              {expense.merchant}
+            </ThemedText>
+
+            <ThemedText style={styles.subtitle} numberOfLines={1}>
+              {t('date')}: {dateToLocaleDateTimeString(expense.date)}
+            </ThemedText>
+
+            <ThemedText style={styles.subtitle}>
+              {t('total')}: ${expense.total}
+            </ThemedText>
           </View>
-          <View style={styles.metricItem}>
-            <Text style={styles.metricLabel}>Total</Text>
-            <Text style={styles.metricValue}>${expense.total}</Text>
-          </View>
+
+          <DeleteConfirmationDialog onDelete={() => handleDelete(expense.id)}>
+            <Button variant="ghost" disabled={isLoading} isLoading={isLoading}>
+              <ButtonIcon
+                name="trash-outline"
+                style={{ color: theme.destructive }}
+              />
+            </Button>
+          </DeleteConfirmationDialog>
         </CardContent>
       </Card>
     </TouchableOpacity>
@@ -51,18 +64,12 @@ const ExpenseCard = ({ expense }: ExpenseCardProps) => {
 };
 
 const styles = StyleSheet.create({
-  metricItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 5,
+  cardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  metricLabel: {
-    color: theme.foreground,
-  },
-  metricValue: {
-    fontWeight: "bold",
-    color: theme.foreground,
-  },
+  subtitle: { color: theme.muted, fontSize: 12 },
 });
 
 export default ExpenseCard;

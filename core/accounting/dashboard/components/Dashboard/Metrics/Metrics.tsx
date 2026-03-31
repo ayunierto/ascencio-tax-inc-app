@@ -2,14 +2,14 @@ import React from "react";
 
 import { Ionicons } from "@expo/vector-icons";
 
-import { MetricsList } from "./MetricsList";
-import { MetricsListValue } from "./MetricsListValue";
 import { Card } from "@/components/ui/Card/Card";
+import { CardContent } from "@/components/ui/Card/CardContent";
 import { SimpleCardHeader } from "@/components/ui/Card/SimpleCardHeader";
 import { SimpleCardHeaderTitle } from "@/components/ui/Card/SimpleCardHeaderTitle";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { theme } from "@/components/ui/theme";
-import { CardContent } from "@/components/ui/Card/CardContent";
+import { MetricsList } from "./MetricsList";
+import { MetricsListValue } from "./MetricsListValue";
 
 interface MetricsProps {
   metrics: { label: string; value: string }[];
@@ -20,7 +20,11 @@ export const Metrics = ({ metrics }: MetricsProps) => {
     <Card>
       <CardContent>
         <SimpleCardHeader>
-          <Ionicons name={"key-outline"} size={20} color={theme.foreground} />
+          <Ionicons
+            name={"bar-chart-outline"}
+            size={24}
+            color={theme.foreground}
+          />
           <SimpleCardHeaderTitle>Key Metrics</SimpleCardHeaderTitle>
         </SimpleCardHeader>
         {metrics.map((metric, index) => (

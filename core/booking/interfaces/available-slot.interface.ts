@@ -1,10 +1,10 @@
-import { Staff } from "@/core/staff/interfaces";
+import { type StaffMember } from '@ascencio/shared/interfaces';
 
 export interface AvailableSlot {
-  /** Tiempo de inicio del slot en formato ISO 8601 (UTC). Ejemplo: '2025-10-20T14:30:00.000Z' */
+  /** Start time of the slot in ISO 8601 (UTC) format. Example: '2025-10-20T14:30:00.000Z' */
   startTimeUTC: string;
-  /** Tiempo de fin del slot en formato ISO 8601 (UTC). Ejemplo: '2025-10-20T15:00:00.000Z' */
+  /** End time of the slot in ISO 8601 (UTC) format. Example: '2025-10-20T15:00:00.000Z' */
   endTimeUTC: string;
-  /** Miembros del Staff disponibles para este slot. */
-  availableStaff: Staff[];
+  /** Staff members available for this slot. */
+  availableStaff: StaffMember[];
 }

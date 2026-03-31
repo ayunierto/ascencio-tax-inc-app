@@ -1,30 +1,37 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { VerifyCodeRequest } from "../schemas/verify-email-code.schema";
-import { User } from "../interfaces/user.interface";
-import { SignUpApiRequest } from "../schemas/sign-up.schema";
-import { SignUpResponse } from "../interfaces/sign-up.response";
-import { VerifyCodeResponse } from "../interfaces/verify-code.response";
-import { SignInRequest } from "../schemas/sign-in.schema";
-import { AuthResponse } from "../interfaces/auth.response";
-import { DeleteAccountRequest } from "../schemas/delete-account.schema";
-import { DeleteAccountResponse } from "../interfaces/delete-account.response";
-import { ForgotPasswordRequest } from "../schemas/forgot-password.schema";
-import { ForgotPasswordResponse } from "../interfaces/forgot-password.response";
-import { ResetPasswordRequest } from "../schemas/reset-password.schema";
-import { ResetPasswordResponse } from "../interfaces/reset-password.response";
+import { StorageAdapter } from '@/core/adapters/storage.adapter';
 import {
   checkAuthStatusAction,
   deleteAccountAction,
   forgotPasswordAction,
   resetPasswordAction,
   signInAction,
+  signInWithGoogleAction,
   signUpAction,
   verifyCodeAction,
-} from "../actions";
-import { StorageAdapter } from "@/core/adapters/storage.adapter";
+} from '../actions';
+import {
+  DeleteAccountRequest,
+  DeleteAccountResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  SignInRequest,
+  SignInResponse,
+  SignUpRequest,
+  SignUpResponse,
+  User,
+  VerifyEmailCodeRequest,
+  VerifyEmailCodeResponse,
+} from '@ascencio/shared';
 
-type AuthStatus = "authenticated" | "unauthenticated" | "loading";
+type AuthStatus =
+  | 'authenticated'
+  | 'unauthenticated'
+  | 'loading'
+  | 'network-error';
 
 export interface AuthState {
   // Properties
@@ -37,14 +44,17 @@ export interface AuthState {
   isAdmin: () => boolean;
 
   // Methods
-  signUp: (data: SignUpApiRequest) => Promise<SignUpResponse>;
-  verifyCode: (data: VerifyCodeRequest) => Promise<VerifyCodeResponse>;
-  signIn: (credentials: SignInRequest) => Promise<AuthResponse>;
+  signUp: (data: SignUpRequest) => Promise<SignUpResponse>;
+  verifyCode: (
+    data: VerifyEmailCodeRequest,
+  ) => Promise<VerifyEmailCodeResponse>;
+  signIn: (credentials: SignInRequest) => Promise<SignInResponse>;
+  signInWithGoogle: (idToken: string) => Promise<SignInResponse>;
   checkAuthStatus: () => Promise<boolean>;
   deleteAccount: (data: DeleteAccountRequest) => Promise<DeleteAccountResponse>;
   logout: () => Promise<void>;
   forgotPassword: (
-    data: ForgotPasswordRequest
+    data: ForgotPasswordRequest,
   ) => Promise<ForgotPasswordResponse>;
   resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
 }
@@ -52,51 +62,63 @@ export interface AuthState {
 export const useAuthStore = create<AuthState>()((set, get) => ({
   access_token: null,
   user: null,
-  authStatus: "loading",
+  authStatus: 'loading',
   tempEmail: undefined,
 
   isAdmin: () => {
     const roles = get().user?.roles || [];
-    return roles.includes("admin");
+    return roles.includes('admin');
   },
 
   checkAuthStatus: async () => {
-    const access_token = await StorageAdapter.getItem("access_token");
+    const access_token = await StorageAdapter.getItem('access_token');
     if (!access_token) {
-      set({ authStatus: "unauthenticated", user: null, access_token: null });
+      set({ authStatus: 'unauthenticated', user: null, access_token: null });
       return false;
     }
 
     try {
       const response = await checkAuthStatusAction();
-      await StorageAdapter.setItem("access_token", response.access_token);
+      await StorageAdapter.setItem('access_token', response.access_token);
       set({
         user: response.user,
         access_token: response.access_token,
-        authStatus: "authenticated",
+        authStatus: 'authenticated',
       });
       return true;
     } catch (error) {
       console.error(error);
-      await StorageAdapter.removeItem("access_token");
+      await StorageAdapter.removeItem('access_token');
       set({
         user: undefined,
         access_token: undefined,
-        authStatus: "unauthenticated",
+        authStatus: 'unauthenticated',
       });
       return false;
     }
   },
 
-  signUp: async (data: SignUpApiRequest) => {
-    const response = await signUpAction(data);
+  signUp: async (data: SignUpRequest) => {
     set({ tempEmail: data.email });
-    return response;
+
+    return await signUpAction(data);
   },
 
-  verifyCode: async (data: VerifyCodeRequest) => {
-    const response = await verifyCodeAction(data);
-    return response;
+  verifyCode: async (data: VerifyEmailCodeRequest) => {
+    try {
+      const response = await verifyCodeAction(data);
+      await StorageAdapter.setItem('access_token', response.access_token);
+      set({
+        user: response.user,
+        access_token: response.access_token,
+        authStatus: 'authenticated',
+      });
+      return response;
+    } catch (error) {
+      await StorageAdapter.removeItem('access_token');
+      set({ user: null, access_token: null, authStatus: 'unauthenticated' });
+      throw error;
+    }
   },
 
   signIn: async (credentials: SignInRequest) => {
@@ -105,16 +127,33 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     try {
       const response = await signInAction(credentials);
-      await StorageAdapter.setItem("access_token", response.access_token);
+      await StorageAdapter.setItem('access_token', response.access_token);
       set({
         user: response.user,
         access_token: response.access_token,
-        authStatus: "authenticated",
+        authStatus: 'authenticated',
       });
       return response;
     } catch (error) {
-      await StorageAdapter.removeItem("access_token");
-      set({ user: null, access_token: null, authStatus: "unauthenticated" });
+      await StorageAdapter.removeItem('access_token');
+      set({ user: null, access_token: null, authStatus: 'unauthenticated' });
+      throw error;
+    }
+  },
+
+  signInWithGoogle: async (idToken: string) => {
+    try {
+      const response = await signInWithGoogleAction(idToken);
+      await StorageAdapter.setItem('access_token', response.access_token);
+      set({
+        user: response.user,
+        access_token: response.access_token,
+        authStatus: 'authenticated',
+      });
+      return response;
+    } catch (error) {
+      await StorageAdapter.removeItem('access_token');
+      set({ user: null, access_token: null, authStatus: 'unauthenticated' });
       throw error;
     }
   },
@@ -122,14 +161,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   deleteAccount: async (data: DeleteAccountRequest) => {
     const response = await deleteAccountAction(data);
 
-    await StorageAdapter.removeItem("access_token");
-    set({ user: null, access_token: null, authStatus: "unauthenticated" });
+    await StorageAdapter.removeItem('access_token'); // Clear token on account deletion
+    set({ user: null, access_token: null, authStatus: 'unauthenticated' });
     return response;
   },
 
   logout: async () => {
-    await StorageAdapter.removeItem("access_token");
-    set({ user: null, access_token: null, authStatus: "unauthenticated" });
+    await StorageAdapter.removeItem('access_token');
+    set({ user: null, access_token: null, authStatus: 'unauthenticated' });
   },
 
   forgotPassword: async (data: ForgotPasswordRequest) => {
@@ -138,7 +177,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       set({ tempEmail: data.email });
       return response;
     } catch (error) {
-      console.error("Error sending forgot password request", error);
+      console.error('Error sending forgot password request', error);
       throw error;
     }
   },
@@ -148,7 +187,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const response = await resetPasswordAction(data);
       return response;
     } catch (error) {
-      console.error("Error resetting password:", error);
+      console.error('Error resetting password:', error);
       throw error;
     }
   },

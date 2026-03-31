@@ -1,12 +1,11 @@
-import React from "react";
-import { View, Text } from "react-native";
+import React from 'react';
+import { Text, View } from 'react-native';
 
-import { Ionicons } from "@expo/vector-icons";
-import { theme } from "@/components/ui/theme";
-import Divider from "@/components/ui/Divider";
+import { Divider } from '@/components/ui/Divider';
+import { theme } from '@/components/ui/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ReceiptsFooterProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
 }
 const ReceiptsFooter = ({ data }: ReceiptsFooterProps) => {
@@ -16,18 +15,18 @@ const ReceiptsFooter = ({ data }: ReceiptsFooterProps) => {
     <View style={{ gap: 4 }}>
       <View
         style={{
-          flexDirection: "row",
+          flexDirection: 'row',
           gap: 8,
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: 'center',
+          justifyContent: 'center',
           marginTop: 20,
         }}
       >
         <Ionicons name="remove-circle-outline" color={theme.mutedForeground} />
         <Text style={{ color: theme.mutedForeground }}>{total}</Text>
       </View>
-      <Divider style={{ width: "60%", marginHorizontal: "auto" }} />
-      <Text style={{ color: theme.mutedForeground, textAlign: "center" }}>
+      <Divider style={{ width: '60%', marginHorizontal: 'auto' }} />
+      <Text style={{ color: theme.mutedForeground, textAlign: 'center' }}>
         {data.length} Receipt(s)
       </Text>
     </View>

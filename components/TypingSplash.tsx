@@ -1,6 +1,6 @@
 // src/components/TypingSplash.tsx o donde prefieras
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 // You might need expo-splash-screen if you are controlling the native splash screen hiding here
 // import * as SplashScreen from 'expo-splash-screen';
 
@@ -41,7 +41,7 @@ const TypingSplash: React.FC<TypingSplashProps> = ({
 
     let currentText = '';
     let index = 0;
-    let typingTimer: NodeJS.Timeout;
+    let typingTimer: ReturnType<typeof setTimeout>;
 
     // Function to add one character
     const type = () => {
@@ -73,7 +73,7 @@ const TypingSplash: React.FC<TypingSplashProps> = ({
 
   useEffect(() => {
     // Cursor blinking logic
-    let cursorTimer: NodeJS.Timeout;
+    let cursorTimer: ReturnType<typeof setInterval>;
 
     if (!isTypingComplete) {
       // Blink cursor only while typing

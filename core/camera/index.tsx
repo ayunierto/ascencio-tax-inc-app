@@ -1,11 +1,16 @@
-import React, { useRef, useState } from 'react';
-import { router } from 'expo-router';
-import { Alert, Image, StyleSheet, View } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
-import * as ImagePicker from 'expo-image-picker';
+import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
+import { router } from "expo-router";
+import React, { useRef, useState } from "react";
+import { Alert, Image, StyleSheet, View } from "react-native";
 
-import { useCameraStore } from '../../core/camera/store/useCameraStore';
+import Loader from "@/components/Loader";
+import { Card } from "@/components/ui";
+import { Button, ButtonText } from "@/components/ui/Button";
+import { CardContent } from "@/components/ui/Card/CardContent";
+import { theme } from "@/components/ui/theme";
+import { ThemedText } from "@/components/ui/ThemedText";
 import {
   ConfirmImageButton,
   FlipCameraButton,
@@ -13,19 +18,14 @@ import {
   RetakeImageButton,
   ReturnCancelButton,
   ShutterButton,
-} from '@/core/camera/components';
-import Loader from '@/components/Loader';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { Button, ButtonText } from '@/components/ui/Button';
-import { Card } from '@/components/ui';
-import { CardContent } from '@/components/ui/Card/CardContent';
-import { theme } from '@/components/ui/theme';
-import { Ionicons } from '@expo/vector-icons';
+} from "@/core/camera/components";
+import { Ionicons } from "@expo/vector-icons";
+import { useCameraStore } from "../../core/camera/store/useCameraStore";
 
 export default function CameraScreen() {
   const { selectImage, removeImage, selectedImage } = useCameraStore();
 
-  const [facing, setFacing] = useState<CameraType>('back');
+  const [facing, setFacing] = useState<CameraType>("back");
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [, requestMediaPermission] = MediaLibrary.usePermissions();
 
@@ -36,18 +36,18 @@ export default function CameraScreen() {
       const { status: cameraPermissionStatus } =
         await requestCameraPermission();
 
-      if (cameraPermissionStatus !== 'granted') {
-        Alert.alert('Error', 'Camera permission not granted');
+      if (cameraPermissionStatus !== "granted") {
+        Alert.alert("Error", "Camera permission not granted");
         return;
       }
       const { status: mediaPermissionStatus } = await requestMediaPermission();
-      if (mediaPermissionStatus !== 'granted') {
-        Alert.alert('Error', 'Gallery permission not granted');
+      if (mediaPermissionStatus !== "granted") {
+        Alert.alert("Error", "Gallery permission not granted");
         return;
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Permits could not be obtained');
+      Alert.alert("Error", "Permits could not be obtained");
     }
   };
 
@@ -64,10 +64,10 @@ export default function CameraScreen() {
           <CardContent>
             <View
               style={{
-                alignItems: 'center',
+                alignItems: "center",
                 marginBottom: 20,
-                flexDirection: 'row',
-                justifyContent: 'center',
+                flexDirection: "row",
+                justifyContent: "center",
                 gap: 20,
               }}
             >
@@ -106,7 +106,7 @@ export default function CameraScreen() {
   };
 
   const toggleCameraFacing = () => {
-    setFacing((current) => (current === 'back' ? 'front' : 'back'));
+    setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
   const onPictureConfirm = async () => {
@@ -114,7 +114,7 @@ export default function CameraScreen() {
     // Save to media library
     await MediaLibrary.createAssetAsync(selectedImage.uri);
     selectImage(selectedImage);
-    router.push('/(tabs)/accounting/receipts/expense/new');
+    router.push("/(app)/expenses/create");
   };
 
   const onRetakePicture = () => {
@@ -123,7 +123,7 @@ export default function CameraScreen() {
 
   const onPickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 1,
     });
@@ -166,10 +166,10 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   message: {
-    textAlign: 'center',
+    textAlign: "center",
     paddingBottom: 10,
   },
   camera: {
@@ -177,11 +177,11 @@ const styles = StyleSheet.create({
   },
   buttonsBottomContainer: {
     flex: 1,
-    flexDirection: 'row',
-    position: 'absolute',
+    flexDirection: "row",
+    position: "absolute",
     bottom: 30,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '100%',
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "100%",
   },
 });

@@ -15,7 +15,7 @@ interface SimpleCardHeaderTitleProps extends TextProps {
 export const SimpleCardHeaderTitle = ({
   style,
   children,
-}: SimpleCardHeaderTitleProps): JSX.Element => {
+}: SimpleCardHeaderTitleProps) => {
   return <Text style={[styles.title, style]}>{children}</Text>;
 };
 

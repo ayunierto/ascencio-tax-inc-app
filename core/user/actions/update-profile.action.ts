@@ -1,21 +1,13 @@
-import { UpdateProfileRequest } from "../schemas/update-profile.schema";
-import { UpdateProfileResponse } from "../interfaces/update-profile.interface";
-import { api } from "@/core/api/api";
+import { api } from '@/core/api/api';
+import { UpdateProfileRequest, UpdateProfileResponse } from '@ascencio/shared';
 
-export const updateProfileAction = async ({
-  lastName,
-  firstName,
-  password,
-  phoneNumber,
-}: UpdateProfileRequest): Promise<UpdateProfileResponse> => {
+export const updateProfileAction = async (
+  values: UpdateProfileRequest,
+): Promise<UpdateProfileResponse> => {
   const { data } = await api.patch<UpdateProfileResponse>(
-    "auth/update-profile",
-    {
-      lastName,
-      firstName,
-      password,
-      phoneNumber,
-    }
+    'auth/update-profile',
+    values,
   );
+
   return data;
 };

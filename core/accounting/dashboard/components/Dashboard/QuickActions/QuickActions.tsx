@@ -1,13 +1,13 @@
 import React from "react";
 
-import { View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Button, ButtonText } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card/Card";
+import { CardContent } from "@/components/ui/Card/CardContent";
 import { SimpleCardHeader } from "@/components/ui/Card/SimpleCardHeader";
 import { SimpleCardHeaderTitle } from "@/components/ui/Card/SimpleCardHeaderTitle";
 import { theme } from "@/components/ui/theme";
-import { Button, ButtonText } from "@/components/ui/Button";
-import { CardContent } from "@/components/ui/Card/CardContent";
+import { Ionicons } from "@expo/vector-icons";
+import { View } from "react-native";
 
 interface QuickActionsProps {
   actions: {
@@ -21,7 +21,7 @@ export const QuickActions = ({ actions }: QuickActionsProps) => {
     <Card>
       <CardContent>
         <SimpleCardHeader>
-          <Ionicons name={"flash-outline"} size={20} color={theme.foreground} />
+          <Ionicons name={"flash-outline"} size={24} color={theme.foreground} />
           <SimpleCardHeaderTitle>Quick Actions</SimpleCardHeaderTitle>
         </SimpleCardHeader>
         <View>

@@ -1,5 +1,4 @@
-export interface ResendResetPasswordCodeResponse {
-  message: string;
-  statusCode?: number;
-  error?: string;
-}
+export type {
+  ResendResetPasswordCodeRequest,
+  ResendResetPasswordCodeResponse,
+} from '@ascencio/shared';

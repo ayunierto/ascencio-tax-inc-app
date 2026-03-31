@@ -1,15 +1,12 @@
-import { api } from "@/core/api/api";
-import { ResetPasswordResponse } from "../interfaces/reset-password.response";
-import { ResetPasswordRequest } from "../schemas/reset-password.schema";
+import { api } from '@/core/api/api';
+import { ResetPasswordRequest, ResetPasswordResponse } from '@ascencio/shared';
 
-export const resetPasswordAction = async ({
-  code,
-  email,
-  newPassword,
-}: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+export const resetPasswordAction = async (
+  request: ResetPasswordRequest,
+): Promise<ResetPasswordResponse> => {
   const { data } = await api.post<ResetPasswordResponse>(
-    "/auth/reset-password",
-    { code, email, newPassword }
+    '/auth/reset-password',
+    request,
   );
 
   return data;

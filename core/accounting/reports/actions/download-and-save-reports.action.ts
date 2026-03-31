@@ -1,5 +1,5 @@
-import * as FileSystem from 'expo-file-system';
 import { StorageAdapter } from '@/core/adapters/storage.adapter';
+import { Directory, File, Paths } from 'expo-file-system';
 
 export const downloadAndSaveReport = async (
   startDate: string,
@@ -15,13 +15,17 @@ export const downloadAndSaveReport = async (
   }
   const fileName = `report-${startDate}-${endDate}.pdf`;
   const url = `${API_URL}/reports/generate?startDate=${startDate}&endDate=${endDate}`;
-  const destinationUri = FileSystem.documentDirectory + fileName;
+  const destinationUri = new Directory(Paths.document, fileName);
 
-  const { uri } = await FileSystem.downloadAsync(url, destinationUri, {
+  destinationUri.create();
+  const output = await File.downloadFileAsync(url, destinationUri, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return uri;
+  console.log(output.exists); // true
+  console.log(output.uri); // path to the downloaded file, e.g., '${cacheDirectory}/pdfs/sample.pdf'
+
+  return output.uri;
 };

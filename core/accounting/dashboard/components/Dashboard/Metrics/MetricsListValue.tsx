@@ -1,8 +1,8 @@
-import { theme } from "@/components/ui/theme";
-import { ThemedText } from "@/components/ui/ThemedText";
-import React from "react";
+import { theme } from '@/components/ui/theme';
+import { ThemedText } from '@/components/ui/ThemedText';
+import React from 'react';
 
-import { StyleSheet, TextProps } from "react-native";
+import { StyleSheet, TextProps } from 'react-native';
 
 export const MetricsListValue = ({ children, style }: TextProps) => {
   return (
@@ -12,7 +12,7 @@ export const MetricsListValue = ({ children, style }: TextProps) => {
 
 const styles = StyleSheet.create({
   metricValue: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: theme.foreground,
   },
 });

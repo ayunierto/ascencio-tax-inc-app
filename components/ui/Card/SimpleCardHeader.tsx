@@ -14,7 +14,7 @@ interface SimpleCardHeaderProps extends ViewProps {
 export const SimpleCardHeader = ({
   style,
   children,
-}: SimpleCardHeaderProps): JSX.Element => {
+}: SimpleCardHeaderProps) => {
   return <View style={[styles.simpleHeader, style]}>{children}</View>;
 };
 

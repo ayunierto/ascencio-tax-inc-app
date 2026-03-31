@@ -1,6 +1,6 @@
-import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
 interface ReturnCancelButtonProps {
   onPress: () => void;

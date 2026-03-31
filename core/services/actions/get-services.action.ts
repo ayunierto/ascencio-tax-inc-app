@@ -1,5 +1,5 @@
-import { api } from "@/core/api/api";
-import { ServicesResponse } from "../interfaces";
+import { api } from '@/core/api/api';
+import { PaginatedResponse, Service } from '@ascencio/shared';
 
 interface Options {
   limit?: number | string;
@@ -7,10 +7,10 @@ interface Options {
 }
 
 export const getServicesAction = async (
-  options: Options
-): Promise<ServicesResponse> => {
+  options: Options,
+): Promise<PaginatedResponse<Service>> => {
   const { limit, offset } = options;
-  const { data } = await api.get<ServicesResponse>("/services", {
+  const { data } = await api.get<PaginatedResponse<Service>>('/services', {
     params: {
       limit,
       offset,

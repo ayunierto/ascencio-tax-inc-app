@@ -38,10 +38,10 @@ export const Alert = ({
           variant === 'info'
             ? 'information-circle-outline'
             : variant === 'warning'
-            ? 'warning-outline'
-            : variant === 'success'
-            ? 'checkmark-circle-outline'
-            : 'alert-circle-outline'
+              ? 'warning-outline'
+              : variant === 'success'
+                ? 'checkmark-circle-outline'
+                : 'alert-circle-outline'
         }
         size={24}
         color="white"

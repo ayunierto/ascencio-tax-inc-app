@@ -1,3 +1,3 @@
-import { Appointment } from "./appointmentResponse";
+import { Appointment } from './appointmentResponse';
 
 export type GetCurrentUserAppointmentsResponse = Appointment[];

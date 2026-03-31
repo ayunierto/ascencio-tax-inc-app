@@ -1,7 +1,7 @@
-import { api } from "@/core/api/api";
-import { AuthResponse } from "../interfaces";
+import { api } from '@/core/api/api';
+import { CheckStatusResponse } from '@ascencio/shared/interfaces';
 
-export const checkAuthStatusAction = async (): Promise<AuthResponse> => {
-  const { data } = await api.get<AuthResponse>("/auth/check-status");
+export const checkAuthStatusAction = async (): Promise<CheckStatusResponse> => {
+  const { data } = await api.get<CheckStatusResponse>('/auth/check-status');
   return data;
 };

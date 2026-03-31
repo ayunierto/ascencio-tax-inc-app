@@ -1,4 +1,4 @@
-import { Schedule } from "@/core/schedules/interfaces/schedule.interface";
+import { Schedule } from '@/core/schedules/interfaces/schedule.interface';
 
 export interface Staff {
   id: string;

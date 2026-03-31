@@ -1,9 +1,9 @@
+import { ThemedText } from "@/components/ui/ThemedText";
+import { theme } from "@/components/ui/theme";
 import { Log } from "@/core/logs/interfaces";
 import React from "react";
 import { FlatList } from "react-native";
 import { ActivityItem } from "./ActivityItem";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { theme } from "@/components/ui/theme";
 
 interface RecentActivityProps {
   activities: Log[];

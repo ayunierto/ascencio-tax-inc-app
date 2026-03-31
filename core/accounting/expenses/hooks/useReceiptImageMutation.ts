@@ -1,11 +1,11 @@
-import { AxiosError } from 'axios';
-import { ReceiptImage } from '../interfaces/upload-receipt-image.response';
 import { ServerException } from '@/core/interfaces/server-exception.response';
 import { useMutation } from '@tanstack/react-query';
-import { uploadReceiptImage } from '../actions/upload-receipt-image';
-import { AnalyzedExpense } from '../interfaces/analyze-expense.interface';
+import { AxiosError } from 'axios';
 import { getReceiptValues } from '../../receipts/actions/get-receipt-values.action';
 import { removeReceiptImage } from '../actions/remove-receipt-image.action';
+import { uploadReceiptImage } from '../actions/upload-receipt-image.action';
+import { AnalyzedExpense } from '../interfaces/analyze-expense.interface';
+import { ReceiptImage } from '../interfaces/upload-receipt-image.response';
 
 export const useReceiptImageMutation = () => {
   const uploadImageMutation = useMutation<

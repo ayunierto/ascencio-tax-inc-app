@@ -1,11 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
+  ActivityIndicator,
+  StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
-  StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import { theme } from '@/components/ui/theme';
 

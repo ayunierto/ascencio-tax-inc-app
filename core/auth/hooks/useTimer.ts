@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * useTimer Hook
@@ -16,45 +16,52 @@ import { useState, useEffect, useRef } from "react";
  */
 export const useTimer = (
   initialTime: number = 30, // Default initial time is 30 seconds
-  onTimerEnd: () => void = () => {}
+  onTimerEnd: () => void = () => {},
 ) => {
   const [timeRemaining, setTimeRemaining] = useState(initialTime);
   const [isRunning, setIsRunning] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout>(undefined);
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
-    if (isRunning && timeRemaining > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeRemaining((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && isRunning) {
-      clearInterval(timerRef.current);
-      setIsRunning(false);
-      onTimerEnd();
-    }
-
+    if (!isRunning) return;
+    timerRef.current = setInterval(() => {
+      setTimeRemaining((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerRef.current);
+          timerRef.current = undefined;
+          setIsRunning(false);
+          onTimerEnd();
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
+        timerRef.current = undefined;
       }
     };
-  }, [isRunning, timeRemaining, onTimerEnd]);
+  }, [isRunning, onTimerEnd]);
 
-  const startTimer = () => {
+  const startTimer = useCallback(() => {
     setIsRunning(true);
-  };
+  }, []);
 
-  const pauseTimer = () => {
+  const pauseTimer = useCallback(() => {
     setIsRunning(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
+      timerRef.current = undefined;
     }
-  };
+  }, []);
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     pauseTimer();
     setTimeRemaining(initialTime);
-  };
+  }, [initialTime, pauseTimer]);
 
   return { timeRemaining, isRunning, startTimer, pauseTimer, resetTimer };
 };

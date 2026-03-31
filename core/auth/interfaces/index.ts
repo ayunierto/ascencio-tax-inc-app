@@ -1,7 +1,16 @@
-export * from './auth.response';
-export * from './delete-account.response';
-export * from './forgot-password.response';
-export * from './reset-password.response';
-export * from './sign-up.response';
-export * from './user.interface';
-export * from './verify-code.response';
+// Re-export types from shared package
+export type {
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  DeleteAccountRequest,
+  DeleteAccountResponse,
+  User,
+  VerifyEmailCodeRequest,
+  VerifyEmailCodeResponse,
+  SignInRequest,
+  SignInResponse,
+  SignUpRequest,
+  SignUpResponse,
+} from '@ascencio/shared';

@@ -1,13 +1,13 @@
 // TODO: Pending review.
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
-import { DateTime } from 'luxon';
+import { ExpenseResponse } from '@/core/accounting/expenses/interfaces';
 import {
   ExpenseFormFields,
   expenseSchema,
 } from '@/core/accounting/expenses/schemas';
-import { ExpenseResponse } from '@/core/accounting/expenses/interfaces';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { DateTime } from 'luxon';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 export const useExpenseForm = (expense?: ExpenseResponse | null) => {
   const form = useForm<ExpenseFormFields>({
@@ -41,7 +41,7 @@ export const useExpenseForm = (expense?: ExpenseResponse | null) => {
         imageUrl: expense.imageUrl || '',
       });
     }
-  }, [expense?.id, form]);
+  }, [expense, form]);
 
   // Auto-save draft functionality (optional)
   useEffect(() => {

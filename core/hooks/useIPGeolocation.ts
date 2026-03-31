@@ -52,12 +52,19 @@ export interface Error {
 const useIPGeolocation = () => {
   const IP_API_KEY = process.env.EXPO_PUBLIC_IP_API_KEY;
   if (!IP_API_KEY) {
-    throw new Error('IP_API_KEY is not defined in environment variables');
+    console.warn('EXPO_PUBLIC_IP_API_KEY not set, skipping IP geolocation');
+    return {
+      location: undefined,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      error: undefined,
+    };
   }
 
   const getLocaleAction = async () => {
     const response = await fetch(
-      `https://api.ipapi.com/check?access_key=${IP_API_KEY}`
+      `https://api.ipapi.com/check?access_key=${IP_API_KEY}`,
     );
     const data: IPAPIResponse | BadResponse = await response.json();
     return data;

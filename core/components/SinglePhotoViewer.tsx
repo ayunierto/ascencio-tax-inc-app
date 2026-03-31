@@ -1,7 +1,13 @@
 // Import necessary components
 import React from 'react';
-import { Modal, View, Button, StyleSheet } from 'react-native';
-import { ActivityIndicator } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { IImageInfo } from 'react-native-image-zoom-viewer/built/image-viewer.type';
 
@@ -32,23 +38,26 @@ export const SinglePhotoViewer = ({
         enableSwipeDown={true} // Allows closing by swiping down
         onSwipeDown={onClose} // Call onClose when swiped down
         renderHeader={() => (
-          // Optional: Add a custom header (e.g., a close button)
+          // Custom header with close button matching app theme
           <View style={styles.header}>
-            <Button title="Close" onPress={onClose} color="#fff" />
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="close" size={28} color="#fff" />
+            </TouchableOpacity>
           </View>
         )}
         // Optional: Show a loading indicator while the image loads
-        loadingRender={() => <ActivityIndicator size="large" color="#fff" />}
+        loadingRender={() => <ActivityIndicator size="large" color="#007AFF" />}
         // Optional: Customize the rendering for failed image loads
         failImageSource={{
           // Display a placeholder if the image fails to load
-          url: 'https://placehold.co/300x300?text=Load+Error&font=source-sans-pro', // Example placeholder URL
+          url: 'https://placehold.co/300x300?text=Load+Error&font=source-sans-pro',
           width: 300,
           height: 300,
         }}
-        // You might not need an index indicator for a single image,
-        // but you can hide it explicitly if it appears
-        // renderIndicator={(currentIndex, allSize) => null}
       />
     </Modal>
   );
@@ -64,8 +73,21 @@ const styles = StyleSheet.create({
   },
   header: {
     position: 'absolute',
-    top: 40, // Adjust based on status bar height or safe area
+    top: 50, // Adjust based on status bar height or safe area
     right: 20,
     zIndex: 1, // Ensure it's above the image viewer
+  },
+  closeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 });

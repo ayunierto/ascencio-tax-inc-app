@@ -1,3 +1,4 @@
-export interface ForgotPasswordResponse {
-  message: string;
-}
+export {
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+} from '@ascencio/shared';

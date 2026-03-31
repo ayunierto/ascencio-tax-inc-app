@@ -1,8 +1,8 @@
 export interface AnalyzedExpense {
   merchant: string;
   date: string;
-  total: number;
-  tax: number;
+  total: number | string;
+  tax: number | string;
   categoryId: string;
   subcategoryId: string;
 }

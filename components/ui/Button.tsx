@@ -1,3 +1,5 @@
+import { theme } from '@/components/ui/theme';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -7,8 +9,6 @@ import {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import { theme } from '@/components/ui/theme';
-import { Ionicons } from '@expo/vector-icons';
 
 // === Variants ===
 type ButtonVariant =
@@ -79,7 +79,7 @@ const buttonTextVariants = ({
   size: ButtonSize;
 }): TextStyle[] => {
   const base: TextStyle = {
-    fontWeight: '600',
+    fontWeight: '500',
     textAlign: 'center',
   };
 
@@ -137,20 +137,26 @@ export const ButtonText: React.FC<{
   variant?: ButtonVariant;
   size?: ButtonSize;
   children: React.ReactNode;
-}> = ({ variant = 'default', size = 'default', children }) => {
-  return <Text style={buttonTextVariants({ variant, size })}>{children}</Text>;
+  style?: StyleProp<TextStyle>;
+}> = ({ variant = 'default', size = 'default', children, style }) => {
+  return (
+    <Text style={[buttonTextVariants({ variant, size }), style]}>
+      {children}
+    </Text>
+  );
 };
 
 export const ButtonIcon: React.FC<{
   variant?: ButtonVariant;
   size?: ButtonSize;
   name: keyof typeof Ionicons.glyphMap;
-}> = ({ variant = 'default', size = 'lg', name }) => {
+  style?: StyleProp<TextStyle>;
+}> = ({ variant = 'default', size = 'lg', name, style }) => {
   return (
     <Ionicons
       name={name}
       // size={24}
-      style={buttonTextVariants({ variant, size })}
+      style={[buttonTextVariants({ variant, size }), style]}
     />
   );
 };

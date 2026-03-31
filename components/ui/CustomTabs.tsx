@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Pressable, Text, StyleSheet } from "react-native";
-import { theme } from "@/components/ui/theme";
+import { theme } from '@/components/ui';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 type Tab = {
   key: string;
@@ -41,7 +41,7 @@ export const CustomTabs = ({ tabs, activeTab, onChange }: CustomTabsProps) => {
 
 const styles = StyleSheet.create({
   tabContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: theme.border,
     backgroundColor: theme.background,
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   activeTab: {
     borderBottomWidth: 2,
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   activeLabel: {
     color: theme.primary,

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Animated, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 type Action = {
   icon: React.ReactNode;

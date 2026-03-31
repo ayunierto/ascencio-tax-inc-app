@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { theme } from './ui/theme';
 import { ThemedText } from './ui/ThemedText';
 

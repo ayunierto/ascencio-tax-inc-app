@@ -1,6 +1,6 @@
-import { api } from "@/core/api/api";
-import { Staff } from "../interfaces";
+import { api } from '@/core/api/api';
+import { Staff } from '../interfaces';
 
 export const getStaffAction = async () => {
-  return (await api.get<Staff[]>("/staff")).data;
+  return (await api.get<Staff[]>('/staff')).data;
 };

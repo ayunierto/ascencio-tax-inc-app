@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime } from 'luxon';
 
 /**
  * Converts a UTC date string to a formatted time string in a specified timezone.
@@ -21,10 +21,10 @@ import { DateTime } from "luxon";
 export const convertUtcDateToLocalTime = (
   utcDate: string,
   timeZone: string,
-  format: "12-hour" | "24-hour" = "12-hour"
+  format: '12-hour' | '24-hour' = '12-hour'
 ) => {
-  const formatString = format === "12-hour" ? "hh:mm a" : "HH:mm";
-  return DateTime.fromISO(utcDate, { zone: "utc" })
+  const formatString = format === '12-hour' ? 'hh:mm a' : 'HH:mm';
+  return DateTime.fromISO(utcDate, { zone: 'utc' })
     .setZone(timeZone)
     .toFormat(formatString);
 };

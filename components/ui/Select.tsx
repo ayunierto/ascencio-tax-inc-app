@@ -1,18 +1,24 @@
-import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Modal,
-  StyleSheet,
   StyleProp,
+  StyleSheet,
+  Text,
   TextStyle,
+  TouchableOpacity,
+  View,
   ViewStyle,
-  ScrollView,
-} from "react-native";
-import { theme } from "./theme";
-import { ThemedText } from "./ThemedText";
-import { Ionicons } from "@expo/vector-icons";
+} from 'react-native';
+import { theme } from './theme';
+import { ThemedText } from './ThemedText';
 
 type SelectContextType = {
   value?: string;
@@ -37,6 +43,7 @@ interface SelectProps {
   placeholder?: string;
   errorTextStyle?: StyleProp<TextStyle>;
   containerStyle?: StyleProp<ViewStyle>;
+  options?: { label: string; value: string }[];
 }
 
 export function Select({
@@ -49,41 +56,54 @@ export function Select({
   disabled,
   errorTextStyle,
   containerStyle,
+  options,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState<string | undefined>(undefined);
 
-  const collectItemsFromChildren = useCallback((nodes: React.ReactNode): Array<{ val: string; lbl: string }> => {
-    const out: Array<{ val: string; lbl: string }> = [];
-    React.Children.forEach(nodes, (child) => {
-      if (!React.isValidElement(child)) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const props: any = child.props;
-      // eslint-disable-next-line react/prop-types
-      if (props && typeof props.value === "string" && typeof props.label === "string") {
-        // eslint-disable-next-line react/prop-types
-        out.push({ val: props.value, lbl: props.label });
-      }
-      if (props && props.children) {
-        out.push(...collectItemsFromChildren(props.children));
-      }
-    });
-    return out;
-  }, []);
+  const collectItemsFromChildren = useCallback(
+    (nodes: React.ReactNode): { val: string; lbl: string }[] => {
+      const out: { val: string; lbl: string }[] = [];
+      React.Children.forEach(nodes, (child) => {
+        if (!React.isValidElement(child)) return;
+        const props: any = child.props;
+        if (
+          props &&
+          typeof props.value === 'string' &&
+          typeof props.label === 'string'
+        ) {
+          out.push({ val: props.value, lbl: props.label });
+        }
+        if (props && props.children) {
+          out.push(...collectItemsFromChildren(props.children));
+        }
+      });
+      return out;
+    },
+    []
+  );
 
   useEffect(() => {
     if (!value) {
       setLabel(undefined);
       return;
     }
-    const items = collectItemsFromChildren(children);
+
+    // Si se proporcionan options directamente, úsalas
+    let items: { val: string; lbl: string }[] = [];
+    if (options && options.length > 0) {
+      items = options.map((opt) => ({ val: opt.value, lbl: opt.label }));
+    } else {
+      items = collectItemsFromChildren(children);
+    }
+
     const found = items.find((i) => i.val === value);
     if (found && found.lbl !== label) {
       setLabel(found.lbl);
     } else if (!found) {
       setLabel(undefined);
     }
-  }, [value, children, collectItemsFromChildren, label]);
+  }, [value, children, collectItemsFromChildren, label, options]);
 
   const setValue = useCallback(
     (val: string, lbl: string) => {
@@ -115,32 +135,43 @@ export function Select({
   );
 
   const helperTextStyles = useMemo(
-    () => [styles.helperTextBase, error && [styles.errorMessage, errorTextStyle]],
+    () => [
+      styles.helperTextBase,
+      error && [styles.errorMessage, errorTextStyle],
+    ],
     [error, errorTextStyle]
   );
 
   return (
     <View style={containerStyle}>
-      <SelectContext.Provider value={contextValue}>{children}</SelectContext.Provider>
-      {(helperText || errorMessage) && <Text style={helperTextStyles}>{error ? errorMessage : helperText}</Text>}
+      <SelectContext.Provider value={contextValue}>
+        {children}
+      </SelectContext.Provider>
+      {(helperText || errorMessage) && (
+        <Text style={helperTextStyles}>
+          {error ? errorMessage : helperText}
+        </Text>
+      )}
     </View>
   );
 }
 
 function useSelectContext() {
   const ctx = useContext(SelectContext);
-  if (!ctx) throw new Error("Select components must be used within <Select>");
+  if (!ctx) throw new Error('Select components must be used within <Select>');
   return ctx;
 }
 
 export function SelectTrigger({
-  placeholder = "Select...",
+  placeholder = 'Select...',
   labelText,
   style,
+  icon,
 }: {
   placeholder?: string;
   labelText?: string;
   style?: StyleProp<ViewStyle>;
+  icon?: React.ReactNode;
 }) {
   const { label, setOpen, error, disabled } = useSelectContext();
 
@@ -149,18 +180,32 @@ export function SelectTrigger({
   }, [disabled, setOpen]);
 
   const triggerStyles = useMemo(
-    () => [styles.trigger, error && styles.triggerError, disabled && styles.triggerDisabled, style],
+    () => [
+      styles.trigger,
+      error && styles.triggerError,
+      disabled && styles.triggerDisabled,
+      style,
+    ],
     [error, disabled, style]
   );
 
   const floatingLabelStyles = useMemo(
-    () => [styles.floatingLabel, { color: error ? theme.destructive : theme.primary }],
+    () => [
+      styles.floatingLabel,
+      { color: error ? theme.destructive : theme.primary },
+    ],
     [error]
   );
 
   const triggerTextStyles = useMemo(
     () => ({
-      color: disabled ? theme.mutedForeground : error ? theme.destructive : label ? theme.foreground : theme.muted,
+      color: disabled
+        ? theme.mutedForeground
+        : error
+        ? theme.destructive
+        : label
+        ? theme.foreground
+        : theme.muted,
     }),
     [label, disabled, error]
   );
@@ -176,10 +221,20 @@ export function SelectTrigger({
       activeOpacity={disabled ? 1 : 0.7}
       disabled={disabled}
     >
-      {labelText && <ThemedText style={floatingLabelStyles}>{labelText}</ThemedText>}
+      {labelText && (
+        <ThemedText style={floatingLabelStyles}>{labelText}</ThemedText>
+      )}
+
+      {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+
       <Text style={triggerTextStyles}>{label || placeholder}</Text>
+
       <Text style={styles.chevron}>
-        <Ionicons name="chevron-down-outline" color={theme.foreground} size={24} />
+        <Ionicons
+          name="chevron-down-outline"
+          color={theme.foreground}
+          size={18}
+        />
       </Text>
     </TouchableOpacity>
   );
@@ -187,10 +242,12 @@ export function SelectTrigger({
 
 export function SelectContent({
   children,
-  maxHeight = "60%",
+  maxHeight = '80%',
+  style,
 }: {
   children: React.ReactNode;
   maxHeight?: number | `${number}%`;
+  style?: StyleProp<ViewStyle>;
 }) {
   const { open, setOpen, disabled } = useSelectContext();
 
@@ -198,10 +255,18 @@ export function SelectContent({
     if (!disabled) setOpen(false);
   }, [disabled, setOpen]);
 
-  const contentStyles = useMemo(() => [styles.content, { maxHeight }], [maxHeight]);
+  const contentStyles = useMemo(
+    () => [styles.content, { maxHeight }, style],
+    [maxHeight, style]
+  );
 
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={handleClose}>
+    <Modal
+      visible={open}
+      transparent
+      animationType="fade"
+      onRequestClose={handleClose}
+    >
       <TouchableOpacity
         style={styles.overlay}
         onPress={handleClose}
@@ -209,14 +274,18 @@ export function SelectContent({
         accessibilityRole="button"
         accessibilityLabel="Close options"
       >
-        <TouchableOpacity style={contentStyles} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-          <ScrollView
+        <TouchableOpacity
+          style={contentStyles}
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+        >
+          {/* <ScrollView
             showsVerticalScrollIndicator
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ paddingVertical: 4 }}
-          >
-            {children}
-          </ScrollView>
+          > */}
+          {children}
+          {/* </ScrollView> */}
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
@@ -234,7 +303,11 @@ export function SelectItem({
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
-  const { setValue, value: selectedValue, disabled: selectDisabled } = useSelectContext();
+  const {
+    setValue,
+    value: selectedValue,
+    disabled: selectDisabled,
+  } = useSelectContext();
 
   const isSelected = selectedValue === value;
   const isDisabled = disabled || selectDisabled;
@@ -246,12 +319,21 @@ export function SelectItem({
   }, [isDisabled, setValue, value, label]);
 
   const itemStyles = useMemo(
-    () => [styles.item, isSelected && styles.itemSelected, isDisabled && styles.itemDisabled, style],
+    () => [
+      styles.item,
+      isSelected && styles.itemSelected,
+      isDisabled && styles.itemDisabled,
+      style,
+    ],
     [isSelected, isDisabled, style]
   );
 
   const textStyles = useMemo(
-    () => [styles.itemText, isSelected && styles.itemTextSelected, isDisabled && styles.itemTextDisabled],
+    () => [
+      styles.itemText,
+      isSelected && styles.itemTextSelected,
+      isDisabled && styles.itemTextDisabled,
+    ],
     [isSelected, isDisabled]
   );
 
@@ -268,7 +350,7 @@ export function SelectItem({
       <Text style={textStyles}>{label}</Text>
       {isSelected && (
         <Text style={styles.checkmark}>
-          <Ionicons name="checkmark" size={24} />
+          <Ionicons name="checkmark" />
         </Text>
       )}
     </TouchableOpacity>
@@ -277,15 +359,15 @@ export function SelectItem({
 
 const styles = StyleSheet.create({
   trigger: {
-    minHeight: 52,
-    paddingHorizontal: 12,
+    minHeight: 54,
+    paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: theme.foreground,
+    borderColor: theme.border,
     borderRadius: theme.radius,
     backgroundColor: theme.background,
-    justifyContent: "center",
-    flexDirection: "row",
-    alignItems: "center",
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   triggerError: {
     borderColor: theme.destructive,
@@ -293,64 +375,65 @@ const styles = StyleSheet.create({
   },
   triggerDisabled: {
     opacity: 0.5,
-    backgroundColor: "rgba(0,0,0,0.05)",
+    backgroundColor: theme.muted + '10',
   },
   floatingLabel: {
-    position: "absolute",
-    top: -10,
+    position: 'absolute',
+    top: -8,
     left: 15,
     backgroundColor: theme.background,
-    paddingHorizontal: 4,
-    fontSize: 12,
-    fontWeight: "500",
+    paddingHorizontal: 6,
+    fontSize: 13,
+    fontWeight: '500',
+    borderRadius: theme.radius,
   },
   chevron: {
-    marginLeft: "auto",
+    marginLeft: 'auto',
     fontSize: 12,
-    color: theme.muted,
+    color: theme.mutedForeground,
   },
   overlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 20,
   },
   content: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.popover,
     borderRadius: theme.radius,
     padding: 8,
-    width: "90%",
-    maxHeight: "60%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
   },
   item: {
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 6,
-    marginVertical: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 8,
+    marginVertical: 2,
   },
   itemSelected: {
-    backgroundColor: theme.primary + "15",
+    backgroundColor: theme.primary + '20',
   },
   itemDisabled: {
     opacity: 0.5,
   },
   itemText: {
     fontSize: 16,
-    color: "#111",
+    color: theme.foreground,
     flex: 1,
   },
   itemTextSelected: {
     color: theme.primary,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   itemTextDisabled: {
     color: theme.mutedForeground,
@@ -358,11 +441,11 @@ const styles = StyleSheet.create({
   checkmark: {
     fontSize: 16,
     color: theme.primary,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginLeft: 8,
   },
   helperTextBase: {
-    marginTop: 4,
+    marginTop: 6,
     fontSize: 12,
     paddingLeft: 4,
     color: theme.mutedForeground,

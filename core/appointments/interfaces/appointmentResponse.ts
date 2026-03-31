@@ -1,6 +1,5 @@
-import { User } from "@/core/auth/interfaces";
-import { Service } from "@/core/services/interfaces";
-import { Staff } from "@/core/staff/interfaces";
+import { User } from '@/core/auth/interfaces';
+import type { StaffMember, Service } from '@ascencio/shared/interfaces';
 
 export interface Appointment {
   id: string;
@@ -15,7 +14,7 @@ export interface Appointment {
   cancellationReason?: string;
   service: Service;
   user: User;
-  staff: Staff;
+  staffMember: StaffMember;
   createdAt: string;
   updatedAt: string;
   deletedAt: string;

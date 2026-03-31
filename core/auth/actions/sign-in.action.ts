@@ -1,10 +1,11 @@
-import { api } from "@/core/api/api";
-import { AuthResponse } from "../interfaces/auth.response";
-import { SignInRequest } from "../schemas/sign-in.schema";
+import { api } from '@/core/api/api';
+import { SignInRequest, SignInResponse } from '@ascencio/shared';
 
 export const signInAction = async (
-  credentials: SignInRequest
-): Promise<AuthResponse> => {
-  const { data } = await api.post<AuthResponse>("/auth/signin", credentials);
+  credentials: SignInRequest,
+): Promise<SignInResponse> => {
+  credentials.email = credentials.email.toLocaleLowerCase().trim();
+  const { data } = await api.post<SignInResponse>('/auth/signin', credentials);
+
   return data;
 };

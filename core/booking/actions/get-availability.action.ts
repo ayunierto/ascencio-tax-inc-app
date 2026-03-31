@@ -1,5 +1,5 @@
-import { api } from "@/core/api/api";
-import { AvailableSlot } from "../interfaces/available-slot.interface";
+import { api } from '@/core/api/api';
+import { AvailableSlot } from '../interfaces/available-slot.interface';
 
 interface AvailabilityRequest {
   serviceId: string;
@@ -8,6 +8,8 @@ interface AvailabilityRequest {
   timeZone: string; // IANA, ej. "America/Lima", "America/Toronto", etc.
 }
 
-export const getAvailabilityAction = async (data: AvailabilityRequest): Promise<AvailableSlot[]> => {
-  return (await api.post<AvailableSlot[]>("/availability", data)).data;
+export const getAvailabilityAction = async (
+  data: AvailabilityRequest
+): Promise<AvailableSlot[]> => {
+  return (await api.post<AvailableSlot[]>('/availability', data)).data;
 };

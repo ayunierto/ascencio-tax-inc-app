@@ -1,3 +1,1 @@
-export interface DeleteAccountResponse {
-  message: string;
-}
+export { DeleteAccountRequest, DeleteAccountResponse } from '@ascencio/shared';

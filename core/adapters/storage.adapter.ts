@@ -1,11 +1,11 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
 export class StorageAdapter {
   static async setItem(key: string, value: string): Promise<void> {
     try {
       await SecureStore.setItemAsync(key, value);
     } catch (error) {
-      console.error("Error setting item in storage:", error);
+      console.error('Error setting item in storage:', error);
     }
   }
 
@@ -13,7 +13,7 @@ export class StorageAdapter {
     try {
       return await SecureStore.getItemAsync(key);
     } catch (error) {
-      console.error("Error getting item from storage:", error);
+      console.error('Error getting item from storage:', error);
       return null;
     }
   }
@@ -22,7 +22,7 @@ export class StorageAdapter {
     try {
       await SecureStore.deleteItemAsync(key);
     } catch (error) {
-      console.error("Error removing item from storage:", error);
+      console.error('Error removing item from storage:', error);
     }
   }
 }

@@ -1,26 +1,29 @@
-import { StyleSheet, Linking } from "react-native";
-import React from "react";
-import { ThemedText } from "./ui/ThemedText";
-import { theme } from "./ui/theme";
+import React from 'react';
+import { Linking, StyleSheet } from 'react-native';
+import { ThemedText } from './ui/ThemedText';
+import { theme } from './ui/theme';
+import { useTranslation } from 'react-i18next';
 
 const TermsAndPrivacy = () => {
+  const { t } = useTranslation();
+
   return (
     <ThemedText>
-      By clicking you accept the{" "}
+      {t('bySigningUpYouAgreeToOur')}{' '}
       <ThemedText
         style={styles.link}
         onPress={() =>
-          Linking.openURL("https://www.ascenciotax.com/termsofuse")
+          Linking.openURL('https://www.ascenciotax.com/termsofuse')
         }
       >
-        Terms of service
-      </ThemedText>{" "}
-      and{" "}
+        {t('termsOfService')}
+      </ThemedText>{' '}
+      {t('and')}{' '}
       <ThemedText
         style={styles.link}
-        onPress={() => Linking.openURL("https://www.ascenciotax.com/privacy")}
+        onPress={() => Linking.openURL('https://www.ascenciotax.com/privacy')}
       >
-        Privacy Policy
+        {t('privacyPolicy')}
       </ThemedText>
     </ThemedText>
   );
@@ -29,7 +32,7 @@ const TermsAndPrivacy = () => {
 const styles = StyleSheet.create({
   link: {
     color: theme.primary,
-    textDecorationLine: "underline",
+    textDecorationLine: 'underline',
   },
 });
 

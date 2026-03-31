@@ -1,21 +1,23 @@
-import { ImagePickerAsset } from "expo-image-picker";
-import { api } from "@/core/api/api";
-import { UploadImageFile } from "../interfaces/upload-image.interface";
+import { api } from '@/core/api/api';
+import { ImagePickerAsset } from 'expo-image-picker';
+import {
+  UploadImageFile,
+  UploadFileResponse,
+} from '../interfaces/upload-image.interface';
 
 export const uploadImage = async (
-  image: ImagePickerAsset
-): Promise<UploadImageFile> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  image: ImagePickerAsset,
+): Promise<UploadFileResponse> => {
   const formdata = new FormData() as any;
-  formdata.append("file", {
+  formdata.append('file', {
     uri: image.uri,
-    name: image.fileName || "photo.jpg",
-    type: "image/jpeg",
+    name: image.fileName || 'photo.jpg',
+    type: 'image/jpeg',
   });
 
-  const { data } = await api.post<UploadImageFile>(
-    "files/upload-image",
-    formdata
+  const { data } = await api.post<UploadFileResponse>(
+    'files/upload-image',
+    formdata,
   );
 
   return data;

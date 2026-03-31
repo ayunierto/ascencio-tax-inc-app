@@ -1,15 +1,15 @@
-import React from 'react';
+import React from "react";
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
-import { Log } from '@/core/logs/interfaces';
-import { Card } from '@/components/ui/Card/Card';
-import { SimpleCardHeader } from '@/components/ui/Card/SimpleCardHeader';
-import { SimpleCardHeaderTitle } from '@/components/ui/Card/SimpleCardHeaderTitle';
-import { ActivityList } from './ActivityList';
-import { theme } from '@/components/ui/theme';
-import { CardContent } from '@/components/ui/Card/CardContent';
-import Loader from '@/components/Loader';
+import Loader from "@/components/Loader";
+import { Card } from "@/components/ui/Card/Card";
+import { CardContent } from "@/components/ui/Card/CardContent";
+import { SimpleCardHeader } from "@/components/ui/Card/SimpleCardHeader";
+import { SimpleCardHeaderTitle } from "@/components/ui/Card/SimpleCardHeaderTitle";
+import { theme } from "@/components/ui/theme";
+import { Log } from "@/core/logs/interfaces";
+import { ActivityList } from "./ActivityList";
 
 interface RecentActivityProps {
   activities: Log[];
@@ -24,7 +24,7 @@ export const RecentActivity = ({
     <Card style={{ flex: 1 }}>
       <CardContent style={{ flex: 1 }}>
         <SimpleCardHeader>
-          <Ionicons name={'flash-outline'} size={20} color={theme.foreground} />
+          <Ionicons name={"flash-outline"} size={20} color={theme.foreground} />
           <SimpleCardHeaderTitle>Recent Activity</SimpleCardHeaderTitle>
         </SimpleCardHeader>
         {loading ? <Loader /> : <ActivityList activities={activities} />}

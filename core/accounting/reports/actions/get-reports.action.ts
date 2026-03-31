@@ -1,5 +1,5 @@
-import { api } from "@/core/api/api";
-import { Report } from "../interfaces";
+import { api } from '@/core/api/api';
+import { Report } from '../interfaces';
 
 export const getReports = async (
   limit = 100,

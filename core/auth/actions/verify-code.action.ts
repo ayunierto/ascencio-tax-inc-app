@@ -1,17 +1,16 @@
-import { api } from "@/core/api/api";
-import { VerifyCodeResponse } from "../interfaces/verify-code.response";
-import { VerifyCodeRequest } from "../schemas/verify-email-code.schema";
+import { api } from '@/core/api/api';
+import {
+  VerifyEmailCodeRequest,
+  VerifyEmailCodeResponse,
+} from '@ascencio/shared';
 
-export const verifyCodeAction = async ({
-  code,
-  email,
-}: VerifyCodeRequest): Promise<VerifyCodeResponse> => {
-  const { data } = await api.post<VerifyCodeResponse>(
-    "/auth/verify-email-code",
-    {
-      code,
-      email,
-    }
+export const verifyCodeAction = async (
+  request: VerifyEmailCodeRequest,
+): Promise<VerifyEmailCodeResponse> => {
+  request.email = request.email.toLocaleLowerCase().trim();
+  const { data } = await api.post<VerifyEmailCodeResponse>(
+    '/auth/verify-email-code',
+    request,
   );
 
   return data;
