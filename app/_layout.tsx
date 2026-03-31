@@ -14,7 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Toaster } from 'sonner-native';
 import { SubscriptionProvider } from '@/core/subscription/SubscriptionContext';
 
-import '../i18n';
+import '../i18n/index';
 
 const queryClient = new QueryClient({
   defaultOptions: {

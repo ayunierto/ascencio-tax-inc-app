@@ -20,8 +20,6 @@ import {
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
 import { Category } from '@/core/accounting/categories/interfaces/category.interface';
 import {
-  Button,
-  ButtonIcon,
   theme,
   ImageUploader,
   ImageUploaderRef,
@@ -31,6 +29,10 @@ import {
 import { getErrorMessage } from '@/utils/getErrorMessage';
 import { DeleteConfirmationDialog, FormViewContainer } from '@/core/components';
 import { useReceiptImageMutation } from '@/core/accounting/expenses/hooks/useReceiptImageMutation';
+import {
+  canAnalyzeReceiptReference,
+  resolveReceiptImageUrl,
+} from '@/core/accounting/expenses/utils/receipt-image.utils';
 import {
   CreateExpenseInput,
   createExpenseSchema,
@@ -53,10 +55,25 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
   const lastScannedImageRef = useRef<string | undefined>(undefined);
   const hasAutoScannedRef = useRef<boolean>(false);
+  const [totalInput, setTotalInput] = useState<string>(
+    expense.total?.toString() || '',
+  );
+  const [taxInput, setTaxInput] = useState<string>(
+    expense.tax?.toString() || '',
+  );
   const [subcategories, setSubcategories] = useState<Subcategory[]>(
     categories.find((cat) => cat.id === expense.category?.id)?.subcategories ||
       [],
   );
+
+  const sanitizeDecimalInput = (text: string) => {
+    const normalized = text.replace(',', '.').replace(/[^\d.]/g, '');
+    const [integerPart, ...decimalParts] = normalized.split('.');
+
+    return decimalParts.length > 0
+      ? `${integerPart}.${decimalParts.join('')}`
+      : integerPart;
+  };
 
   const { getReceiptValuesMutation } = useReceiptImageMutation();
   const {
@@ -94,6 +111,8 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
       categoryId: expense.category?.id || undefined,
       subcategoryId: expense.subcategory?.id || undefined,
     });
+    setTotalInput(expense.total?.toString() || '');
+    setTaxInput(expense.tax?.toString() || '');
   }, [expense, reset]);
 
   const createMutation = createExpenseMutation();
@@ -102,46 +121,6 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
 
   const watchedImageUrl = watch('imageUrl');
   const previousImageUrlRef = useRef<string | undefined>(watchedImageUrl);
-
-  // Auto scan when a new temp receipt image is uploaded (form value)
-  React.useEffect(() => {
-    const previousImageUrl = previousImageUrlRef.current;
-    const currentImageUrl = watchedImageUrl;
-
-    // Update the previous value for next comparison
-    previousImageUrlRef.current = currentImageUrl;
-
-    // Don't scan if no image
-    if (!currentImageUrl) return;
-
-    // Don't scan if not a temp image (already saved images)
-    if (!currentImageUrl.startsWith('temp_receipts/')) return;
-
-    // Don't scan if it's the same image we already scanned
-    if (lastScannedImageRef.current === currentImageUrl) return;
-
-    // CRITICAL: Don't scan on initial mount - only when image actually changes
-    // This prevents scanning when opening an existing expense from the list
-    if (previousImageUrl === currentImageUrl) return;
-
-    // Don't scan if this is the first render and image was already there
-    // (opening existing expense with image)
-    if (previousImageUrl === undefined && expense.imageUrl === currentImageUrl)
-      return;
-
-    // Mark this image as scanned
-    lastScannedImageRef.current = currentImageUrl;
-    hasAutoScannedRef.current = true;
-
-    // Convert relative path to full Cloudinary URL
-    const cloudinaryCloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    if (!cloudinaryCloudName) {
-      console.error('Cloudinary cloud name not configured');
-      return;
-    }
-    const fullImageUrl = `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${currentImageUrl}`;
-    handleScanReceipt(fullImageUrl);
-  }, [watchedImageUrl, expense.imageUrl]);
 
   const onSubmit = async (data: CreateExpenseInput) => {
     console.log('[EXPENSE FORM] onSubmit called with data:', data);
@@ -220,71 +199,122 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
   /**
    * Handle OCR scanning of receipt after image upload
    */
-  const handleScanReceipt = async (imageUrl: string) => {
-    let toastId: string | number | undefined;
-    try {
-      toastId = toast.loading(t('extractingReceiptValues'));
-
-      const extractedValues = await getReceiptValuesMutation.mutateAsync(
-        imageUrl,
-        {
-          onError: (error) => {
-            toast.error(t('errorGettingReceiptValues'), {
-              description: error.response?.data.message || error.message,
-            });
-          },
-        },
-      );
-
-      // Update form with extracted values
-      if (extractedValues.merchant) {
-        setValue('merchant', extractedValues.merchant);
-      }
-      if (extractedValues.date) {
-        // Convert YYYY-MM-DD to ISO datetime (add time component)
-        const dateStr = extractedValues.date;
-        // Check if it's just a date or already has time
-        const isoDateTime = dateStr.includes('T')
-          ? dateStr
-          : `${dateStr}T00:00:00.000Z`;
-        setValue('date', isoDateTime);
-      }
-      if (
-        extractedValues.total !== undefined &&
-        extractedValues.total !== null
-      ) {
-        // Ensure it's a number or string, handle empty strings
-        const totalValue =
-          extractedValues.total === '' ? 0 : extractedValues.total;
-        setValue('total', totalValue);
-      }
-      if (extractedValues.tax !== undefined && extractedValues.tax !== null) {
-        // Ensure it's a number or string, handle empty strings
-        const taxValue = extractedValues.tax === '' ? 0 : extractedValues.tax;
-        setValue('tax', taxValue);
-      }
-      if (extractedValues.categoryId) {
-        setValue('categoryId', extractedValues.categoryId);
-        // Update subcategories list when category is set
-        const category = categories.find(
-          (cat) => cat.id === extractedValues.categoryId,
-        );
-        if (category) {
-          setSubcategories(category.subcategories || []);
+  const handleScanReceipt = React.useCallback(
+    async (imageRef: string) => {
+      let toastId: string | number | undefined;
+      try {
+        const imageUrl = resolveReceiptImageUrl(imageRef);
+        if (!imageUrl) {
+          toast.error('Cloudinary configuration error');
+          return;
         }
-      }
-      if (extractedValues.subcategoryId) {
-        setValue('subcategoryId', extractedValues.subcategoryId);
-      }
 
-      toast.success(t('receiptScannedSuccessfully'));
-      toast.dismiss(toastId);
-    } catch (error) {
-      console.error('Error scanning receipt:', error);
-      toast.error(t('errorGettingReceiptValues'));
-      if (toastId) toast.dismiss(toastId);
-    }
-  };
+        toastId = toast.loading(t('extractingReceiptValues'));
+
+        const extractedValues = await getReceiptValuesMutation.mutateAsync(
+          imageUrl,
+          {
+            onError: (error) => {
+              toast.error(t('errorGettingReceiptValues'), {
+                description: error.response?.data.message || error.message,
+              });
+            },
+          },
+        );
+
+        // Update form with extracted values
+        if (extractedValues.merchant) {
+          setValue('merchant', extractedValues.merchant);
+        }
+        if (extractedValues.date) {
+          // Convert YYYY-MM-DD to ISO datetime (add time component)
+          const dateStr = extractedValues.date;
+          // Check if it's just a date or already has time
+          const isoDateTime = dateStr.includes('T')
+            ? dateStr
+            : `${dateStr}T00:00:00.000Z`;
+          setValue('date', isoDateTime);
+        }
+        if (
+          extractedValues.total !== undefined &&
+          extractedValues.total !== null
+        ) {
+          // Ensure it's a number or string, handle empty strings
+          const totalValue =
+            extractedValues.total === '' ? 0 : extractedValues.total;
+          setValue('total', totalValue);
+          setTotalInput(totalValue.toString());
+        }
+        if (extractedValues.tax !== undefined && extractedValues.tax !== null) {
+          // Ensure it's a number or string, handle empty strings
+          const taxValue = extractedValues.tax === '' ? 0 : extractedValues.tax;
+          setValue('tax', taxValue);
+          setTaxInput(taxValue.toString());
+        }
+        if (extractedValues.categoryId) {
+          setValue('categoryId', extractedValues.categoryId);
+          // Update subcategories list when category is set
+          const category = categories.find(
+            (cat) => cat.id === extractedValues.categoryId,
+          );
+          if (category) {
+            setSubcategories(category.subcategories || []);
+          }
+        }
+        if (extractedValues.subcategoryId) {
+          setValue('subcategoryId', extractedValues.subcategoryId);
+        }
+
+        toast.success(t('receiptScannedSuccessfully'));
+        toast.dismiss(toastId);
+      } catch (error) {
+        console.error('Error scanning receipt:', error);
+        toast.error(t('errorGettingReceiptValues'));
+        if (toastId) toast.dismiss(toastId);
+      }
+    },
+    [categories, getReceiptValuesMutation, setValue, t],
+  );
+
+  // Auto scan when a new temp receipt image is uploaded (form value)
+  React.useEffect(() => {
+    const previousImageUrl = previousImageUrlRef.current;
+    const currentImageUrl = watchedImageUrl;
+
+    // Update the previous value for next comparison
+    previousImageUrlRef.current = currentImageUrl;
+
+    // Don't scan if no image
+    if (!currentImageUrl) return;
+
+    // Don't scan if image reference cannot be resolved for OCR.
+    if (!canAnalyzeReceiptReference(currentImageUrl)) return;
+
+    const isInitialRender = previousImageUrl === currentImageUrl;
+    const shouldAutoScanInitialCreate =
+      isInitialRender &&
+      expense.id === 'new' &&
+      !hasAutoScannedRef.current &&
+      !!currentImageUrl;
+
+    // Don't scan if it's the same image we already scanned
+    if (lastScannedImageRef.current === currentImageUrl) return;
+
+    // CRITICAL: Don't scan on initial mount - only when image actually changes
+    // This prevents scanning when opening an existing expense from the list
+    if (isInitialRender && !shouldAutoScanInitialCreate) return;
+
+    // Don't scan if this is the first render and image was already there
+    // (opening existing expense with image)
+    if (previousImageUrl === undefined && expense.imageUrl === currentImageUrl)
+      return;
+
+    // Mark this image as scanned
+    lastScannedImageRef.current = currentImageUrl;
+    hasAutoScannedRef.current = true;
+
+    handleScanReceipt(currentImageUrl);
+  }, [watchedImageUrl, expense.imageUrl, expense.id, handleScanReceipt]);
 
   /**
    * Handle downloading receipt image
@@ -297,16 +327,10 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
     }
 
     try {
-      const cloudinaryCloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      let fullImageUrl = imageUrl;
-
-      // Convert relative path to full Cloudinary URL if needed
-      if (!imageUrl.startsWith('http')) {
-        if (!cloudinaryCloudName) {
-          toast.error('Cloudinary configuration error');
-          return;
-        }
-        fullImageUrl = `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${imageUrl}`;
+      const fullImageUrl = resolveReceiptImageUrl(imageUrl);
+      if (!fullImageUrl) {
+        toast.error('Cloudinary configuration error');
+        return;
       }
 
       if (Platform.OS === 'web') {
@@ -362,7 +386,7 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
         title={expense.id === 'new' ? t('newExpense') : t('expenseDetails')}
         left={
           <HeaderButton onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <Ionicons name='arrow-back' size={24} color='#ffffff' />
           </HeaderButton>
         }
         right={
@@ -370,7 +394,7 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
             {watch('imageUrl') && (
               <HeaderButton onPress={handleDownloadReceipt}>
                 <Ionicons
-                  name="download-outline"
+                  name='download-outline'
                   size={24}
                   color={theme.primary}
                 />
@@ -385,7 +409,7 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
                 deleteMutation.isPending
               }
             >
-              <Ionicons name="save-outline" size={24} color={theme.primary} />
+              <Ionicons name='save-outline' size={24} color={theme.primary} />
             </HeaderButton>
 
             {expense.id !== 'new' && (
@@ -397,7 +421,7 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
                   }
                 >
                   <Ionicons
-                    name="trash-outline"
+                    name='trash-outline'
                     size={24}
                     color={theme.destructive}
                   />
@@ -410,14 +434,14 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
       <FormViewContainer>
         <Controller
           control={control}
-          name="imageUrl"
+          name='imageUrl'
           render={({ field: { onChange, value } }) => (
             <View style={{ gap: 8 }}>
               <ImageUploader
                 ref={imageUploaderRef}
                 value={value}
                 onChange={onChange}
-                folder="temp_receipts"
+                folder='temp_receipts'
                 label={t('receiptImage')}
                 allowCamera={true}
                 allowGallery={true}
@@ -446,14 +470,14 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
 
         <Controller
           control={control}
-          name="date"
+          name='date'
           render={({ field: { onChange, value } }) => (
             <DateTimePicker
               labelText={t('date')}
               error={!!errors.date}
               errorMessage={getErrorMessage(errors.date)}
               value={value ?? null}
-              mode="date"
+              mode='date'
               onChange={onChange}
             />
           )}
@@ -461,17 +485,40 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
 
         <Controller
           control={control}
-          name="total"
-          render={({ field: { onChange, onBlur, value } }) => (
+          name='total'
+          render={({ field: { onChange, onBlur } }) => (
             <Input
               label={t('total')}
-              value={value?.toString() || ''}
-              onBlur={onBlur}
-              onChangeText={(text) => {
-                const num = parseFloat(text);
-                onChange(isNaN(num) ? 0 : num);
+              value={totalInput}
+              onBlur={() => {
+                onBlur();
+                if (!totalInput) {
+                  onChange(0);
+                  return;
+                }
+
+                const num = Number(totalInput);
+                if (Number.isNaN(num)) {
+                  onChange(0);
+                  setTotalInput('');
+                  return;
+                }
+
+                onChange(num);
+                setTotalInput(num.toString());
               }}
-              keyboardType="decimal-pad"
+              onChangeText={(text) => {
+                const sanitized = sanitizeDecimalInput(text);
+                setTotalInput(sanitized);
+
+                if (!sanitized || sanitized.endsWith('.')) return;
+
+                const num = Number(sanitized);
+                if (!Number.isNaN(num)) {
+                  onChange(num);
+                }
+              }}
+              keyboardType='decimal-pad'
               error={!!errors.total}
               errorMessage={getErrorMessage(errors.total)}
             />
@@ -480,17 +527,40 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
 
         <Controller
           control={control}
-          name="tax"
-          render={({ field: { onChange, onBlur, value } }) => (
+          name='tax'
+          render={({ field: { onChange, onBlur } }) => (
             <Input
               label={t('tax')}
-              value={value?.toString() || ''}
-              onBlur={onBlur}
-              onChangeText={(text) => {
-                const num = parseFloat(text);
-                onChange(isNaN(num) ? 0 : num);
+              value={taxInput}
+              onBlur={() => {
+                onBlur();
+                if (!taxInput) {
+                  onChange(0);
+                  return;
+                }
+
+                const num = Number(taxInput);
+                if (Number.isNaN(num)) {
+                  onChange(0);
+                  setTaxInput('');
+                  return;
+                }
+
+                onChange(num);
+                setTaxInput(num.toString());
               }}
-              keyboardType="decimal-pad"
+              onChangeText={(text) => {
+                const sanitized = sanitizeDecimalInput(text);
+                setTaxInput(sanitized);
+
+                if (!sanitized || sanitized.endsWith('.')) return;
+
+                const num = Number(sanitized);
+                if (!Number.isNaN(num)) {
+                  onChange(num);
+                }
+              }}
+              keyboardType='decimal-pad'
               error={!!errors.tax}
               errorMessage={getErrorMessage(errors.tax)}
             />
@@ -567,7 +637,7 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
 
         <Controller
           control={control}
-          name="notes"
+          name='notes'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               label={t('notes')}

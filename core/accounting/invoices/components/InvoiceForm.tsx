@@ -79,6 +79,13 @@ const toNumber = (value: unknown, fallback = 0) => {
   return Number.isFinite(num) ? num : fallback;
 };
 
+const sanitizeDecimalInput = (value: string) => {
+  const normalized = value.replace(/,/g, '.').replace(/[^\d.]/g, '');
+  const parts = normalized.split('.');
+  if (parts.length <= 1) return normalized;
+  return `${parts[0]}.${parts.slice(1).join('')}`;
+};
+
 export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
@@ -91,6 +98,9 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   );
   // Track price text inputs to allow typing decimals like "1."
   const [priceTexts, setPriceTexts] = useState<Record<string, string>>({});
+  const [taxRateInput, setTaxRateInput] = useState(() =>
+    toNumber(invoice.taxRate, 13).toString(),
+  );
 
   const isNew = invoice.id === 'new';
 
@@ -977,20 +987,23 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                         label={t('price')}
                         value={priceTexts[item.id] ?? item.price.toString()}
                         onChangeText={(text) => {
-                          // Store the text as-is for display
+                          const sanitized = sanitizeDecimalInput(text);
+
+                          // Keep text state to allow intermediate decimal values like "1."
                           setPriceTexts((prev) => ({
                             ...prev,
-                            [item.id]: text,
+                            [item.id]: sanitized,
                           }));
 
-                          // Allow empty string
-                          if (text === '') {
+                          if (!sanitized) {
                             updateLineItem(item.id, 'price', 0);
                             return;
                           }
-                          // Allow decimal format: digits and one decimal point
-                          if (/^\d*\.?\d*$/.test(text)) {
-                            const num = parseFloat(text) || 0;
+
+                          if (sanitized.endsWith('.')) return;
+
+                          const num = Number(sanitized);
+                          if (!Number.isNaN(num)) {
                             updateLineItem(item.id, 'price', num);
                           }
                         }}
@@ -1026,13 +1039,38 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
             <Controller
               control={control}
               name="taxRate"
-              render={({ field: { onChange, value } }) => (
+              render={({ field: { onChange, onBlur } }) => (
                 <Input
                   label={`${t('taxRate')} (%)`}
-                  value={(value ?? 13).toString()}
+                  value={taxRateInput}
+                  onBlur={() => {
+                    onBlur();
+
+                    if (!taxRateInput) {
+                      onChange(0);
+                      return;
+                    }
+
+                    const num = Number(taxRateInput);
+                    if (Number.isNaN(num)) {
+                      onChange(0);
+                      setTaxRateInput('');
+                      return;
+                    }
+
+                    onChange(num);
+                    setTaxRateInput(num.toString());
+                  }}
                   onChangeText={(text) => {
-                    const num = parseFloat(text);
-                    onChange(isNaN(num) ? 0 : num);
+                    const sanitized = sanitizeDecimalInput(text);
+                    setTaxRateInput(sanitized);
+
+                    if (!sanitized || sanitized.endsWith('.')) return;
+
+                    const num = Number(sanitized);
+                    if (!Number.isNaN(num)) {
+                      onChange(num);
+                    }
                   }}
                   keyboardType="decimal-pad"
                   editable={canEdit}

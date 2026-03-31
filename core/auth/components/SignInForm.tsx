@@ -77,8 +77,10 @@ export const SignInForm = () => {
       await signInWithGoogle();
       toast.success(t('signInSuccess'));
       router.replace('/(app)/(dashboard)');
-    } catch (error) {
-      toast.error(t('googleSignInError'));
+    } catch (error: unknown) {
+      const errorMessageKey =
+        error instanceof Error ? error.message : 'googleSignInError';
+      toast.error(t(errorMessageKey));
       console.error('Google Sign-In Error:', error);
     }
   };
@@ -90,12 +92,12 @@ export const SignInForm = () => {
 
         {/* Google Sign-In Button */}
         <Button
-          variant="outline"
+          variant='outline'
           disabled={isGoogleLoading || isPending}
           isLoading={isGoogleLoading || isPending}
           onPress={handleGoogleSignIn}
         >
-          <ButtonIcon name="logo-google" />
+          <ButtonIcon name='logo-google' />
           <ButtonText>{t('continueWithGoogle')}</ButtonText>
         </Button>
 
@@ -110,18 +112,18 @@ export const SignInForm = () => {
 
         <Controller
           control={control}
-          name="email"
+          name='email'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              leadingIcon="at-outline"
+              leadingIcon='at-outline'
               label={t('email')}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              returnKeyType="next"
+              keyboardType='email-address'
+              autoCapitalize='none'
+              autoComplete='email'
+              returnKeyType='next'
               onSubmitEditing={() => passwordInputRef.current?.focus()}
               error={!!formErrors.email}
               errorMessage={getErrorMessage(formErrors.email)}
@@ -131,19 +133,19 @@ export const SignInForm = () => {
 
         <Controller
           control={control}
-          name="password"
+          name='password'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               ref={passwordInputRef}
-              leadingIcon="lock-closed-outline"
+              leadingIcon='lock-closed-outline'
               label={t('password')}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
               secureTextEntry={true}
-              autoComplete="password"
-              autoCapitalize="none"
-              returnKeyType="done"
+              autoComplete='password'
+              autoCapitalize='none'
+              returnKeyType='done'
               onSubmitEditing={handleSubmit(onSignIn)}
               error={!!formErrors.password}
               errorMessage={getErrorMessage(formErrors.password)}

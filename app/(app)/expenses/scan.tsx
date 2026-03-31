@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Alert, Image, StyleSheet, View } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
+import { Buffer } from 'buffer';
 import 'react-native-get-random-values';
 
 import Loader from '@/components/Loader';
@@ -20,10 +21,22 @@ import {
 } from '@/core/camera/components';
 import { useScanReceiptsNew } from '@/core/accounting/expenses/hooks';
 
-globalThis.Buffer = Buffer;
+const globalWithBuffer = globalThis as typeof globalThis & {
+  Buffer?: typeof Buffer;
+};
+
+if (!globalWithBuffer.Buffer) {
+  globalWithBuffer.Buffer = Buffer;
+}
 
 export default function ScanReceiptScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, selectedImageUri } = useLocalSearchParams<{
+    id?: string;
+    selectedImageUri?: string | string[];
+  }>();
+  const preselectedImageUri = Array.isArray(selectedImageUri)
+    ? selectedImageUri[0]
+    : selectedImageUri;
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [, requestMediaPermission] = MediaLibrary.usePermissions();
 
@@ -37,7 +50,7 @@ export default function ScanReceiptScreen() {
     pickFromGallery,
     takePicture,
     statusMessage,
-  } = useScanReceiptsNew(id);
+  } = useScanReceiptsNew(id, preselectedImageUri);
 
   const onRequestPermissions = async () => {
     try {

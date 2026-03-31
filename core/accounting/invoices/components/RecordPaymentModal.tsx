@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +32,13 @@ interface RecordPaymentModalProps {
   isSubmitting?: boolean;
 }
 
+const sanitizeDecimalInput = (value: string) => {
+  const normalized = value.replace(/,/g, '.').replace(/[^\d.]/g, '');
+  const parts = normalized.split('.');
+  if (parts.length <= 1) return normalized;
+  return `${parts[0]}.${parts.slice(1).join('')}`;
+};
+
 export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   visible,
   onClose,
@@ -41,6 +48,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   isSubmitting = false,
 }) => {
   const { t } = useTranslation();
+  const [amountInput, setAmountInput] = useState(() => remainingBalance.toString());
 
   const {
     control,
@@ -71,6 +79,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         reference: '',
         note: '',
       });
+      setAmountInput(remainingBalance.toString());
     }
   }, [visible, remainingBalance, reset]);
 
@@ -181,13 +190,38 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           <Controller
             control={control}
             name="amount"
-            render={({ field: { onChange, value } }) => (
+            render={({ field: { onChange, onBlur } }) => (
               <Input
                 label={`${t('paymentAmount')} *`}
-                value={value?.toString() || ''}
+                value={amountInput}
+                onBlur={() => {
+                  onBlur();
+
+                  if (!amountInput) {
+                    onChange(0);
+                    return;
+                  }
+
+                  const num = Number(amountInput);
+                  if (Number.isNaN(num)) {
+                    onChange(0);
+                    setAmountInput('');
+                    return;
+                  }
+
+                  onChange(num);
+                  setAmountInput(num.toString());
+                }}
                 onChangeText={(text) => {
-                  const num = parseFloat(text);
-                  onChange(isNaN(num) ? 0 : num);
+                  const sanitized = sanitizeDecimalInput(text);
+                  setAmountInput(sanitized);
+
+                  if (!sanitized || sanitized.endsWith('.')) return;
+
+                  const num = Number(sanitized);
+                  if (!Number.isNaN(num)) {
+                    onChange(num);
+                  }
                 }}
                 keyboardType="decimal-pad"
                 placeholder={t('enterAmount')}

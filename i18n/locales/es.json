@@ -113,6 +113,8 @@
   "signOutSuccess": "Cierre de sesión exitoso.",
   "continueWithGoogle": "Continuar con Google",
   "googleSignInError": "Error al iniciar sesión con Google. Por favor, intenta de nuevo.",
+  "googleSignInDeveloperError": "Error de configuración de Google Sign-In. Contacta al administrador.",
+  "networkConnectionError": "No se pudo conectar al servidor. Verifica tu conexión a internet e inténtalo de nuevo.",
   "selectYourCountry": "Selecciona tu país",
   "bySigningUpYouAgreeToOur": "Al hacer clic en continuar, aceptas nuestros",
 

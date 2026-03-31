@@ -116,6 +116,8 @@
   "signInSuccessDescription": "You have successfully logged into your account.",
   "continueWithGoogle": "Continue with Google",
   "googleSignInError": "Google sign-in failed. Please try again.",
+  "googleSignInDeveloperError": "Google Sign-In is misconfigured. Please contact support.",
+  "networkConnectionError": "Could not connect to the server. Check your internet connection and try again.",
 
   "signOutSuccess": "Signed out successfully.",
 

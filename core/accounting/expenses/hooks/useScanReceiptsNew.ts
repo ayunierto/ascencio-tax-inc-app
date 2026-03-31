@@ -19,8 +19,7 @@ export const useScanReceiptsNew = (
   const ref = useRef<CameraView>(null);
   const [pictureUri, setPictureUri] = useState<string | null>(null);
   const { setDetails } = useExpenseStore();
-  const { uploadImageMutation, getReceiptValuesMutation } =
-    useReceiptImageMutation();
+  const { uploadImageMutation } = useReceiptImageMutation();
 
   // Handle pre-selected image from gallery
   useEffect(() => {
@@ -96,12 +95,8 @@ export const useScanReceiptsNew = (
         imageUrl: uploadedPicture.url,
       });
 
-      // 2. Extract receipt values (OCR + GPT)
-      setStatusMessage(t('extractingReceiptValues'));
-      const extractedValues = await getReceiptValues(uploadedPicture.url);
-      setDetails({ ...extractedValues });
-
-      // 3. Redirect to new or edit expense screen
+      // 2. Redirect to new or edit expense screen
+      // The extraction is handled in ExpenseForm for both header scan and manual upload.
       setPictureUri(null);
       if (expenseId && expenseId !== 'new') {
         router.replace({
@@ -140,16 +135,6 @@ export const useScanReceiptsNew = (
       },
       onError: (error) => {
         toast.error(t('errorUploadingImage'), {
-          description: error.response?.data.message || error.message,
-        });
-      },
-    });
-  };
-
-  const getReceiptValues = async (imageUrl: string) => {
-    return await getReceiptValuesMutation.mutateAsync(imageUrl, {
-      onError: (error) => {
-        toast.error(t('errorGettingReceiptValues'), {
           description: error.response?.data.message || error.message,
         });
       },

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { UploadSignaturePayload } from '@ascencio/shared';
 import { api } from '@/core/api/api';
 import {
@@ -11,6 +12,7 @@ import {
 } from './types';
 
 const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const RECEIPT_FOLDER_REGEX = /(^|\/)temp_receipts(\/|$)/;
 
 const isUrl = (value?: string): boolean => !!value && value.startsWith('http');
 
@@ -141,6 +143,16 @@ const pickImage = async (source: ImageSource): Promise<string | undefined> => {
   return result.assets[0]?.uri;
 };
 
+const prepareReceiptImageForOcr = async (uri: string): Promise<string> => {
+  const { uri: preparedUri } = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { width: 1280 } }],
+    { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG },
+  );
+
+  return preparedUri;
+};
+
 interface UseImageHandlerControllerArgs
   extends Omit<ImageHandlerProps, 'children'>, ImageHandlerCallbacks {}
 
@@ -168,6 +180,8 @@ export const useImageHandlerController = ({
   const tempImageRef = useRef<string | undefined>(undefined);
   const savedRef = useRef<boolean>(false);
   const onCleanupErrorRef = useRef(onCleanupError);
+
+  const isReceiptFolder = RECEIPT_FOLDER_REGEX.test(folder);
 
   useEffect(() => {
     onCleanupErrorRef.current = onCleanupError;
@@ -229,7 +243,11 @@ export const useImageHandlerController = ({
           }
         }
 
-        const uploadResult = await uploadImage(selectedUri, folder);
+        const uriToUpload = isReceiptFolder
+          ? await prepareReceiptImageForOcr(selectedUri)
+          : selectedUri;
+
+        const uploadResult = await uploadImage(uriToUpload, folder);
 
         if (!uploadResult) {
           onUploadError?.({
@@ -239,7 +257,11 @@ export const useImageHandlerController = ({
         }
 
         tempImageRef.current = uploadResult.publicId;
-        onChange(uploadResult.publicId);
+        // For receipts we keep the secure URL to avoid rebuilding the URL later
+        // and to match the header scan flow.
+        onChange(
+          isReceiptFolder ? uploadResult.secureUrl : uploadResult.publicId,
+        );
         setLocalImageUrl(uploadResult.secureUrl);
         setImageLoadError(false);
         onUploadSuccess?.(uploadResult);
@@ -256,6 +278,7 @@ export const useImageHandlerController = ({
       onReplaceTempDeleteError,
       onUploadError,
       onUploadSuccess,
+      isReceiptFolder,
     ],
   );
 

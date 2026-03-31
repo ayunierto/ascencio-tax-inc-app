@@ -3,6 +3,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import { isAxiosError } from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
 export const useGoogleSignIn = () => {
@@ -51,19 +52,26 @@ export const useGoogleSignIn = () => {
       // Enviar el idToken al backend para verificación y autenticación
       await signInWithGoogle(idToken);
     } catch (err: any) {
-      let errorMessage = 'Failed to authenticate';
+      let errorMessageKey = 'googleSignInError';
 
       if (err.code === statusCodes.SIGN_IN_CANCELLED) {
-        errorMessage = 'Sign in cancelled';
+        errorMessageKey = 'googleSignInError';
       } else if (err.code === statusCodes.IN_PROGRESS) {
-        errorMessage = 'Sign in already in progress';
+        errorMessageKey = 'googleSignInError';
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        errorMessage = 'Play services not available';
+        errorMessageKey = 'googleSignInError';
+      } else if (err.code === statusCodes.DEVELOPER_ERROR) {
+        errorMessageKey = 'googleSignInDeveloperError';
+      } else if (isAxiosError(err) && !err.response) {
+        errorMessageKey = 'networkConnectionError';
+      } else if (isAxiosError(err) && err.response?.data?.message) {
+        errorMessageKey = err.response.data.message;
       }
 
-      const error = new Error(errorMessage);
-      setError(error);
+      const mappedError = new Error(errorMessageKey);
+      setError(mappedError);
       console.error('Google Sign-In Error:', err);
+      throw mappedError;
     } finally {
       setIsLoading(false);
     }

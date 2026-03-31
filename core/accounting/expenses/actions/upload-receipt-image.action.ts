@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { api } from '@/core/api/api';
 import { ReceiptImage } from '../interfaces/upload-receipt-image.response';
 
 export const uploadReceiptImage = async (
@@ -11,24 +11,10 @@ export const uploadReceiptImage = async (
     type: 'image/jpeg',
   });
 
-  // const { data } = await api.post<ReceiptImage>(
-  //   '/expenses/upload-receipt-image',
-  //   formdata
-  // );
-
-  const response = await fetch(
-    `${process.env.EXPO_PUBLIC_API_URL}/expenses/upload-receipt-image`,
-    {
-      method: 'POST',
-      body: formdata,
-      headers: {
-        Authorization: `Bearer ${await SecureStore.getItemAsync(
-          'access_token',
-        )}`,
-      },
-    },
+  const { data } = await api.post<ReceiptImage>(
+    '/expenses/upload-receipt-image',
+    formdata,
   );
-  const data = await response.json();
 
   return data;
 };
