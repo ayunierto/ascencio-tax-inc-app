@@ -475,9 +475,9 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
           hitSlop={12}
         >
           {createInvoice.isPending || updateInvoice.isPending ? (
-            <ActivityIndicator size="small" color={theme.primary} />
+            <ActivityIndicator size='small' color={theme.primary} />
           ) : (
-            <Ionicons name="save-outline" size={24} color={theme.primary} />
+            <Ionicons name='save-outline' size={24} color={theme.primary} />
           )}
         </HeaderButton>
       )}
@@ -485,10 +485,10 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
       {!isNew && canEdit && (
         <HeaderButton onPress={handleDeleteInvoice} hitSlop={12}>
           {isDeleting ? (
-            <ActivityIndicator size="small" color={theme.destructive} />
+            <ActivityIndicator size='small' color={theme.destructive} />
           ) : (
             <Ionicons
-              name="trash-outline"
+              name='trash-outline'
               size={24}
               color={theme.destructive}
             />
@@ -518,7 +518,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
             flexGrow: 1,
             // paddingBottom: insets.bottom + 40,
           }}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps='handled'
         >
           <View style={{ flex: 1, gap: 16 }}>
             {/* Error Box for general form errors */}
@@ -561,9 +561,9 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                   }}
                 >
                   <Ionicons
-                    name="information-circle"
+                    name='information-circle'
                     size={20}
-                    color="#3b82f6"
+                    color='#3b82f6'
                   />
                   <ThemedText
                     style={{ flex: 1, fontSize: 14, color: '#1e40af' }}
@@ -575,7 +575,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
               <Controller
                 control={control}
-                name="fromCompanyId"
+                name='fromCompanyId'
                 render={({ field: { onChange, value } }) => (
                   <Select
                     value={value || ''}
@@ -606,7 +606,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                       labelText={t('fromCompany')}
                     />
                     <SelectContent>
-                      <SelectItem label={t('selectCompany')} value="" />
+                      <SelectItem label={t('selectCompany')} value='' />
                       {companies.map((company) => (
                         <SelectItem
                           key={company.id}
@@ -624,7 +624,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
             <View>
               <Controller
                 control={control}
-                name="billToClientId"
+                name='billToClientId'
                 render={({ field: { onChange, value } }) => (
                   <View>
                     <ClientSelector
@@ -682,7 +682,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                 <View style={{ gap: 12, marginTop: 12 }}>
                   <Controller
                     control={control}
-                    name="billToFullName"
+                    name='billToFullName'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={`${t('clientName')} *`}
@@ -692,22 +692,22 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                         editable={canEdit}
                         error={!!errors.billToFullName}
                         errorMessage={getErrorMessage(errors.billToFullName)}
-                        autoCapitalize="words"
+                        autoCapitalize='words'
                       />
                     )}
                   />
 
                   <Controller
                     control={control}
-                    name="billToEmail"
+                    name='billToEmail'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('email')}
                         value={value}
                         onChangeText={onChange}
                         placeholder={t('enterEmail')}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
+                        keyboardType='email-address'
+                        autoCapitalize='none'
                         editable={canEdit}
                         error={!!errors.billToEmail}
                         errorMessage={getErrorMessage(errors.billToEmail)}
@@ -717,15 +717,15 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                   <Controller
                     control={control}
-                    name="billToPhone"
+                    name='billToPhone'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('phone')}
                         value={value}
                         onChangeText={onChange}
                         placeholder={t('enterPhone')}
-                        keyboardType="phone-pad"
-                        autoCapitalize="none"
+                        keyboardType='phone-pad'
+                        autoCapitalize='none'
                         editable={canEdit}
                         error={!!errors.billToPhone}
                         errorMessage={getErrorMessage(errors.billToPhone)}
@@ -735,7 +735,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                   <Controller
                     control={control}
-                    name="billToAddress"
+                    name='billToAddress'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('address')}
@@ -753,7 +753,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                   <Controller
                     control={control}
-                    name="billToCity"
+                    name='billToCity'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('city')}
@@ -769,7 +769,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                   <Controller
                     control={control}
-                    name="billToProvince"
+                    name='billToProvince'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('province')}
@@ -785,7 +785,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                   <Controller
                     control={control}
-                    name="billToPostalCode"
+                    name='billToPostalCode'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('postalCode')}
@@ -801,7 +801,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                   <Controller
                     control={control}
-                    name="billToCountry"
+                    name='billToCountry'
                     render={({ field: { onChange, value } }) => (
                       <Input
                         label={t('country')}
@@ -827,12 +827,12 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                 <View style={{ flex: 1 }}>
                   <Controller
                     control={control}
-                    name="issueDate"
+                    name='issueDate'
                     render={({ field: { onChange, value } }) => (
                       <DateTimePicker
                         labelText={t('issueDate')}
                         value={value}
-                        mode="date"
+                        mode='date'
                         onChange={onChange}
                         error={!!errors.issueDate}
                         errorMessage={errors.issueDate?.message}
@@ -844,12 +844,12 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                 <View style={{ flex: 1 }}>
                   <Controller
                     control={control}
-                    name="dueDate"
+                    name='dueDate'
                     render={({ field: { onChange, value } }) => (
                       <DateTimePicker
                         labelText={t('dueDate')}
                         value={value}
-                        mode="date"
+                        mode='date'
                         onChange={onChange}
                         error={!!errors.dueDate}
                         errorMessage={errors.dueDate?.message}
@@ -874,9 +874,9 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                   {t('lineItems')}
                 </ThemedText>
 
-                <Button size="sm" onPress={addLineItem} disabled={!canEdit}>
-                  <ButtonIcon name="add-circle-outline" />
-                  <ButtonText size="sm">{t('addItem')}</ButtonText>
+                <Button size='sm' onPress={addLineItem} disabled={!canEdit}>
+                  <ButtonIcon name='add-circle-outline' />
+                  <ButtonText size='sm'>{t('addItem')}</ButtonText>
                 </Button>
               </View>
 
@@ -928,13 +928,13 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
 
                       <Button
                         style={{ position: 'absolute', top: 0, right: 4 }}
-                        size="sm"
-                        variant="ghost"
+                        size='sm'
+                        variant='ghost'
                         onPress={() => removeLineItem(item.id)}
                         disabled={lineItems.length <= 1}
                       >
                         <ButtonIcon
-                          name="trash-outline"
+                          name='trash-outline'
                           style={{ color: theme.destructive }}
                         />
                       </Button>
@@ -975,7 +975,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                             updateLineItem(item.id, 'quantity', num);
                           }
                         }}
-                        keyboardType="numeric"
+                        keyboardType='numeric'
                         style={{ flex: 1 }}
                         error={!!errors.lineItems?.[index]?.quantity}
                         errorMessage={getErrorMessage(
@@ -1015,7 +1015,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                             return newState;
                           });
                         }}
-                        keyboardType="decimal-pad"
+                        keyboardType='decimal-pad'
                         style={{ flex: 1 }}
                         error={!!errors.lineItems?.[index]?.price}
                         errorMessage={getErrorMessage(
@@ -1038,7 +1038,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
             {/* Section: Tax Rate */}
             <Controller
               control={control}
-              name="taxRate"
+              name='taxRate'
               render={({ field: { onChange, onBlur } }) => (
                 <Input
                   label={`${t('taxRate')} (%)`}
@@ -1072,7 +1072,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                       onChange(num);
                     }
                   }}
-                  keyboardType="decimal-pad"
+                  keyboardType='decimal-pad'
                   editable={canEdit}
                   error={!!errors.taxRate}
                   errorMessage={getErrorMessage(errors.taxRate)}
@@ -1153,7 +1153,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
             {/* Section: Notes */}
             <Controller
               control={control}
-              name="notes"
+              name='notes'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('notes')}
@@ -1178,12 +1178,12 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
               </ThemedText>
               <Controller
                 control={control}
-                name="logoUrl"
+                name='logoUrl'
                 render={({ field: { onChange, value } }) => (
                   <ImageUploader
                     value={value}
                     onChange={onChange}
-                    folder="invoices"
+                    folder='invoices'
                   />
                 )}
               />
@@ -1195,13 +1195,13 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                 <Button
                   onPress={handleGeneratePdf}
                   disabled={isGeneratingPdf}
-                  variant="outline"
+                  variant='outline'
                   style={{ flexDirection: 'row', gap: 8 }}
                 >
                   {isGeneratingPdf ? (
-                    <ActivityIndicator size="small" color={theme.primary} />
+                    <ActivityIndicator size='small' color={theme.primary} />
                   ) : (
-                    <ButtonIcon name="document-text-outline" />
+                    <ButtonIcon name='document-text-outline' />
                   )}
                   <ButtonText>{t('generatePdf')}</ButtonText>
                 </Button>
@@ -1218,9 +1218,9 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                     }}
                   >
                     {issueInvoice.isPending ? (
-                      <ActivityIndicator size="small" color="white" />
+                      <ActivityIndicator size='small' color='white' />
                     ) : (
-                      <ButtonIcon name="checkmark-circle-outline" />
+                      <ButtonIcon name='checkmark-circle-outline' />
                     )}
                     <ButtonText>{t('issueInvoice')}</ButtonText>
                   </Button>
@@ -1274,7 +1274,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                     {invoice.balanceDue > 0 && (
                       <Button
                         onPress={() => setIsPaymentModalVisible(true)}
-                        variant="default"
+                        variant='default'
                         style={{ marginTop: 8 }}
                       >
                         <ButtonText>{t('recordPayment')}</ButtonText>

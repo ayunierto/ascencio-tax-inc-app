@@ -48,7 +48,9 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   isSubmitting = false,
 }) => {
   const { t } = useTranslation();
-  const [amountInput, setAmountInput] = useState(() => remainingBalance.toString());
+  const [amountInput, setAmountInput] = useState(() =>
+    remainingBalance.toString(),
+  );
 
   const {
     control,
@@ -120,8 +122,8 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
-      presentationStyle="fullScreen"
+      animationType='slide'
+      presentationStyle='fullScreen'
       onRequestClose={onClose}
     >
       <SafeAreaView
@@ -152,7 +154,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             )}
           </View>
           <TouchableOpacity onPress={onClose} disabled={isSubmitting}>
-            <Ionicons name="close" size={28} color={theme.foreground} />
+            <Ionicons name='close' size={28} color={theme.foreground} />
           </TouchableOpacity>
         </View>
 
@@ -189,7 +191,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           {/* Payment Amount */}
           <Controller
             control={control}
-            name="amount"
+            name='amount'
             render={({ field: { onChange, onBlur } }) => (
               <Input
                 label={`${t('paymentAmount')} *`}
@@ -223,11 +225,11 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                     onChange(num);
                   }
                 }}
-                keyboardType="decimal-pad"
+                keyboardType='decimal-pad'
                 placeholder={t('enterAmount')}
                 error={!!errors.amount || !!amountError}
                 errorMessage={amountError || getErrorMessage(errors.amount)}
-                leadingIcon="cash-outline"
+                leadingIcon='cash-outline'
               />
             )}
           />
@@ -235,12 +237,12 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           {/* Payment Date */}
           <Controller
             control={control}
-            name="paidAt"
+            name='paidAt'
             render={({ field: { onChange, value } }) => (
               <DateTimePicker
                 labelText={`${t('paymentDate')} *`}
                 value={value}
-                mode="date"
+                mode='date'
                 onChange={onChange}
                 error={!!errors.paidAt}
                 errorMessage={getErrorMessage(errors.paidAt)}
@@ -251,7 +253,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           {/* Payment Method */}
           <Controller
             control={control}
-            name="method"
+            name='method'
             render={({ field: { onChange, value } }) => (
               <Select
                 value={value || 'cash'}
@@ -279,7 +281,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           {/* Reference */}
           <Controller
             control={control}
-            name="reference"
+            name='reference'
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t('paymentReference')}
@@ -288,7 +290,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                 placeholder={t('enterReference')}
                 error={!!errors.reference}
                 errorMessage={getErrorMessage(errors.reference)}
-                leadingIcon="receipt-outline"
+                leadingIcon='receipt-outline'
               />
             )}
           />
@@ -296,7 +298,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           {/* Notes */}
           <Controller
             control={control}
-            name="note"
+            name='note'
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t('paymentNotes')}
@@ -307,7 +309,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                 numberOfLines={3}
                 error={!!errors.note}
                 errorMessage={getErrorMessage(errors.note)}
-                leadingIcon="document-text-outline"
+                leadingIcon='document-text-outline'
               />
             )}
           />
@@ -331,7 +333,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             <ButtonText>{t('save')}</ButtonText>
           </Button>
 
-          <Button variant="outline" onPress={onClose} disabled={isSubmitting}>
+          <Button variant='outline' onPress={onClose} disabled={isSubmitting}>
             <ButtonText>{t('cancel')}</ButtonText>
           </Button>
         </View>
