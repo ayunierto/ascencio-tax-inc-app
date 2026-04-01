@@ -4,6 +4,8 @@ export type ImageSource = 'camera' | 'gallery';
 
 export interface ImageHandlerRef {
   markAsSaved: () => void;
+  selectFromCamera: () => Promise<void>;
+  selectFromGallery: () => Promise<void>;
 }
 
 export interface UploadResult {

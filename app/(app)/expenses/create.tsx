@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { useCategories } from '@/core/accounting/categories/hooks/useCategories';
 import ExpenseForm from '@/core/accounting/expenses/components/ExpenseForm/ExpenseForm';
@@ -11,6 +11,9 @@ import { theme } from '@/components/ui';
 import { Expense } from '@ascencio/shared';
 
 export default function CreateExpenseScreen() {
+  const { openCamera } = useLocalSearchParams<{ openCamera?: string }>();
+  const shouldOpenCamera = openCamera === '1';
+
   const {
     imageUrl,
     merchant,
@@ -90,7 +93,11 @@ export default function CreateExpenseScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <ExpenseForm expense={newExpense} categories={categories} />
+      <ExpenseForm
+        expense={newExpense}
+        categories={categories}
+        autoOpenCameraOnMount={shouldOpenCamera}
+      />
     </View>
   );
 }

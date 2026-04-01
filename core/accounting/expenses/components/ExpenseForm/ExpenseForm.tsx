@@ -48,11 +48,17 @@ import {
 interface ExpenseFormProps {
   expense: Expense;
   categories: Category[];
+  autoOpenCameraOnMount?: boolean;
 }
 
-export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
+export default function ExpenseForm({
+  expense,
+  categories,
+  autoOpenCameraOnMount = false,
+}: ExpenseFormProps) {
   const { t } = useTranslation();
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
+  const hasOpenedCameraRef = useRef(false);
   const lastScannedImageRef = useRef<string | undefined>(undefined);
   const hasAutoScannedRef = useRef<boolean>(false);
   const [totalInput, setTotalInput] = useState<string>(
@@ -114,6 +120,21 @@ export default function ExpenseForm({ expense, categories }: ExpenseFormProps) {
     setTotalInput(expense.total?.toString() || '');
     setTaxInput(expense.tax?.toString() || '');
   }, [expense, reset]);
+
+  React.useEffect(() => {
+    if (!autoOpenCameraOnMount || hasOpenedCameraRef.current) {
+      return;
+    }
+
+    hasOpenedCameraRef.current = true;
+    const timeout = setTimeout(() => {
+      imageUploaderRef.current?.selectFromCamera().catch((error) => {
+        console.error('Error opening camera from create flow:', error);
+      });
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [autoOpenCameraOnMount]);
 
   const createMutation = createExpenseMutation();
   const updateMutation = updateExpenseMutation();

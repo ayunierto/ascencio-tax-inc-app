@@ -66,6 +66,8 @@ export interface ImageUploaderRef {
    * the cleanup effect from deleting the promoted image.
    */
   markAsSaved: () => void;
+  selectFromCamera: () => Promise<void>;
+  selectFromGallery: () => Promise<void>;
 }
 
 interface ImageUploaderAreaProps {
@@ -199,6 +201,12 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     useImperativeHandle(ref, () => ({
       markAsSaved: () => {
         imageHandlerRef.current?.markAsSaved();
+      },
+      selectFromCamera: async () => {
+        await imageHandlerRef.current?.selectFromCamera();
+      },
+      selectFromGallery: async () => {
+        await imageHandlerRef.current?.selectFromGallery();
       },
     }));
 

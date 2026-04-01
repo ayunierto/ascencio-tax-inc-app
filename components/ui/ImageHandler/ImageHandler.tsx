@@ -43,6 +43,8 @@ const ImageHandlerRootBase = (
 
   useImperativeHandle(ref, () => ({
     markAsSaved: contextValue.markAsSaved,
+    selectFromCamera: contextValue.selectFromCamera,
+    selectFromGallery: contextValue.selectFromGallery,
   }));
 
   return (
