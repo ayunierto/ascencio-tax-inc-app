@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { CameraView } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { toast } from 'sonner-native';
 import { useTranslation } from 'react-i18next';
 import { useExpenseStore } from '../store/useExpenseStore';
-import { useReceiptImageMutation } from './useReceiptImageMutation';
+import { useReceiptPipeline } from './useReceiptPipeline';
 
 export const useScanReceiptsNew = (
   expenseId?: string,
@@ -19,22 +19,25 @@ export const useScanReceiptsNew = (
   const ref = useRef<CameraView>(null);
   const [pictureUri, setPictureUri] = useState<string | null>(null);
   const { setDetails } = useExpenseStore();
-  const { uploadImageMutation } = useReceiptImageMutation();
+  const { uploadImageMutation } = useReceiptPipeline();
+
+  const handlePreselectedImage = useCallback(
+    async (uri: string) => {
+      setLoading(true);
+      setStatusMessage(t('compressingPicture'));
+      const compressedUri = await compressPicture(uri);
+      setPictureUri(compressedUri);
+      setLoading(false);
+    },
+    [t],
+  );
 
   // Handle pre-selected image from gallery
   useEffect(() => {
     if (preselectedImageUri) {
-      handlePreselectedImage(preselectedImageUri);
+      void handlePreselectedImage(preselectedImageUri);
     }
-  }, [preselectedImageUri]);
-
-  const handlePreselectedImage = async (uri: string) => {
-    setLoading(true);
-    setStatusMessage(t('compressingPicture'));
-    const compressedUri = await compressPicture(uri);
-    setPictureUri(compressedUri);
-    setLoading(false);
-  };
+  }, [handlePreselectedImage, preselectedImageUri]);
 
   const takePicture = async () => {
     try {
@@ -135,7 +138,7 @@ export const useScanReceiptsNew = (
       },
       onError: (error) => {
         toast.error(t('errorUploadingImage'), {
-          description: error.response?.data.message || error.message,
+          description: error.message,
         });
       },
     });

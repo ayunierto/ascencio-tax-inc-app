@@ -9,6 +9,7 @@ import { fetch } from 'expo/fetch';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
+import Loader from '@/components/Loader';
 
 import { Input } from '@/components/ui/Input';
 import {
@@ -28,7 +29,7 @@ import {
 } from '@/components/ui';
 import { getErrorMessage } from '@/utils/getErrorMessage';
 import { DeleteConfirmationDialog, FormViewContainer } from '@/core/components';
-import { useReceiptImageMutation } from '@/core/accounting/expenses/hooks/useReceiptImageMutation';
+import { useReceiptPipeline } from '@/core/accounting/expenses/hooks/useReceiptPipeline';
 import {
   canAnalyzeReceiptReference,
   resolveReceiptImageUrl,
@@ -59,6 +60,9 @@ export default function ExpenseForm({
   const { t } = useTranslation();
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
   const hasOpenedCameraRef = useRef(false);
+  const [isBootstrappingCamera, setIsBootstrappingCamera] = useState(
+    autoOpenCameraOnMount,
+  );
   const lastScannedImageRef = useRef<string | undefined>(undefined);
   const hasAutoScannedRef = useRef<boolean>(false);
   const [totalInput, setTotalInput] = useState<string>(
@@ -81,7 +85,7 @@ export default function ExpenseForm({
       : integerPart;
   };
 
-  const { getReceiptValuesMutation } = useReceiptImageMutation();
+  const { getReceiptValuesMutation } = useReceiptPipeline();
   const {
     handleSubmit,
     control,
@@ -127,13 +131,25 @@ export default function ExpenseForm({
     }
 
     hasOpenedCameraRef.current = true;
-    const timeout = setTimeout(() => {
-      imageUploaderRef.current?.selectFromCamera().catch((error) => {
+    const bootstrapTimeout = setTimeout(() => {
+      setIsBootstrappingCamera(false);
+    }, 1500);
+
+    const timeout = setTimeout(async () => {
+      try {
+        await imageUploaderRef.current?.selectFromCamera();
+      } catch (error) {
         console.error('Error opening camera from create flow:', error);
-      });
+      } finally {
+        clearTimeout(bootstrapTimeout);
+        setIsBootstrappingCamera(false);
+      }
     }, 0);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(bootstrapTimeout);
+    };
   }, [autoOpenCameraOnMount]);
 
   const createMutation = createExpenseMutation();
@@ -144,38 +160,25 @@ export default function ExpenseForm({
   const previousImageUrlRef = useRef<string | undefined>(watchedImageUrl);
 
   const onSubmit = async (data: CreateExpenseInput) => {
-    console.log('[EXPENSE FORM] onSubmit called with data:', data);
-    console.log('[EXPENSE FORM] Expense ID:', data.id);
-    console.log('[EXPENSE FORM] Is update?', data.id && data.id !== 'new');
-
     try {
       // Validate and transform data through schema (converts strings to numbers)
       const validatedData = createExpenseSchema.parse(data);
 
       if (validatedData.id && validatedData.id !== 'new') {
-        console.log('[EXPENSE FORM] Updating expense...');
-        const result = await updateMutation.mutateAsync(validatedData);
-        console.log('[EXPENSE FORM] Update result:', result);
+        await updateMutation.mutateAsync(validatedData);
         // Mark image as saved to prevent cleanup
         imageUploaderRef.current?.markAsSaved();
-        console.log('[EXPENSE FORM] Showing success toast');
         toast.success(t('expenseUpdatedSuccessfully'));
-        console.log('[EXPENSE FORM] Navigating back');
         setTimeout(() => router.back(), 500);
       } else {
-        console.log('[EXPENSE FORM] Creating expense...');
-        const result = await createMutation.mutateAsync(validatedData);
-        console.log('[EXPENSE FORM] Create result:', result);
+        await createMutation.mutateAsync(validatedData);
         // Mark image as saved to prevent cleanup
         imageUploaderRef.current?.markAsSaved();
-        console.log('[EXPENSE FORM] Showing success toast');
         toast.success(t('expenseCreatedSuccessfully'));
-        console.log('[EXPENSE FORM] Navigating back');
         setTimeout(() => router.back(), 500);
       }
     } catch (error: any) {
-      console.error('[EXPENSE FORM] Error saving expense:', error);
-      console.error('[EXPENSE FORM] Error response:', error?.response?.data);
+      console.error('Error saving expense:', error);
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
@@ -204,14 +207,12 @@ export default function ExpenseForm({
   };
 
   const handleSaveButton = () => {
-    console.log('[EXPENSE FORM] Save button pressed');
     handleSubmit(
       (data) => {
-        console.log('[EXPENSE FORM] Form validation passed, calling onSubmit');
         onSubmit(data);
       },
       (errors) => {
-        console.error('[EXPENSE FORM] Form validation failed:', errors);
+        console.error('Form validation failed:', errors);
         toast.error(t('pleaseFixValidationErrors'));
       },
     )();
@@ -403,250 +404,230 @@ export default function ExpenseForm({
 
   return (
     <View style={{ flex: 1 }}>
-      <CustomHeader
-        title={expense.id === 'new' ? t('newExpense') : t('expenseDetails')}
-        left={
-          <HeaderButton onPress={() => router.back()}>
-            <Ionicons name='arrow-back' size={24} color='#ffffff' />
-          </HeaderButton>
-        }
-        right={
-          <View style={{ flexDirection: 'row', gap: 16 }}>
-            {watch('imageUrl') && (
-              <HeaderButton onPress={handleDownloadReceipt}>
-                <Ionicons
-                  name='download-outline'
-                  size={24}
-                  color={theme.primary}
-                />
-              </HeaderButton>
-            )}
-
-            <HeaderButton
-              onPress={handleSaveButton}
-              disabled={
-                createMutation.isPending ||
-                updateMutation.isPending ||
-                deleteMutation.isPending
-              }
-            >
-              <Ionicons name='save-outline' size={24} color={theme.primary} />
+      <View
+        style={{
+          flex: 1,
+          opacity: isBootstrappingCamera ? 0 : 1,
+        }}
+        pointerEvents={isBootstrappingCamera ? 'none' : 'auto'}
+      >
+        <CustomHeader
+          title={expense.id === 'new' ? t('newExpense') : t('expenseDetails')}
+          left={
+            <HeaderButton onPress={() => router.back()}>
+              <Ionicons name='arrow-back' size={24} color='#ffffff' />
             </HeaderButton>
-
-            {expense.id !== 'new' && (
-              <DeleteConfirmationDialog onDelete={handleDelete}>
-                <HeaderButton
-                  onPress={() => {}}
-                  disabled={
-                    updateMutation.isPending || deleteMutation.isPending
-                  }
-                >
+          }
+          right={
+            <View style={{ flexDirection: 'row', gap: 16 }}>
+              {watch('imageUrl') && (
+                <HeaderButton onPress={handleDownloadReceipt}>
                   <Ionicons
-                    name='trash-outline'
+                    name='download-outline'
                     size={24}
-                    color={theme.destructive}
+                    color={theme.primary}
                   />
                 </HeaderButton>
-              </DeleteConfirmationDialog>
-            )}
-          </View>
-        }
-      />
-      <FormViewContainer>
-        <Controller
-          control={control}
-          name='imageUrl'
-          render={({ field: { onChange, value } }) => (
-            <View style={{ gap: 8 }}>
-              <ImageUploader
-                ref={imageUploaderRef}
-                value={value}
-                onChange={onChange}
-                folder='temp_receipts'
-                label={t('receiptImage')}
-                allowCamera={true}
-                allowGallery={true}
-                // error={!!errors.imageUrl}
-                // errorMessage={getErrorMessage(errors.imageUrl)}
-                // isScanning={isScanning}
-              />
+              )}
+
+              <HeaderButton
+                onPress={handleSaveButton}
+                disabled={
+                  createMutation.isPending ||
+                  updateMutation.isPending ||
+                  deleteMutation.isPending
+                }
+              >
+                <Ionicons name='save-outline' size={24} color={theme.primary} />
+              </HeaderButton>
+
+              {expense.id !== 'new' && (
+                <DeleteConfirmationDialog onDelete={handleDelete}>
+                  <HeaderButton
+                    onPress={() => {}}
+                    disabled={
+                      updateMutation.isPending || deleteMutation.isPending
+                    }
+                  >
+                    <Ionicons
+                      name='trash-outline'
+                      size={24}
+                      color={theme.destructive}
+                    />
+                  </HeaderButton>
+                </DeleteConfirmationDialog>
+              )}
             </View>
-          )}
+          }
         />
-
-        <Controller
-          control={control}
-          name={'merchant'}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label={t('merchant')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={!!errors.merchant}
-              errorMessage={getErrorMessage(errors.merchant)}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name='date'
-          render={({ field: { onChange, value } }) => (
-            <DateTimePicker
-              labelText={t('date')}
-              error={!!errors.date}
-              errorMessage={getErrorMessage(errors.date)}
-              value={value ?? null}
-              mode='date'
-              onChange={onChange}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name='total'
-          render={({ field: { onChange, onBlur } }) => (
-            <Input
-              label={t('total')}
-              value={totalInput}
-              onBlur={() => {
-                onBlur();
-                if (!totalInput) {
-                  onChange(0);
-                  return;
-                }
-
-                const num = Number(totalInput);
-                if (Number.isNaN(num)) {
-                  onChange(0);
-                  setTotalInput('');
-                  return;
-                }
-
-                onChange(num);
-                setTotalInput(num.toString());
-              }}
-              onChangeText={(text) => {
-                const sanitized = sanitizeDecimalInput(text);
-                setTotalInput(sanitized);
-
-                if (!sanitized || sanitized.endsWith('.')) return;
-
-                const num = Number(sanitized);
-                if (!Number.isNaN(num)) {
-                  onChange(num);
-                }
-              }}
-              keyboardType='decimal-pad'
-              error={!!errors.total}
-              errorMessage={getErrorMessage(errors.total)}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name='tax'
-          render={({ field: { onChange, onBlur } }) => (
-            <Input
-              label={t('tax')}
-              value={taxInput}
-              onBlur={() => {
-                onBlur();
-                if (!taxInput) {
-                  onChange(0);
-                  return;
-                }
-
-                const num = Number(taxInput);
-                if (Number.isNaN(num)) {
-                  onChange(0);
-                  setTaxInput('');
-                  return;
-                }
-
-                onChange(num);
-                setTaxInput(num.toString());
-              }}
-              onChangeText={(text) => {
-                const sanitized = sanitizeDecimalInput(text);
-                setTaxInput(sanitized);
-
-                if (!sanitized || sanitized.endsWith('.')) return;
-
-                const num = Number(sanitized);
-                if (!Number.isNaN(num)) {
-                  onChange(num);
-                }
-              }}
-              keyboardType='decimal-pad'
-              error={!!errors.tax}
-              errorMessage={getErrorMessage(errors.tax)}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name={'categoryId'}
-          render={({ field: { onChange, value } }) => (
-            <Select
-              value={value}
-              onValueChange={(id) => {
-                onChange(id); // setValue("categoryId", id);
-                const sub =
-                  categories.find((cat) => cat.id === id)?.subcategories || [];
-                setSubcategories(sub);
-                setValue('subcategoryId', undefined);
-              }}
-              error={!!errors.categoryId}
-              errorMessage={getErrorMessage(errors.categoryId)}
-              options={categories.map((cat) => ({
-                label: cat.name,
-                value: cat.id,
-              }))}
-            >
-              <SelectTrigger
-                placeholder={t('selectACategory')}
-                labelText={t('category')}
-              />
-              <SelectContent>
-                <ScrollView>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} label={cat.name} value={cat.id} />
-                  ))}
-                </ScrollView>
-              </SelectContent>
-            </Select>
-          )}
-        />
-
-        {subcategories && subcategories.length > 0 && (
+        <FormViewContainer>
           <Controller
             control={control}
-            name={'subcategoryId'}
+            name='imageUrl'
+            render={({ field: { onChange, value } }) => (
+              <View style={{ gap: 8 }}>
+                <ImageUploader
+                  ref={imageUploaderRef}
+                  value={value}
+                  onChange={onChange}
+                  folder='temp_receipts'
+                  label={t('receiptImage')}
+                  allowCamera={true}
+                  allowGallery={true}
+                  // error={!!errors.imageUrl}
+                  // errorMessage={getErrorMessage(errors.imageUrl)}
+                  // isScanning={isScanning}
+                />
+              </View>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name={'merchant'}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('merchant')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={!!errors.merchant}
+                errorMessage={getErrorMessage(errors.merchant)}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name='date'
+            render={({ field: { onChange, value } }) => (
+              <DateTimePicker
+                labelText={t('date')}
+                error={!!errors.date}
+                errorMessage={getErrorMessage(errors.date)}
+                value={value ?? null}
+                mode='date'
+                onChange={onChange}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name='total'
+            render={({ field: { onChange, onBlur } }) => (
+              <Input
+                label={t('total')}
+                value={totalInput}
+                onBlur={() => {
+                  onBlur();
+                  if (!totalInput) {
+                    onChange(0);
+                    return;
+                  }
+
+                  const num = Number(totalInput);
+                  if (Number.isNaN(num)) {
+                    onChange(0);
+                    setTotalInput('');
+                    return;
+                  }
+
+                  onChange(num);
+                  setTotalInput(num.toString());
+                }}
+                onChangeText={(text) => {
+                  const sanitized = sanitizeDecimalInput(text);
+                  setTotalInput(sanitized);
+
+                  if (!sanitized || sanitized.endsWith('.')) return;
+
+                  const num = Number(sanitized);
+                  if (!Number.isNaN(num)) {
+                    onChange(num);
+                  }
+                }}
+                keyboardType='decimal-pad'
+                error={!!errors.total}
+                errorMessage={getErrorMessage(errors.total)}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name='tax'
+            render={({ field: { onChange, onBlur } }) => (
+              <Input
+                label={t('tax')}
+                value={taxInput}
+                onBlur={() => {
+                  onBlur();
+                  if (!taxInput) {
+                    onChange(0);
+                    return;
+                  }
+
+                  const num = Number(taxInput);
+                  if (Number.isNaN(num)) {
+                    onChange(0);
+                    setTaxInput('');
+                    return;
+                  }
+
+                  onChange(num);
+                  setTaxInput(num.toString());
+                }}
+                onChangeText={(text) => {
+                  const sanitized = sanitizeDecimalInput(text);
+                  setTaxInput(sanitized);
+
+                  if (!sanitized || sanitized.endsWith('.')) return;
+
+                  const num = Number(sanitized);
+                  if (!Number.isNaN(num)) {
+                    onChange(num);
+                  }
+                }}
+                keyboardType='decimal-pad'
+                error={!!errors.tax}
+                errorMessage={getErrorMessage(errors.tax)}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name={'categoryId'}
             render={({ field: { onChange, value } }) => (
               <Select
                 value={value}
-                onValueChange={onChange}
-                options={subcategories.map((sub) => ({
-                  label: sub.name,
-                  value: sub.id,
+                onValueChange={(id) => {
+                  onChange(id); // setValue("categoryId", id);
+                  const sub =
+                    categories.find((cat) => cat.id === id)?.subcategories ||
+                    [];
+                  setSubcategories(sub);
+                  setValue('subcategoryId', undefined);
+                }}
+                error={!!errors.categoryId}
+                errorMessage={getErrorMessage(errors.categoryId)}
+                options={categories.map((cat) => ({
+                  label: cat.name,
+                  value: cat.id,
                 }))}
               >
                 <SelectTrigger
-                  placeholder={t('selectASubcategory')}
-                  labelText={t('subcategory')}
+                  placeholder={t('selectACategory')}
+                  labelText={t('category')}
                 />
                 <SelectContent>
                   <ScrollView>
-                    {subcategories.map((sub) => (
+                    {categories.map((cat) => (
                       <SelectItem
-                        key={sub.id}
-                        label={sub.name}
-                        value={sub.id}
+                        key={cat.id}
+                        label={cat.name}
+                        value={cat.id}
                       />
                     ))}
                   </ScrollView>
@@ -654,23 +635,69 @@ export default function ExpenseForm({
               </Select>
             )}
           />
-        )}
 
-        <Controller
-          control={control}
-          name='notes'
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label={t('notes')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={!!errors.notes}
-              errorMessage={getErrorMessage(errors.notes)}
+          {subcategories && subcategories.length > 0 && (
+            <Controller
+              control={control}
+              name={'subcategoryId'}
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  value={value}
+                  onValueChange={onChange}
+                  options={subcategories.map((sub) => ({
+                    label: sub.name,
+                    value: sub.id,
+                  }))}
+                >
+                  <SelectTrigger
+                    placeholder={t('selectASubcategory')}
+                    labelText={t('subcategory')}
+                  />
+                  <SelectContent>
+                    <ScrollView>
+                      {subcategories.map((sub) => (
+                        <SelectItem
+                          key={sub.id}
+                          label={sub.name}
+                          value={sub.id}
+                        />
+                      ))}
+                    </ScrollView>
+                  </SelectContent>
+                </Select>
+              )}
             />
           )}
-        />
-      </FormViewContainer>
+
+          <Controller
+            control={control}
+            name='notes'
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('notes')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={!!errors.notes}
+                errorMessage={getErrorMessage(errors.notes)}
+              />
+            )}
+          />
+        </FormViewContainer>
+      </View>
+      {isBootstrappingCamera && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+          }}
+        >
+          <Loader message={t('loading')} />
+        </View>
+      )}
     </View>
   );
 }

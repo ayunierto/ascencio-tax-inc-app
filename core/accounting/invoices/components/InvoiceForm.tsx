@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { router, useNavigation } from 'expo-router';
@@ -34,8 +33,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CustomHeader,
+  HeaderButton,
 } from '@/components/ui';
-import { ErrorBox } from '@/core/auth/components/ErrorBox';
 import { ThemedText } from '@/components/ui/ThemedText';
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
 import {
@@ -57,7 +57,6 @@ import { useCompanies } from '../../companies/hooks';
 import { useClients } from '../../clients/hooks';
 import { ClientSelector } from './ClientSelector/';
 import { RecordPaymentModal } from './RecordPaymentModal';
-import { CustomHeader, HeaderButton } from '@/components/ui';
 
 interface InvoiceFormProps {
   invoice: Invoice;
@@ -95,6 +94,10 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
   const [isManualClientEntry, setIsManualClientEntry] = useState(
     !invoice.billToClientId && !!invoice.billToName,
+  );
+  // Track quantity text inputs to allow typing decimals like "1."
+  const [quantityTexts, setQuantityTexts] = useState<Record<string, string>>(
+    {},
   );
   // Track price text inputs to allow typing decimals like "1."
   const [priceTexts, setPriceTexts] = useState<Record<string, string>>({});
@@ -200,12 +203,11 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   }, []);
 
   /**
-   * Handler for validation errors - logs errors for debugging
+   * Handler for validation errors in submit.
    */
   const onValidationError = (formErrors: any) => {
     console.warn('Validation errors:', formErrors);
-    // Errors are now displayed persistently in the form fields
-    // No need for toast notifications on validation errors
+    toast.error(t('pleaseFixFormErrors'));
   };
 
   const handleGeneratePdf = async () => {
@@ -521,10 +523,6 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
           keyboardShouldPersistTaps='handled'
         >
           <View style={{ flex: 1, gap: 16 }}>
-            {/* Error Box for general form errors */}
-            {Object.keys(errors).length > 0 && (
-              <ErrorBox message={t('pleaseFixFormErrors')} />
-            )}
             {/* Invoice Number (read-only for existing) */}
             {!isNew && (
               <View
@@ -964,18 +962,37 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                     >
                       <Input
                         label={t('quantity')}
-                        value={item.quantity.toString()}
+                        value={
+                          quantityTexts[item.id] ?? item.quantity.toString()
+                        }
                         onChangeText={(text) => {
-                          if (text === '') {
+                          const sanitized = sanitizeDecimalInput(text);
+
+                          setQuantityTexts((prev) => ({
+                            ...prev,
+                            [item.id]: sanitized,
+                          }));
+
+                          if (!sanitized) {
                             updateLineItem(item.id, 'quantity', 0);
                             return;
                           }
-                          const num = parseInt(text);
-                          if (!isNaN(num)) {
+
+                          if (sanitized.endsWith('.')) return;
+
+                          const num = Number(sanitized);
+                          if (!Number.isNaN(num)) {
                             updateLineItem(item.id, 'quantity', num);
                           }
                         }}
-                        keyboardType='numeric'
+                        onBlur={() => {
+                          setQuantityTexts((prev) => {
+                            const newState = { ...prev };
+                            delete newState[item.id];
+                            return newState;
+                          });
+                        }}
+                        keyboardType='decimal-pad'
                         style={{ flex: 1 }}
                         error={!!errors.lineItems?.[index]?.quantity}
                         errorMessage={getErrorMessage(

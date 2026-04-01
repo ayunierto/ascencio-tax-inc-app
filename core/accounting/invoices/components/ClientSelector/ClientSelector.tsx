@@ -49,6 +49,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
   const shouldShowError = isManualMode
     ? hasManualFieldsError
     : hasClientError || hasManualFieldsError;
+  const hasSearchModeError = !isManualMode && shouldShowError;
   const displayErrorMessage = isManualMode
     ? manualFieldsErrorMessage
     : clientErrorMessage || manualFieldsErrorMessage;
@@ -85,12 +86,12 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
           {t('billTo')}
         </ThemedText>
 
-        <Button size="sm" onPress={() => onManualMode(!isManualMode)}>
+        <Button size='sm' onPress={() => onManualMode(!isManualMode)}>
           <ButtonIcon
             name={isManualMode ? 'search-outline' : 'create-outline'}
           />
 
-          <ButtonText variant="destructive" size="sm">
+          <ButtonText variant='destructive' size='sm'>
             {isManualMode ? t('searchClient') : t('manualEntry')}
           </ButtonText>
         </Button>
@@ -106,7 +107,9 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
                 backgroundColor: theme.background,
                 borderRadius: 8,
                 borderWidth: 1,
-                borderColor: theme.primary,
+                borderColor: hasSearchModeError
+                  ? theme.destructive
+                  : theme.primary,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -125,13 +128,13 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
               </View>
 
               <Button
-                size="icon"
-                variant="destructive"
+                size='icon'
+                variant='destructive'
                 onPress={() => {
                   onClientSelect(undefined);
                 }}
               >
-                <ButtonIcon name="close-circle-outline" />
+                <ButtonIcon name='close-circle-outline' />
               </Button>
             </View>
           ) : (
@@ -141,11 +144,13 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
                 // onValueChange={onChange}
                 // options={countryCodes}
                 onValueChange={() => {}}
+                error={hasSearchModeError}
+                errorMessage={displayErrorMessage}
               >
                 <SelectTrigger
                   placeholder={t('searchOrSelectClient')}
                   icon={
-                    <Ionicons name="search" size={20} color={theme.muted} />
+                    <Ionicons name='search' size={20} color={theme.muted} />
                   }
                 />
                 <SelectContent
@@ -162,7 +167,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
                     onChangeText={setSearchQuery}
                     placeholder={t('searchByNameEmailPhone')}
                     autoFocus
-                    leadingIcon="search"
+                    leadingIcon='search'
                     clearable
                   />
 
@@ -170,7 +175,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
 
                   {/* Manual Entry Option */}
                   <Button onPress={handleManualEntry}>
-                    <ButtonIcon name="add-circle-outline" />
+                    <ButtonIcon name='add-circle-outline' />
                     <ButtonText>{t('enterClientManually')}</ButtonText>
                   </Button>
 
@@ -220,7 +225,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
       )}
 
       {/* Error Message - Always visible when there's an error */}
-      {shouldShowError && displayErrorMessage && (
+      {isManualMode && shouldShowError && displayErrorMessage && (
         <View style={{ marginTop: 8 }}>
           <ErrorMessage message={displayErrorMessage} />
         </View>

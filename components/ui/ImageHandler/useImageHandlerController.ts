@@ -1,117 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { UploadSignaturePayload } from '@ascencio/shared';
-import { api } from '@/core/api/api';
 import {
   ImageHandlerCallbacks,
   ImageHandlerContextValue,
   ImageHandlerProps,
   ImageSource,
-  UploadResult,
 } from './types';
+import { cloudinaryStorageProvider } from './cloudinaryStorage';
 
-const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const RECEIPT_FOLDER_REGEX = /(^|\/)temp_receipts(\/|$)/;
-
-const isUrl = (value?: string): boolean => !!value && value.startsWith('http');
-
-const resolveCloudinaryUrl = (value?: string): string | undefined => {
-  if (!value) return undefined;
-  if (isUrl(value)) return value;
-  if (!CLOUDINARY_CLOUD_NAME) return undefined;
-  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${value}`;
-};
-
-const extractPublicId = (url: string): string | null => {
-  try {
-    const parts = url.split('/upload/');
-    if (parts.length < 2) return null;
-
-    const pathParts = parts[1].split('/');
-    const relevantParts = pathParts.filter((part) => !part.startsWith('v'));
-
-    const filenameWithExt = relevantParts[relevantParts.length - 1];
-    const filename = filenameWithExt.split('.')[0];
-    const folderPath = relevantParts.slice(0, -1).join('/');
-
-    return folderPath ? `${folderPath}/${filename}` : filename;
-  } catch (error) {
-    console.error('Error extracting cloudinary publicId:', error);
-    return null;
-  }
-};
-
-const deleteImageFromCloudinary = async (
-  imageRef: string,
-): Promise<boolean> => {
-  const publicId = isUrl(imageRef) ? extractPublicId(imageRef) : imageRef;
-
-  if (!publicId) {
-    return false;
-  }
-
-  try {
-    await api.delete(`/files/${encodeURIComponent(publicId)}`);
-    return true;
-  } catch (error) {
-    console.error('Error deleting image from cloudinary:', error);
-    return false;
-  }
-};
-
-const requestSignature = async (
-  folder: string,
-): Promise<UploadSignaturePayload> => {
-  const { data } = await api.post<UploadSignaturePayload>('/files/signature', {
-    folder,
-  });
-  return data;
-};
-
-const uploadImage = async (
-  uri: string,
-  folder: string,
-): Promise<UploadResult | undefined> => {
-  try {
-    const signed = await requestSignature(folder);
-    const formData = new FormData();
-    const uriParts = uri.split('.');
-    const fileType = uriParts[uriParts.length - 1] || 'jpg';
-
-    formData.append('file', {
-      uri,
-      name: `photo.${fileType}`,
-      type: `image/${fileType}`,
-    } as unknown as Blob);
-
-    formData.append('api_key', signed.apiKey);
-    formData.append('timestamp', String(signed.timestamp));
-    formData.append('signature', signed.signature);
-    formData.append('public_id', signed.publicId);
-    formData.append('folder', signed.folder);
-
-    const response = await fetch(signed.uploadUrl, {
-      method: 'POST',
-      body: formData,
-    });
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      console.error('Cloudinary upload failed:', json?.error?.message);
-      return undefined;
-    }
-
-    return {
-      secureUrl: json.secure_url as string,
-      publicId: json.public_id as string,
-    };
-  } catch (error) {
-    console.error('Unexpected error uploading image:', error);
-    return undefined;
-  }
-};
 
 const requestPermission = async (source: ImageSource): Promise<boolean> => {
   const permissionResult =
@@ -174,7 +72,7 @@ export const useImageHandlerController = ({
   const [imageLoadError, setImageLoadError] = useState(false);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
   const [localImageUrl, setLocalImageUrl] = useState<string | undefined>(
-    resolveCloudinaryUrl(value),
+    cloudinaryStorageProvider.resolveUrl(value),
   );
 
   const tempImageRef = useRef<string | undefined>(undefined);
@@ -188,8 +86,8 @@ export const useImageHandlerController = ({
   }, [onCleanupError]);
 
   useEffect(() => {
-    setLocalImageUrl(resolveCloudinaryUrl(value));
-    if (value && !isUrl(value)) {
+    setLocalImageUrl(cloudinaryStorageProvider.resolveUrl(value));
+    if (value && !cloudinaryStorageProvider.isRemoteUrl(value)) {
       tempImageRef.current = value;
     }
   }, [value]);
@@ -201,9 +99,9 @@ export const useImageHandlerController = ({
       if (
         currentTemp &&
         !savedRef.current &&
-        currentTemp.startsWith('temp_files/')
+        cloudinaryStorageProvider.isTemporaryRef(currentTemp)
       ) {
-        deleteImageFromCloudinary(currentTemp).then((wasDeleted) => {
+        cloudinaryStorageProvider.delete(currentTemp).then((wasDeleted) => {
           if (!wasDeleted) {
             onCleanupErrorRef.current?.({
               message: 'Failed to cleanup temporary image',
@@ -233,7 +131,7 @@ export const useImageHandlerController = ({
         }
 
         if (tempImageRef.current) {
-          const oldDeleted = await deleteImageFromCloudinary(
+          const oldDeleted = await cloudinaryStorageProvider.delete(
             tempImageRef.current,
           );
           if (!oldDeleted) {
@@ -247,7 +145,10 @@ export const useImageHandlerController = ({
           ? await prepareReceiptImageForOcr(selectedUri)
           : selectedUri;
 
-        const uploadResult = await uploadImage(uriToUpload, folder);
+        const uploadResult = await cloudinaryStorageProvider.uploadTemp(
+          uriToUpload,
+          folder,
+        );
 
         if (!uploadResult) {
           onUploadError?.({
@@ -293,7 +194,7 @@ export const useImageHandlerController = ({
     onChange(undefined);
     tempImageRef.current = undefined;
 
-    const deleted = await deleteImageFromCloudinary(imageToDelete);
+    const deleted = await cloudinaryStorageProvider.delete(imageToDelete);
 
     if (deleted) {
       onDeleteSuccess?.();
