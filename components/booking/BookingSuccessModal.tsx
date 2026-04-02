@@ -1,18 +1,18 @@
-import { Ionicons } from "@expo/vector-icons";
-import { DateTime } from "luxon";
-import React, { useEffect, useRef } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import { DateTime } from 'luxon';
+import React, { useEffect, useRef } from 'react';
 import {
   Animated,
   Modal,
   StyleSheet,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/Button";
-import { theme } from "@/components/ui/theme";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { Appointment } from "@/core/appointments/interfaces/appointmentResponse";
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
+import { theme } from '@/components/ui/theme';
+import { ThemedText } from '@/components/ui/ThemedText';
+import { Appointment } from '@/core/appointments/interfaces/appointmentResponse';
 
 interface BookingSuccessModalProps {
   visible: boolean;
@@ -34,7 +34,7 @@ export const BookingSuccessModal = ({
       translateX: new Animated.Value(0),
       opacity: new Animated.Value(1),
       rotate: new Animated.Value(0),
-    }))
+    })),
   ).current;
 
   useEffect(() => {
@@ -84,55 +84,24 @@ export const BookingSuccessModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
-  // TODO: Implement add to calendar functionality
-  // Use expo-calendar to add the appointment to the device's calendar
-  // const handleAddToCalendar = async () => {
-  //   try {
-  //     const { status } = await Calendar.requestCalendarPermissionsAsync();
-  //     if (status === 'granted') {
-  //       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-  //       const defaultCalendar = calendars.find(cal => cal.isPrimary) || calendars[0];
-  //
-  //       await Calendar.createEventAsync(defaultCalendar.id, {
-  //         title: appointment.service.name,
-  //         startDate: new Date(appointment.start),
-  //         endDate: new Date(appointment.end),
-  //         location: appointment.service.address,
-  //         notes: appointment.comments,
-  //         alarms: [{ relativeOffset: -60 }], // 1 hour before
-  //       });
-  //
-  //       Toast.show({
-  //         type: 'success',
-  //         text1: 'Added to calendar',
-  //         text2: 'Your appointment has been added to your calendar',
-  //       });
-  //     }
-  //   } catch (error) {
-  //     Toast.show({
-  //       type: 'error',
-  //       text1: 'Error',
-  //       text2: 'Could not add to calendar',
-  //     });
-  //   }
-  // };
+  // TODO: Implement add-to-calendar functionality (expo-calendar).
 
   const startDate = DateTime.fromISO(appointment.start);
   const now = DateTime.now();
-  const diff = startDate.diff(now, ["days", "hours", "minutes"]);
+  const diff = startDate.diff(now, ['days', 'hours', 'minutes']);
 
   const getCountdown = () => {
     if (diff.days >= 1) {
-      return `${Math.floor(diff.days)} ${Math.floor(diff.days) === 1 ? "day" : "days"}`;
+      return `${Math.floor(diff.days)} ${Math.floor(diff.days) === 1 ? 'day' : 'days'}`;
     } else if (diff.hours >= 1) {
-      return `${Math.floor(diff.hours)} ${Math.floor(diff.hours) === 1 ? "hour" : "hours"}`;
+      return `${Math.floor(diff.hours)} ${Math.floor(diff.hours) === 1 ? 'hour' : 'hours'}`;
     } else {
       return `${Math.floor(diff.minutes)} minutes`;
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType='fade'>
       <View style={styles.overlay}>
         {/* Confetti */}
         {confettiAnims.map((anim, index) => (
@@ -145,9 +114,9 @@ export const BookingSuccessModal = ({
                 backgroundColor: [
                   theme.primary,
                   theme.success,
-                  "#FFD700",
-                  "#FF6B9D",
-                  "#9B59B6",
+                  '#FFD700',
+                  '#FF6B9D',
+                  '#9B59B6',
                 ][index % 5],
                 transform: [
                   { translateY: anim.translateY },
@@ -155,7 +124,7 @@ export const BookingSuccessModal = ({
                   {
                     rotate: anim.rotate.interpolate({
                       inputRange: [0, 360],
-                      outputRange: ["0deg", "360deg"],
+                      outputRange: ['0deg', '360deg'],
                     }),
                   },
                 ],
@@ -178,7 +147,7 @@ export const BookingSuccessModal = ({
           <View style={styles.iconContainer}>
             <View style={styles.successCircle}>
               <Ionicons
-                name="checkmark-circle"
+                name='checkmark-circle'
                 size={80}
                 color={theme.success}
               />
@@ -194,24 +163,24 @@ export const BookingSuccessModal = ({
           {/* Appointment Details Card */}
           <View style={styles.detailsCard}>
             <View style={styles.detailRow}>
-              <Ionicons name="calendar" size={20} color={theme.primary} />
+              <Ionicons name='calendar' size={20} color={theme.primary} />
               <ThemedText style={styles.detailText}>
                 {startDate.toLocaleString(DateTime.DATE_HUGE)}
               </ThemedText>
             </View>
 
             <View style={styles.detailRow}>
-              <Ionicons name="time" size={20} color={theme.primary} />
+              <Ionicons name='time' size={20} color={theme.primary} />
               <ThemedText style={styles.detailText}>
-                {startDate.toFormat("h:mm a")} -{" "}
-                {DateTime.fromISO(appointment.end).toFormat("h:mm a")}
+                {startDate.toFormat('h:mm a')} -{' '}
+                {DateTime.fromISO(appointment.end).toFormat('h:mm a')}
               </ThemedText>
             </View>
 
             <View style={styles.detailRow}>
-              <Ionicons name="person" size={20} color={theme.primary} />
+              <Ionicons name='person' size={20} color={theme.primary} />
               <ThemedText style={styles.detailText}>
-                {appointment.staffMember.firstName}{" "}
+                {appointment.staffMember.firstName}{' '}
                 {appointment.staffMember.lastName}
               </ThemedText>
             </View>
@@ -219,7 +188,7 @@ export const BookingSuccessModal = ({
             {appointment.service.isAvailableOnline &&
               appointment.zoomMeetingLink && (
                 <View style={styles.detailRow}>
-                  <Ionicons name="videocam" size={20} color={theme.primary} />
+                  <Ionicons name='videocam' size={20} color={theme.primary} />
                   <ThemedText style={styles.detailText}>
                     Online Meeting
                   </ThemedText>
@@ -251,7 +220,7 @@ export const BookingSuccessModal = ({
             */}
 
             <Button onPress={onViewAppointments} style={styles.button}>
-              <ButtonIcon name="list-outline" />
+              <ButtonIcon name='list-outline' />
               <ButtonText>View My Bookings</ButtonText>
             </Button>
           </View>
@@ -269,13 +238,13 @@ export const BookingSuccessModal = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   confetti: {
-    position: "absolute",
+    position: 'absolute',
     top: -20,
     width: 10,
     height: 10,
@@ -285,11 +254,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.background,
     borderRadius: theme.radius * 3,
     padding: 30,
-    width: "100%",
+    width: '100%',
     maxWidth: 400,
-    alignItems: "center",
+    alignItems: 'center',
     elevation: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -298,24 +267,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successCircle: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
     color: theme.mutedForeground,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 24,
     lineHeight: 22,
   },
   detailsCard: {
-    width: "100%",
+    width: '100%',
     backgroundColor: theme.card,
     borderRadius: theme.radius,
     padding: 16,
@@ -323,8 +292,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   detailText: {
@@ -332,11 +301,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   countdownContainer: {
-    width: "100%",
-    backgroundColor: theme.primary + "15",
+    width: '100%',
+    backgroundColor: theme.primary + '15',
     borderRadius: theme.radius,
     padding: 16,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 24,
   },
   countdownLabel: {
@@ -346,16 +315,16 @@ const styles = StyleSheet.create({
   },
   countdownValue: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: theme.primary,
   },
   buttonsContainer: {
-    width: "100%",
+    width: '100%',
     gap: 12,
     marginBottom: 16,
   },
   button: {
-    width: "100%",
+    width: '100%',
   },
   closeButton: {
     padding: 12,
@@ -363,6 +332,6 @@ const styles = StyleSheet.create({
   closeText: {
     fontSize: 16,
     color: theme.mutedForeground,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 });

@@ -44,6 +44,7 @@ export interface AuthState {
   isAdmin: () => boolean;
 
   // Methods
+  setUser: (user: User | null) => void;
   signUp: (data: SignUpRequest) => Promise<SignUpResponse>;
   verifyCode: (
     data: VerifyEmailCodeRequest,
@@ -68,6 +69,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   isAdmin: () => {
     const roles = get().user?.roles || [];
     return roles.includes('admin');
+  },
+
+  setUser: (user: User | null) => {
+    set({ user });
   },
 
   checkAuthStatus: async () => {

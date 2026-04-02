@@ -16,10 +16,14 @@ import { AxiosError } from 'axios';
 import { router } from 'expo-router';
 import { DateTime } from 'luxon';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, TouchableOpacity, View, StyleSheet } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { toast } from 'sonner-native';
 
 export default function BookingSummaryScreen() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { service, staffMember, start, end, timeZone, comments, resetBooking } =
     useBookingStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -37,10 +41,8 @@ export default function BookingSummaryScreen() {
       await queryClient.invalidateQueries({ queryKey: ['appointments'] });
     },
     onError: async () => {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Something went wrong. Please try again later.',
+      toast.error(t('errorCreatingAppointment'), {
+        description: t('genericTryAgainLater'),
       });
     },
   });
@@ -48,8 +50,8 @@ export default function BookingSummaryScreen() {
   if (!service || !staffMember || !start || !timeZone || !end) {
     return (
       <EmptyContent
-        title="Incomplete booking information"
-        subtitle="Please go back and complete your booking details."
+        title={t('incompleteBookingInformation')}
+        subtitle={t('completeBookingDetails')}
       />
     );
   }
@@ -70,10 +72,8 @@ export default function BookingSummaryScreen() {
           setShowSuccessModal(true);
         },
         onError(error) {
-          Toast.show({
-            type: 'error',
-            text1: 'Error',
-            text2: error.response?.data.message || error.message,
+          toast.error(error.response?.data.message || error.message, {
+            description: t('error'),
           });
         },
       },
@@ -107,16 +107,19 @@ export default function BookingSummaryScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      >
         <View style={styles.content}>
           <BookingProgressStepper currentStep={3} />
 
           <View style={styles.header}>
             <ThemedText style={styles.title}>
-              Review Your Appointment
+              {t('reviewYourAppointment')}
             </ThemedText>
             <ThemedText style={styles.subtitle}>
-              Please review all details before confirming your appointment
+              {t('reviewAppointmentSubtitle')}
             </ThemedText>
           </View>
 
@@ -127,11 +130,13 @@ export default function BookingSummaryScreen() {
                 <View style={styles.cardInfo}>
                   <View style={styles.cardLabelRow}>
                     <Ionicons
-                      name="briefcase-outline"
+                      name='briefcase-outline'
                       size={20}
                       color={theme.primary}
                     />
-                    <ThemedText style={styles.cardLabel}>SERVICE</ThemedText>
+                    <ThemedText style={styles.cardLabel}>
+                      {t('serviceUpper')}
+                    </ThemedText>
                   </View>
                   <ThemedText style={styles.cardTitle}>
                     {service.name}
@@ -143,18 +148,18 @@ export default function BookingSummaryScreen() {
                   )}
                   <View style={styles.detailRow}>
                     <Ionicons
-                      name="time-outline"
+                      name='time-outline'
                       size={16}
                       color={theme.mutedForeground}
                     />
                     <ThemedText style={styles.detailText}>
-                      {duration} minutes
+                      {t('durationMinutes', { count: duration })}
                     </ThemedText>
                   </View>
                 </View>
                 <TouchableOpacity onPress={() => handleEdit('service')}>
                   <Ionicons
-                    name="pencil-outline"
+                    name='pencil-outline'
                     size={20}
                     color={theme.primary}
                   />
@@ -170,12 +175,12 @@ export default function BookingSummaryScreen() {
                 <View style={styles.cardInfo}>
                   <View style={styles.cardLabelRow}>
                     <Ionicons
-                      name="person-outline"
+                      name='person-outline'
                       size={20}
                       color={theme.primary}
                     />
                     <ThemedText style={styles.cardLabel}>
-                      STAFF MEMBER
+                      {t('staffMemberUpper')}
                     </ThemedText>
                   </View>
                   <ThemedText style={styles.cardTitle}>
@@ -184,7 +189,7 @@ export default function BookingSummaryScreen() {
                 </View>
                 <TouchableOpacity onPress={() => handleEdit('staff')}>
                   <Ionicons
-                    name="pencil-outline"
+                    name='pencil-outline'
                     size={20}
                     color={theme.primary}
                   />
@@ -200,12 +205,12 @@ export default function BookingSummaryScreen() {
                 <View style={styles.cardInfo}>
                   <View style={styles.cardLabelRow}>
                     <Ionicons
-                      name="calendar-outline"
+                      name='calendar-outline'
                       size={20}
                       color={theme.primary}
                     />
                     <ThemedText style={styles.cardLabel}>
-                      DATE & TIME
+                      {t('dateAndTimeUpper')}
                     </ThemedText>
                   </View>
                   <ThemedText style={styles.cardTitle}>
@@ -216,12 +221,12 @@ export default function BookingSummaryScreen() {
                     {endDateTime.toFormat('h:mm a')}
                   </ThemedText>
                   <ThemedText style={styles.detailText}>
-                    Time zone: {timeZone}
+                    {t('timeZoneLabel')}: {timeZone}
                   </ThemedText>
                 </View>
                 <TouchableOpacity onPress={() => handleEdit('time')}>
                   <Ionicons
-                    name="pencil-outline"
+                    name='pencil-outline'
                     size={20}
                     color={theme.primary}
                   />
@@ -238,11 +243,13 @@ export default function BookingSummaryScreen() {
                   <View style={styles.cardInfo}>
                     <View style={styles.cardLabelRow}>
                       <Ionicons
-                        name="chatbox-outline"
+                        name='chatbox-outline'
                         size={20}
                         color={theme.primary}
                       />
-                      <ThemedText style={styles.cardLabel}>COMMENTS</ThemedText>
+                      <ThemedText style={styles.cardLabel}>
+                        {t('commentsUpper')}
+                      </ThemedText>
                     </View>
                     <ThemedText style={styles.cardDescription}>
                       {comments}
@@ -250,7 +257,7 @@ export default function BookingSummaryScreen() {
                   </View>
                   <TouchableOpacity onPress={() => handleEdit('details')}>
                     <Ionicons
-                      name="pencil-outline"
+                      name='pencil-outline'
                       size={20}
                       color={theme.primary}
                     />
@@ -263,12 +270,12 @@ export default function BookingSummaryScreen() {
           <View style={styles.actions}>
             <Button
               onPress={handleBack}
-              variant="outline"
+              variant='outline'
               style={styles.button}
               disabled={isPending}
             >
-              <ButtonIcon name="arrow-back-outline" />
-              <ButtonText>Back</ButtonText>
+              <ButtonIcon name='arrow-back-outline' />
+              <ButtonText>{t('back')}</ButtonText>
             </Button>
             <Button
               onPress={handleConfirm}
@@ -276,11 +283,11 @@ export default function BookingSummaryScreen() {
               disabled={isPending}
             >
               {isPending ? (
-                <ButtonText>Booking...</ButtonText>
+                <ButtonText>{t('booking')}</ButtonText>
               ) : (
                 <>
-                  <ButtonIcon name="checkmark-circle-outline" />
-                  <ButtonText>Confirm</ButtonText>
+                  <ButtonIcon name='checkmark-circle-outline' />
+                  <ButtonText>{t('confirm')}</ButtonText>
                 </>
               )}
             </Button>
@@ -308,7 +315,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     gap: 20,
-    paddingBottom: 40,
   },
   header: {
     gap: 8,

@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { FlatList, RefreshControl, View, StyleSheet } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 import { useTranslation } from 'react-i18next';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppointmentCard } from '@/components/bookings/AppointmentCard';
 import { AppointmentListSkeleton } from '@/components/bookings/AppointmentCardSkeleton';
@@ -21,6 +22,7 @@ import { AxiosError } from 'axios';
 
 export default function AppointmentsIndexScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
 
@@ -46,18 +48,17 @@ export default function AppointmentsIndexScreen() {
       cancelAppointment(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      Toast.show({
-        type: 'success',
-        text1: t('appointmentCancelled'),
-        text2: t('appointmentCancelledDescription'),
+      toast.success(t('appointmentCancelled'), {
+        description: t('appointmentCancelledDescription'),
       });
     },
     onError: (error: any) => {
-      Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: error.response?.data?.message || t('errorCancellingAppointment'),
-      });
+      toast.error(
+        error.response?.data?.message || t('errorCancellingAppointment'),
+        {
+          description: t('error'),
+        },
+      );
     },
   });
 
@@ -85,19 +86,19 @@ export default function AppointmentsIndexScreen() {
             <HeaderButton
               onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
             >
-              <Ionicons name="menu" size={24} color="#ffffff" />
+              <Ionicons name='menu' size={24} color='#ffffff' />
             </HeaderButton>
           }
         />
         <EmptyContent
-          title="Error"
+          title={t('error')}
           subtitle={
-            error.response?.data.message || error.message || 'An error occurred'
+            error.response?.data.message || error.message || t('errorOccurred')
           }
-          icon="alert-circle-outline"
+          icon='alert-circle-outline'
           action={
             <Button onPress={refetch}>
-              <ButtonIcon name="refresh-outline" />
+              <ButtonIcon name='refresh-outline' />
               <ButtonText>{t('retry')}</ButtonText>
             </Button>
           }
@@ -115,7 +116,7 @@ export default function AppointmentsIndexScreen() {
             <HeaderButton
               onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
             >
-              <Ionicons name="menu" size={24} color="#ffffff" />
+              <Ionicons name='menu' size={24} color='#ffffff' />
             </HeaderButton>
           }
         />
@@ -133,22 +134,25 @@ export default function AppointmentsIndexScreen() {
             <HeaderButton
               onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
             >
-              <Ionicons name="menu" size={24} color="#ffffff" />
+              <Ionicons name='menu' size={24} color='#ffffff' />
             </HeaderButton>
           }
         />
         <EmptyContent
           title={t('noAppointments')}
           subtitle={t('noAppointmentsDescription')}
-          icon="calendar-outline"
+          icon='calendar-outline'
         />
         <View style={styles.buttonContainer}>
-          <Button onPress={handleBookNew} style={styles.buttonSpacing}>
-            <ButtonIcon name="add-circle-outline" />
+          <Button
+            onPress={handleBookNew}
+            style={[styles.buttonSpacing, { marginBottom: insets.bottom + 8 }]}
+          >
+            <ButtonIcon name='add-circle-outline' />
             <ButtonText>{t('bookAppointment')}</ButtonText>
           </Button>
-          <Button onPress={handleViewPast} variant="outline">
-            <ButtonIcon name="time-outline" />
+          <Button onPress={handleViewPast} variant='outline'>
+            <ButtonIcon name='time-outline' />
             <ButtonText>{t('viewHistory')}</ButtonText>
           </Button>
         </View>
@@ -164,7 +168,7 @@ export default function AppointmentsIndexScreen() {
           <HeaderButton
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           >
-            <Ionicons name="menu" size={24} color="#ffffff" />
+            <Ionicons name='menu' size={24} color='#ffffff' />
           </HeaderButton>
         }
       />
@@ -172,9 +176,9 @@ export default function AppointmentsIndexScreen() {
         <ThemedText style={styles.headerTitle}>
           {t('upcomingAppointments')}
         </ThemedText>
-        <Button onPress={handleViewPast} variant="ghost" size="sm">
-          <ButtonText size="sm">{t('viewHistory')}</ButtonText>
-          <ButtonIcon name="arrow-forward" />
+        <Button onPress={handleViewPast} variant='ghost' size='sm'>
+          <ButtonText size='sm'>{t('viewHistory')}</ButtonText>
+          <ButtonIcon name='arrow-forward' />
         </Button>
       </View>
 
@@ -187,7 +191,10 @@ export default function AppointmentsIndexScreen() {
             onCancel={handleCancelAppointment}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: insets.bottom + 100 },
+        ]}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
@@ -198,10 +205,10 @@ export default function AppointmentsIndexScreen() {
         }
       />
 
-      <View style={styles.fab}>
+      <View style={[styles.fab, { bottom: insets.bottom + 16 }]}>
         <Button onPress={handleBookNew}>
-          <ButtonIcon name="add-circle-outline" />
-          <ButtonText>Book New</ButtonText>
+          <ButtonIcon name='add-circle-outline' />
+          <ButtonText>{t('bookNew')}</ButtonText>
         </Button>
       </View>
     </View>
@@ -228,7 +235,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 16,
     gap: 12,
-    paddingBottom: 100,
   },
   emptyContainer: {
     flex: 1,

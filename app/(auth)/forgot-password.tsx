@@ -2,8 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 
 import { Button, ButtonText } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -16,6 +17,7 @@ import { authStyles } from '@/core/auth/styles/authStyles';
 import { ForgotPasswordRequest, forgotPasswordSchema } from '@ascencio/shared';
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const { tempEmail } = useAuthStore();
 
   const {
@@ -35,35 +37,31 @@ const ForgotPassword = () => {
     (values: ForgotPasswordRequest) => {
       forgotPassword(values, {
         onSuccess: (data) => {
-          Toast.show({
-            type: 'success',
-            text1: 'Email sent',
-            text2: data.message,
+          toast.success(t('emailSent'), {
+            description: data.message,
           });
           router.replace('/reset-password');
         },
         onError: (error) => {
-          Toast.show({
-            type: 'error',
-            text1: 'Forgot Password Error',
-            text2: error.response?.data.message || error.message,
+          toast.error(error.response?.data.message || error.message, {
+            description: t('forgotPasswordError'),
           });
         },
       });
     },
-    [forgotPassword],
+    [forgotPassword, t],
   );
 
   const submitButtonText = useMemo(
-    () => (isPending ? 'Sending...' : 'Send'),
-    [isPending],
+    () => (isPending ? t('sending') : t('send')),
+    [isPending, t],
   );
 
   return (
     <AuthFormContainer maxWidth={360}>
       <Header
-        title="Find your account"
-        subtitle="Please enter your email or mobile number to search for your account."
+        title={t('findYourAccount')}
+        subtitle={t('findYourAccountSubtitle')}
       />
 
       <View style={authStyles.fieldsContainer}>
@@ -71,17 +69,17 @@ const ForgotPassword = () => {
 
         <Controller
           control={control}
-          name="email"
+          name='email'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Email"
+              label={t('email')}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              placeholder="Email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              returnKeyType="done"
+              placeholder={t('email')}
+              autoCapitalize='none'
+              keyboardType='email-address'
+              returnKeyType='done'
               onSubmitEditing={handleSubmit(handleForgotPassword)}
               errorMessage={errors.email?.message}
               error={!!errors.email}
@@ -99,8 +97,8 @@ const ForgotPassword = () => {
           <ButtonText>{submitButtonText}</ButtonText>
         </Button>
 
-        <Button variant="outline" onPress={() => router.replace('/login')}>
-          <ButtonText>Back</ButtonText>
+        <Button variant='outline' onPress={() => router.replace('/login')}>
+          <ButtonText>{t('back')}</ButtonText>
         </Button>
       </View>
     </AuthFormContainer>

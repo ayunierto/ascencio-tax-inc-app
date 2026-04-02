@@ -1,7 +1,7 @@
 import { ServerException } from '@/core/interfaces/server-exception.response';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 import { ResendResetPasswordCodeResponse } from '../interfaces/resend-reset-password-code.response';
 
 export const useResendResetPasswordMutation = () => {
@@ -14,10 +14,8 @@ export const useResendResetPasswordMutation = () => {
       return await resendResetPasswordCode(email);
     },
     onError: (error) => {
-      Toast.show({
-        type: 'error',
-        text1: 'Resend Reset Password Code Error',
-        text2: error.response?.data.message || error.message,
+      toast.error(error.response?.data.message || error.message, {
+        description: 'Resend reset password code error',
       });
     },
   });
@@ -25,7 +23,9 @@ export const useResendResetPasswordMutation = () => {
 
 import { api } from '@/core/api/api';
 
-async function resendResetPasswordCode(email: string): Promise<ResendResetPasswordCodeResponse> {
+async function resendResetPasswordCode(
+  email: string,
+): Promise<ResendResetPasswordCodeResponse> {
   const { data } = await api.post('/auth/resend-reset-password-code', {
     email: email.toLocaleLowerCase().trim(),
   });

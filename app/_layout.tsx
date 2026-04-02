@@ -2,7 +2,6 @@ import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import Toast from 'react-native-toast-message';
 // ⚠️ TEMPORARY: Commented out for testing
 // import { useEffect } from 'react';
 // import { Platform } from 'react-native';
@@ -61,21 +60,20 @@ export default function RootLayout() {
               }}
             >
               {/* Root index - handles initial routing logic */}
-              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name='index' options={{ headerShown: false }} />
 
               {/* Auth routes - accessible without authentication */}
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name='(auth)' options={{ headerShown: false }} />
 
               {/* Public routes - accessible without authentication */}
-              <Stack.Screen name="(public)" options={{ headerShown: false }} />
+              <Stack.Screen name='(public)' options={{ headerShown: false }} />
 
               {/* Protected routes - requires authentication */}
-              <Stack.Screen name="(app)" options={{ headerShown: false }} />
+              <Stack.Screen name='(app)' options={{ headerShown: false }} />
             </Stack>
 
-            <StatusBar style="light" />
+            <StatusBar style='light' />
 
-            <Toast />
             <Toaster />
           </ThemeProvider>
         </SubscriptionProvider>

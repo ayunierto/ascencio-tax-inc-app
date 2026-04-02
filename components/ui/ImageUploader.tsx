@@ -1,4 +1,9 @@
-import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import React, {
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+  useEffect,
+} from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner-native';
@@ -55,6 +60,11 @@ interface ImageUploaderProps {
    * Allow gallery selection
    */
   allowGallery?: boolean;
+
+  /**
+   * Callback invoked when upload state changes.
+   */
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
 /**
@@ -94,7 +104,7 @@ const ImageUploaderArea: React.FC<ImageUploaderAreaProps> = ({
     return (
       <ImageHandler.Placeholder style={styles.placeholderContainer}>
         <Ionicons
-          name="image-outline"
+          name='image-outline'
           size={50}
           color={theme.mutedForeground}
         />
@@ -110,7 +120,7 @@ const ImageUploaderArea: React.FC<ImageUploaderAreaProps> = ({
       <ImageHandler.Image
         containerStyle={styles.previewPressable}
         style={styles.image}
-        resizeMode="cover"
+        resizeMode='cover'
       />
 
       <ImageHandler.Viewer />
@@ -119,11 +129,11 @@ const ImageUploaderArea: React.FC<ImageUploaderAreaProps> = ({
         <AlertDialogTrigger asChild>
           <Button
             style={styles.deleteButton}
-            variant="destructive"
+            variant='destructive'
             disabled={uploading}
-            size="icon"
+            size='icon'
           >
-            <ButtonIcon name="trash-outline" />
+            <ButtonIcon name='trash-outline' />
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
@@ -145,6 +155,18 @@ const ImageUploaderArea: React.FC<ImageUploaderAreaProps> = ({
       <ImageHandler.UploadingOverlay overlayStyle={styles.uploadingOverlay} />
     </View>
   );
+};
+
+const UploadingStateReporter: React.FC<{
+  onChange?: (uploading: boolean) => void;
+}> = ({ onChange }) => {
+  const { uploading } = useImageHandler();
+
+  useEffect(() => {
+    onChange?.(uploading);
+  }, [onChange, uploading]);
+
+  return null;
 };
 
 /**
@@ -192,6 +214,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       label,
       allowCamera = true,
       allowGallery = true,
+      onUploadingChange,
     },
     ref,
   ) => {
@@ -248,6 +271,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         }}
         style={styles.container}
       >
+        <UploadingStateReporter onChange={onUploadingChange} />
+
         {label && <ThemedText style={styles.label}>{label}</ThemedText>}
 
         <View style={styles.imageContainer}>
@@ -261,9 +286,9 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           />
 
           <ImageHandler.Actions style={styles.buttonsContainer}>
-            {allowCamera && <ImageHandler.ActionButton action="camera" />}
+            {allowCamera && <ImageHandler.ActionButton action='camera' />}
 
-            {allowGallery && <ImageHandler.ActionButton action="gallery" />}
+            {allowGallery && <ImageHandler.ActionButton action='gallery' />}
           </ImageHandler.Actions>
         </View>
       </ImageHandler>

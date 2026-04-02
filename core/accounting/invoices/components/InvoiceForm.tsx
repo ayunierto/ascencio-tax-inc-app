@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,7 +44,8 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/Select';
-import { ImageUploader } from '@/components/ui/ImageUploader';
+import { ImageUploader, ImageUploaderRef } from '@/components/ui/ImageUploader';
+import { resolveStoredImageUrl } from '@/components/ui/ImageHandler/cloudinaryStorage';
 import {
   useCreateInvoiceMutation,
   useDeleteInvoiceMutation,
@@ -92,9 +93,11 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
+  const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [isManualClientEntry, setIsManualClientEntry] = useState(
     !invoice.billToClientId && !!invoice.billToName,
   );
+  const imageUploaderRef = useRef<ImageUploaderRef>(null);
   // Track quantity text inputs to allow typing decimals like "1."
   const [quantityTexts, setQuantityTexts] = useState<Record<string, string>>(
     {},
@@ -121,10 +124,10 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   });
 
   const { data: companiesData } = useCompanies();
-  const companies = companiesData?.items ?? [];
+  const companies = useMemo(() => companiesData?.items ?? [], [companiesData]);
 
   const { data: clientsData } = useClients();
-  const clients = clientsData?.items ?? [];
+  const clients = useMemo(() => clientsData?.items ?? [], [clientsData]);
 
   const {
     control,
@@ -164,6 +167,24 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   });
 
   const watchedTaxRate = watch('taxRate') ?? 13;
+  const watchedFromCompanyId = useWatch({
+    control,
+    name: 'fromCompanyId',
+  });
+
+  const selectedCompany = useMemo(() => {
+    const fallbackCompanyId = companies.length === 1 ? companies[0].id : undefined;
+    const effectiveCompanyId = watchedFromCompanyId || fallbackCompanyId;
+    if (!effectiveCompanyId) return undefined;
+    return companies.find((company) => company.id === effectiveCompanyId);
+  }, [companies, watchedFromCompanyId]);
+
+  const selectedCompanyHasLogo =
+    typeof selectedCompany?.logoUrl === 'string' &&
+    selectedCompany.logoUrl.trim().length > 0;
+
+  const shouldShowLogoUploader =
+    companies.length === 0 || !selectedCompany || !selectedCompanyHasLogo;
 
   // Calculate totals
   const { subtotal, taxAmount, total } = useMemo(() => {
@@ -338,6 +359,11 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const onSubmit = async (values: any) => {
     console.log('[INVOICE FORM] Starting submit with values:', values);
 
+    if (isLogoUploading) {
+      toast.error(t('uploadingImage'));
+      return;
+    }
+
     // Validate line items
     const validLineItems = lineItems.filter(
       (item) => item.description.trim() !== '',
@@ -392,6 +418,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
         console.log('[INVOICE FORM] Update successful:', result);
 
         if (!isMounted.current) return;
+        imageUploaderRef.current?.markAsSaved();
         toast.success(t('invoiceUpdatedSuccessfully'));
         // Stay on the current invoice page after updating
         // No navigation needed, just refresh the data
@@ -401,6 +428,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
         console.log('[INVOICE FORM] Create successful:', result);
 
         if (!isMounted.current) return;
+        imageUploaderRef.current?.markAsSaved();
         toast.success(t('invoiceCreatedSuccessfully'));
         // Navigate to the created invoice page with its ID
         if (result && result.id) {
@@ -474,6 +502,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
       {canEdit && (
         <HeaderButton
           onPress={handleSubmit(onSubmit, onValidationError)}
+          disabled={isLogoUploading}
           hitSlop={12}
         >
           {createInvoice.isPending || updateInvoice.isPending ? (
@@ -518,7 +547,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
           style={{ padding: 10, flex: 1 }}
           contentContainerStyle={{
             flexGrow: 1,
-            // paddingBottom: insets.bottom + 40,
+            paddingBottom: insets.bottom + 24,
           }}
           keyboardShouldPersistTaps='handled'
         >
@@ -1187,24 +1216,28 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
             />
 
             {/* Section: Logo */}
-            <View>
-              <ThemedText
-                style={{ marginBottom: 8, fontWeight: '600', fontSize: 16 }}
-              >
-                {t('logo')} ({t('optional')})
-              </ThemedText>
-              <Controller
-                control={control}
-                name='logoUrl'
-                render={({ field: { onChange, value } }) => (
-                  <ImageUploader
-                    value={value}
-                    onChange={onChange}
-                    folder='invoices'
-                  />
-                )}
-              />
-            </View>
+            {shouldShowLogoUploader && canEdit && (
+              <View>
+                <ThemedText
+                  style={{ marginBottom: 8, fontWeight: '600', fontSize: 16 }}
+                >
+                  {t('logo')} ({t('optional')})
+                </ThemedText>
+                <Controller
+                  control={control}
+                  name='logoUrl'
+                  render={({ field: { onChange, value } }) => (
+                    <ImageUploader
+                      ref={imageUploaderRef}
+                      value={value}
+                      onChange={(imageRef) => onChange(resolveStoredImageUrl(imageRef))}
+                      folder='temp_files'
+                      onUploadingChange={setIsLogoUploading}
+                    />
+                  )}
+                />
+              </View>
+            )}
 
             {/* PDF Actions */}
             {!isNew && (

@@ -1,16 +1,14 @@
 import * as z from 'zod';
 
 export const availabilitySchema = z.object({
-  serviceId: z.string().uuid({ message: 'Invalid service ID format' }),
+  serviceId: z.string().uuid({ message: 'invalidServiceIdFormat' }),
   staffId: z.string().optional(),
   date: z.string({
-    message: 'The date is required. Please select a date.',
+    message: 'dateRequired',
   }),
-  time: z
-    .string({ message: 'The time is required. Please select a time.' })
-    .min(4, 'The time is required. Please select a time.'),
+  time: z.string({ message: 'timeRequired' }).min(4, 'timeRequired'),
   timeZone: z.string({
-    message: 'The time zone is required. Please select a time zone.',
+    message: 'timeZoneRequired',
   }),
 });
 

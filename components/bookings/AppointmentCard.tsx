@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DateTime } from 'luxon';
 import React, { useState } from 'react';
 import { Linking, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { CancelAppointmentModal } from '@/components/bookings/CancelAppointmentModal';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
@@ -21,6 +22,7 @@ export const AppointmentCard = ({
   isPast = false,
   onCancel,
 }: AppointmentCardProps) => {
+  const { t } = useTranslation();
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -30,16 +32,20 @@ export const AppointmentCard = ({
     const start = DateTime.fromISO(appointment.start);
     const diff = start.diff(now, ['days', 'hours', 'minutes']);
 
-    if (isPast) return 'Completed';
+    if (isPast) return t('statusCompleted');
 
     if (diff.days >= 1) {
-      return `In ${Math.floor(diff.days)} ${Math.floor(diff.days) === 1 ? 'day' : 'days'}`;
+      const days = Math.floor(diff.days);
+      return days === 1 ? t('inOneDay') : t('inMultipleDays', { count: days });
     } else if (diff.hours >= 1) {
-      return `In ${Math.floor(diff.hours)} ${Math.floor(diff.hours) === 1 ? 'hour' : 'hours'}`;
+      const hours = Math.floor(diff.hours);
+      return hours === 1
+        ? t('inOneHour')
+        : t('inMultipleHours', { count: hours });
     } else if (diff.minutes > 0) {
-      return `In ${Math.floor(diff.minutes)} minutes`;
+      return t('inMinutes', { count: Math.floor(diff.minutes) });
     } else {
-      return 'Now';
+      return t('now');
     }
   };
 
@@ -78,6 +84,7 @@ export const AppointmentCard = ({
         setShowCancelModal(false);
       } catch (error) {
         console.error('Error cancelling appointment:', error);
+        setShowCancelModal(false);
       } finally {
         setIsCancelling(false);
       }
@@ -87,11 +94,17 @@ export const AppointmentCard = ({
   const startDate = DateTime.fromISO(appointment.start);
   const endDate = DateTime.fromISO(appointment.end);
   const duration = endDate.diff(startDate, 'minutes').minutes;
+  const normalizedStatus = appointment.status?.toLowerCase();
 
   // Check if meeting is today and within time range
   const isToday = startDate.hasSame(DateTime.now(), 'day');
   const isUpcoming = startDate > DateTime.now();
   const canJoin = isToday && !isPast;
+  const canCancel =
+    isUpcoming &&
+    Boolean(onCancel) &&
+    normalizedStatus !== 'cancelled' &&
+    normalizedStatus !== 'completed';
 
   return (
     <TouchableOpacity activeOpacity={0.7} style={{ marginBottom: 16 }}>
@@ -124,7 +137,7 @@ export const AppointmentCard = ({
                 }}
               >
                 <Ionicons
-                  name="time-outline"
+                  name='time-outline'
                   size={14}
                   color={theme.mutedForeground}
                 />
@@ -156,7 +169,9 @@ export const AppointmentCard = ({
                   textTransform: 'capitalize',
                 }}
               >
-                {isPast ? 'Completed' : appointment.status || 'Scheduled'}
+                {isPast
+                  ? t('statusCompleted')
+                  : appointment.status || t('scheduled')}
               </ThemedText>
             </View>
           </View>
@@ -172,7 +187,7 @@ export const AppointmentCard = ({
               }}
             >
               <Ionicons
-                name="calendar-outline"
+                name='calendar-outline'
                 size={16}
                 color={theme.mutedForeground}
               />
@@ -194,7 +209,7 @@ export const AppointmentCard = ({
               }}
             >
               <Ionicons
-                name="time-outline"
+                name='time-outline'
                 size={16}
                 color={theme.mutedForeground}
               />
@@ -215,7 +230,7 @@ export const AppointmentCard = ({
             }}
           >
             <Ionicons
-              name="person-outline"
+              name='person-outline'
               size={16}
               color={theme.mutedForeground}
             />
@@ -235,9 +250,9 @@ export const AppointmentCard = ({
                 marginBottom: 16,
               }}
             >
-              <Ionicons name="videocam" size={16} color={theme.primary} />
+              <Ionicons name='videocam' size={16} color={theme.primary} />
               <ThemedText style={{ fontSize: 14, color: theme.primary }}>
-                Online Meeting
+                {t('onlineMeeting')}
               </ThemedText>
             </View>
           )}
@@ -272,24 +287,24 @@ export const AppointmentCard = ({
                 <Button
                   onPress={handleJoinMeeting}
                   style={{ flex: 1 }}
-                  size="sm"
+                  size='sm'
                 >
-                  <ButtonIcon name="videocam" />
-                  <ButtonText>Join Meeting</ButtonText>
+                  <ButtonIcon name='videocam' />
+                  <ButtonText>{t('joinMeeting')}</ButtonText>
                 </Button>
               )}
 
               {/* Cancel Button - Only for upcoming appointments */}
-              {isUpcoming && onCancel && (
+              {canCancel && (
                 <Button
-                  variant="destructive"
+                  variant='destructive'
                   onPress={handleCancelPress}
                   style={{ flex: canJoin ? 0 : 1 }}
-                  size="sm"
+                  size='sm'
                   disabled={isCancelling}
                 >
-                  <ButtonIcon name="close-circle-outline" />
-                  <ButtonText>Cancel</ButtonText>
+                  <ButtonIcon name='close-circle-outline' />
+                  <ButtonText>{t('cancel')}</ButtonText>
                 </Button>
               )}
             </View>
@@ -297,9 +312,9 @@ export const AppointmentCard = ({
 
           {/* Past - Show meeting link if available */}
           {isPast && appointment.zoomMeetingLink && (
-            <Button variant="outline" onPress={handleJoinMeeting} size="sm">
-              <ButtonIcon name="link-outline" />
-              <ButtonText>View Meeting Link</ButtonText>
+            <Button variant='outline' onPress={handleJoinMeeting} size='sm'>
+              <ButtonIcon name='link-outline' />
+              <ButtonText>{t('viewMeetingLink')}</ButtonText>
             </Button>
           )}
         </CardContent>

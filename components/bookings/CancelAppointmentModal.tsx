@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -9,11 +9,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
+import { useTranslation } from 'react-i18next';
 
-import { Button, ButtonText } from "@/components/ui/Button";
-import { theme } from "@/components/ui/theme";
-import { ThemedText } from "@/components/ui/ThemedText";
+import { Button, ButtonText } from '@/components/ui/Button';
+import { theme } from '@/components/ui/theme';
+import { ThemedText } from '@/components/ui/ThemedText';
 
 interface CancelAppointmentModalProps {
   visible: boolean;
@@ -23,15 +24,7 @@ interface CancelAppointmentModalProps {
   appointmentTitle?: string;
 }
 
-const CANCEL_REASONS = [
-  "Schedule conflict",
-  "No longer needed",
-  "Found another provider",
-  "Personal reasons",
-  "Weather/Transportation issues",
-  "Health issues",
-  "Other",
-];
+const OTHER_REASON_VALUE = 'other';
 
 export const CancelAppointmentModal = ({
   visible,
@@ -40,32 +33,56 @@ export const CancelAppointmentModal = ({
   isLoading = false,
   appointmentTitle,
 }: CancelAppointmentModalProps) => {
-  const [selectedReason, setSelectedReason] = useState("");
-  const [customReason, setCustomReason] = useState("");
+  const { t } = useTranslation();
+  const [selectedReason, setSelectedReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
+
+  const cancellationReasons = [
+    { value: 'scheduleConflict', label: t('cancelReasonScheduleConflict') },
+    { value: 'noLongerNeeded', label: t('cancelReasonNoLongerNeeded') },
+    {
+      value: 'foundAnotherProvider',
+      label: t('cancelReasonFoundAnotherProvider'),
+    },
+    { value: 'personalReasons', label: t('cancelReasonPersonalReasons') },
+    {
+      value: 'weatherTransportationIssues',
+      label: t('cancelReasonWeatherTransportationIssues'),
+    },
+    { value: 'healthIssues', label: t('cancelReasonHealthIssues') },
+    { value: OTHER_REASON_VALUE, label: t('cancelReasonOther') },
+  ];
 
   const handleConfirm = () => {
-    const reason = selectedReason === "Other" ? customReason : selectedReason;
+    const selectedReasonItem = cancellationReasons.find(
+      (reason) => reason.value === selectedReason,
+    );
+    const reason =
+      selectedReason === OTHER_REASON_VALUE
+        ? customReason
+        : selectedReasonItem?.label || selectedReason;
     onConfirm(reason);
   };
 
   const handleClose = () => {
-    setSelectedReason("");
-    setCustomReason("");
+    setSelectedReason('');
+    setCustomReason('');
     onClose();
   };
 
   const isValid =
-    selectedReason && (selectedReason !== "Other" || customReason.trim());
+    selectedReason &&
+    (selectedReason !== OTHER_REASON_VALUE || customReason.trim());
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType='fade'
       onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <View style={styles.overlay}>
@@ -80,13 +97,13 @@ export const CancelAppointmentModal = ({
               <View style={styles.header}>
                 <View style={styles.iconContainer}>
                   <Ionicons
-                    name="alert-circle"
+                    name='alert-circle'
                     size={48}
                     color={theme.destructive}
                   />
                 </View>
                 <ThemedText style={styles.title}>
-                  Cancel Appointment?
+                  {t('cancelAppointmentQuestion')}
                 </ThemedText>
                 {appointmentTitle && (
                   <ThemedText style={styles.subtitle}>
@@ -98,53 +115,57 @@ export const CancelAppointmentModal = ({
               {/* Reasons */}
               <View style={styles.reasonsContainer}>
                 <ThemedText style={styles.label}>
-                  Please select a reason for cancellation:
+                  {t('selectCancellationReason')}
                 </ThemedText>
-                {CANCEL_REASONS.map((reason) => (
+                {cancellationReasons.map((reason) => (
                   <TouchableOpacity
-                    key={reason}
+                    key={reason.value}
                     style={[
                       styles.reasonOption,
-                      selectedReason === reason && styles.reasonOptionSelected,
+                      selectedReason === reason.value &&
+                        styles.reasonOptionSelected,
                     ]}
-                    onPress={() => setSelectedReason(reason)}
+                    onPress={() => setSelectedReason(reason.value)}
                   >
                     <View
                       style={[
                         styles.radio,
-                        selectedReason === reason && styles.radioSelected,
+                        selectedReason === reason.value && styles.radioSelected,
                       ]}
                     >
-                      {selectedReason === reason && (
+                      {selectedReason === reason.value && (
                         <View style={styles.radioInner} />
                       )}
                     </View>
                     <ThemedText
                       style={[
                         styles.reasonText,
-                        selectedReason === reason && styles.reasonTextSelected,
+                        selectedReason === reason.value &&
+                          styles.reasonTextSelected,
                       ]}
                     >
-                      {reason}
+                      {reason.label}
                     </ThemedText>
                   </TouchableOpacity>
                 ))}
               </View>
 
               {/* Custom reason input */}
-              {selectedReason === "Other" && (
+              {selectedReason === OTHER_REASON_VALUE && (
                 <View style={styles.customReasonContainer}>
-                  <ThemedText style={styles.label}>Please specify:</ThemedText>
+                  <ThemedText style={styles.label}>
+                    {t('pleaseSpecify')}
+                  </ThemedText>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="Enter your reason..."
+                    placeholder={t('enterCancellationReason')}
                     placeholderTextColor={theme.mutedForeground}
                     value={customReason}
                     onChangeText={setCustomReason}
                     multiline
                     numberOfLines={3}
                     maxLength={200}
-                    textAlignVertical="top"
+                    textAlignVertical='top'
                   />
                   <ThemedText style={styles.charCount}>
                     {customReason.length}/200
@@ -155,35 +176,34 @@ export const CancelAppointmentModal = ({
               {/* Warning */}
               <View style={styles.warningContainer}>
                 <Ionicons
-                  name="information-circle-outline"
+                  name='information-circle-outline'
                   size={20}
                   color={theme.mutedForeground}
                 />
                 <ThemedText style={styles.warningText}>
-                  This action cannot be undone. You&apos;ll need to book a new
-                  appointment if you change your mind.
+                  {t('cancelActionWarning')}
                 </ThemedText>
               </View>
 
               {/* Buttons */}
               <View style={styles.buttonsContainer}>
                 <Button
-                  variant="outline"
+                  variant='outline'
                   onPress={handleClose}
                   style={styles.button}
                   disabled={isLoading}
                 >
-                  <ButtonText>Keep Appointment</ButtonText>
+                  <ButtonText>{t('keepAppointment')}</ButtonText>
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant='destructive'
                   onPress={handleConfirm}
                   style={styles.button}
                   disabled={!isValid || isLoading}
                   isLoading={isLoading}
                 >
                   <ButtonText>
-                    {isLoading ? "Cancelling..." : "Yes, Cancel"}
+                    {isLoading ? t('cancelling') : t('yesCancel')}
                   </ButtonText>
                 </Button>
               </View>
@@ -201,29 +221,29 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   modalContent: {
     backgroundColor: theme.background,
     borderRadius: theme.radius * 2,
     padding: 20,
-    width: "100%",
+    width: '100%',
     maxWidth: 600,
-    maxHeight: "90%",
+    maxHeight: '90%',
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 24,
   },
   iconContainer: {
@@ -231,27 +251,27 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
     color: theme.mutedForeground,
-    textAlign: "center",
+    textAlign: 'center',
   },
   reasonsContainer: {
     marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 12,
     color: theme.foreground,
   },
   reasonOption: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 12,
     borderRadius: theme.radius,
     borderWidth: 1,
@@ -261,7 +281,7 @@ const styles = StyleSheet.create({
   },
   reasonOptionSelected: {
     borderColor: theme.primary,
-    backgroundColor: theme.primary + "10",
+    backgroundColor: theme.primary + '10',
   },
   radio: {
     width: 20,
@@ -270,8 +290,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.border,
     marginRight: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   radioSelected: {
     borderColor: theme.primary,
@@ -289,7 +309,7 @@ const styles = StyleSheet.create({
   },
   reasonTextSelected: {
     color: theme.primary,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   customReasonContainer: {
     marginBottom: 20,
@@ -307,13 +327,13 @@ const styles = StyleSheet.create({
   charCount: {
     fontSize: 12,
     color: theme.mutedForeground,
-    textAlign: "right",
+    textAlign: 'right',
     marginTop: 4,
   },
   warningContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: theme.muted + "30",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: theme.muted + '30',
     padding: 12,
     borderRadius: theme.radius,
     marginBottom: 20,
@@ -326,7 +346,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   buttonsContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 12,
   },
   button: {

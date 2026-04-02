@@ -66,11 +66,18 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
     console.log('[COMPANY FORM] Company ID:', values.id);
     console.log('[COMPANY FORM] Is update?', values.id !== 'new');
 
-    // Only send mediaToken if it's a new temp upload (starts with temp_files/)
-    // If it's the same as logoUrl, don't send it (no change)
+    // If logo was removed from an existing company, send empty token to trigger server-side cleanup.
+    const logoWasRemoved =
+      values.id !== 'new' && !!initialMediaToken && !values.mediaToken;
+
+    // Only send mediaToken when it changed meaningfully:
+    // - new upload token in temp_files/
+    // - explicit clear (empty string)
     const mediaTokenToSend = values.mediaToken?.startsWith('temp_files/')
       ? values.mediaToken
-      : undefined;
+      : logoWasRemoved
+        ? ''
+        : undefined;
 
     const submitData = {
       ...values,
@@ -154,7 +161,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
         title={company.id === 'new' ? t('newCompany') : t('companyDetails')}
         left={
           <HeaderButton onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <Ionicons name='arrow-back' size={24} color='#ffffff' />
           </HeaderButton>
         }
         right={
@@ -167,7 +174,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
                 deleteCompany.isPending
               }
             >
-              <Ionicons name="save-outline" size={24} color={theme.primary} />
+              <Ionicons name='save-outline' size={24} color={theme.primary} />
             </HeaderButton>
 
             {company.id !== 'new' && (
@@ -177,7 +184,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
                   disabled={updateCompany.isPending || deleteCompany.isPending}
                 >
                   <Ionicons
-                    name="trash-outline"
+                    name='trash-outline'
                     size={24}
                     color={theme.destructive}
                   />
@@ -195,18 +202,18 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
         <ScrollView
           style={{ padding: 16, paddingTop: 8 }}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom }}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps='handled'
         >
           <View style={{ flex: 1, gap: 16 }}>
             <Controller
               control={control}
-              name="mediaToken"
+              name='mediaToken'
               render={({ field: { onChange, value } }) => (
                 <ImageUploader
                   ref={imageUploaderRef}
                   value={value as string | undefined}
                   onChange={onChange}
-                  folder="temp_files"
+                  folder='temp_files'
                   // label={t('companyLogo')}
                 />
               )}
@@ -214,7 +221,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="name"
+              name='name'
               render={({ field: { onChange, value } }) => (
                 <Input
                   onChangeText={onChange}
@@ -228,7 +235,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="legalName"
+              name='legalName'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={`${t('legalName')}`}
@@ -242,7 +249,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="businessNumber"
+              name='businessNumber'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('businessNumber')}
@@ -250,21 +257,21 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
                   value={value}
                   error={!!errors.businessNumber}
                   errorMessage={getErrorMessage(errors.businessNumber)}
-                  helperText="(123456789RC0001)"
+                  helperText='(123456789RC0001)'
                 />
               )}
             />
 
             <Controller
               control={control}
-              name="email"
+              name='email'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('email')}
                   onChangeText={onChange}
                   value={value}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
+                  keyboardType='email-address'
+                  autoCapitalize='none'
                   error={!!errors.email}
                   errorMessage={getErrorMessage(errors.email)}
                 />
@@ -273,13 +280,13 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="phone"
+              name='phone'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('phone')}
                   onChangeText={onChange}
                   value={value}
-                  keyboardType="phone-pad"
+                  keyboardType='phone-pad'
                   error={!!errors.phone}
                   errorMessage={getErrorMessage(errors.phone)}
                 />
@@ -288,7 +295,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="address"
+              name='address'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('address')}
@@ -304,7 +311,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
             <View style={{ flexDirection: 'row', gap: 16 }}>
               <Controller
                 control={control}
-                name="city"
+                name='city'
                 render={({ field: { onChange, value } }) => (
                   <Input
                     label={t('city')}
@@ -319,7 +326,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
               <Controller
                 control={control}
-                name="province"
+                name='province'
                 render={({ field: { onChange, value } }) => (
                   <Input
                     label={t('province')}
@@ -335,7 +342,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="postalCode"
+              name='postalCode'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('postalCode')}
@@ -349,7 +356,7 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
 
             <Controller
               control={control}
-              name="payrollAccountNumber"
+              name='payrollAccountNumber'
               render={({ field: { onChange, value } }) => (
                 <Input
                   label={t('payrollAccountNumber')}

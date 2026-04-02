@@ -3,8 +3,10 @@ import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DateTime } from 'luxon';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { toast } from 'sonner-native';
 
 import { Alert } from '@/components/ui/Alert';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
@@ -22,6 +24,7 @@ import {
   AvailabilityRequest,
   availabilitySchema,
 } from '../schemas/availability.schema';
+import { AvailableSlot } from '../interfaces/available-slot.interface';
 import AvailabilitySlots from './AvailabilitySlots';
 
 interface AvailabilityFormProps {
@@ -38,8 +41,10 @@ const AvailabilityForm = ({
   serviceStaff,
   onSubmit,
 }: AvailabilityFormProps) => {
+  const ANY_STAFF_VALUE = 'any-staff';
+  const { t } = useTranslation();
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const { updateState } = useBookingStore();
+  const { updateState, staffMember } = useBookingStore();
   const form = useForm<AvailabilityRequest>({
     resolver: zodResolver(availabilitySchema),
     defaultValues: {
@@ -50,10 +55,9 @@ const AvailabilityForm = ({
   });
 
   const handleFormSubmit = (values: AvailabilityRequest) => {
-    // Ensure all data is in the store before submitting
-    const selectedStaffMember = serviceStaff.find(
-      (s) => s.id === values.staffId,
-    );
+    // El staff confirmado en store tiene prioridad (slot seleccionado).
+    const selectedStaffMember =
+      staffMember ?? serviceStaff.find((s) => s.id === values.staffId);
     const selectedServiceData = services.find((s) => s.id === values.serviceId);
 
     if (selectedStaffMember && selectedServiceData) {
@@ -62,9 +66,45 @@ const AvailabilityForm = ({
         staffMember: selectedStaffMember,
         timeZone: values.timeZone,
       });
+
+      onSubmit({
+        ...values,
+        staffId: selectedStaffMember.id,
+      });
+      return;
     }
 
     onSubmit(values);
+  };
+
+  const applySlotSelection = (
+    slot: AvailableSlot,
+    selectedStaff: StaffMember,
+  ) => {
+    form.clearErrors('time');
+    form.setValue('time', slot.startTimeUTC, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+
+    updateState({
+      start: slot.startTimeUTC,
+      end: slot.endTimeUTC,
+      timeZone: userTimeZone,
+      staffMember: selectedStaff,
+    });
+  };
+
+  const pickRandomStaff = (
+    staffList: StaffMember[],
+  ): StaffMember | undefined => {
+    if (staffList.length === 0) {
+      return undefined;
+    }
+
+    const randomIndex = Math.floor(Math.random() * staffList.length);
+    return staffList[randomIndex];
   };
 
   return (
@@ -78,11 +118,15 @@ const AvailabilityForm = ({
             value={value}
             onValueChange={onChange}
             error={!!form.formState.errors.serviceId}
-            errorMessage={form.formState.errors.serviceId?.message}
+            errorMessage={
+              form.formState.errors.serviceId?.message
+                ? t(form.formState.errors.serviceId.message)
+                : undefined
+            }
           >
             <SelectTrigger
-              placeholder={'Select a service'}
-              labelText="Service"
+              placeholder={t('selectService')}
+              labelText={t('service')}
             />
             <SelectContent>
               {services.map(({ id, name }) => (
@@ -98,13 +142,32 @@ const AvailabilityForm = ({
         name={'staffId'}
         render={({ field: { onChange, value } }) => (
           <Select
-            value={value}
-            onValueChange={onChange}
+            value={value ?? ANY_STAFF_VALUE}
+            onValueChange={(selectedValue) => {
+              const nextValue =
+                selectedValue === ANY_STAFF_VALUE ? undefined : selectedValue;
+
+              onChange(nextValue);
+              form.resetField('time');
+              updateState({
+                start: undefined,
+                end: undefined,
+                staffMember: undefined,
+              });
+            }}
             error={!!form.formState.errors.staffId}
-            errorMessage={form.formState.errors.staffId?.message}
+            errorMessage={
+              form.formState.errors.staffId?.message
+                ? t(form.formState.errors.staffId.message)
+                : undefined
+            }
           >
-            <SelectTrigger placeholder={'Select Staff'} labelText="Staff" />
+            <SelectTrigger
+              placeholder={t('selectStaff')}
+              labelText={t('staff')}
+            />
             <SelectContent>
+              <SelectItem label={t('anyStaff')} value={ANY_STAFF_VALUE} />
               {serviceStaff.map(({ id, firstName, lastName }) => (
                 <SelectItem
                   key={id}
@@ -160,23 +223,29 @@ const AvailabilityForm = ({
             form={form}
             userTimeZone={userTimeZone}
             onChange={(slot) => {
-              onChange(slot.startTimeUTC);
-
               const staffId = form.watch('staffId');
               const matchedStaff = slot.availableStaff.find(
                 (s) => s.id === staffId,
               );
-              const randomStaff =
-                slot.availableStaff[
-                  Math.floor(Math.random() * slot.availableStaff.length)
-                ];
+              const randomStaff = pickRandomStaff(slot.availableStaff);
+              const selectedStaff = matchedStaff ?? randomStaff;
 
-              updateState({
-                start: slot.startTimeUTC,
-                end: slot.endTimeUTC,
-                timeZone: userTimeZone,
-                staffMember: matchedStaff ?? randomStaff,
-              });
+              if (!selectedStaff) {
+                form.setError('time', {
+                  type: 'manual',
+                  message: t('noAppointmentsAvailableForDay'),
+                });
+                return;
+              }
+
+              applySlotSelection(slot, selectedStaff);
+              onChange(slot.startTimeUTC);
+
+              if (!matchedStaff && slot.availableStaff.length > 1) {
+                toast.success(t('staffAutoAssigned'), {
+                  description: `${selectedStaff.firstName} ${selectedStaff.lastName}`,
+                });
+              }
             }}
           />
         )}
@@ -184,26 +253,26 @@ const AvailabilityForm = ({
 
       {/* Handle error messages */}
       {form.formState.errors.date && (
-        <Alert style={{ width: '100%' }} variant="error">
-          {form.formState.errors.date.message}
+        <Alert style={{ width: '100%' }} variant='error'>
+          {t(form.formState.errors.date.message ?? '')}
         </Alert>
       )}
 
       {form.formState.errors.time && (
-        <Alert style={{ width: '100%' }} variant="error">
-          {form.formState.errors.time.message}
+        <Alert style={{ width: '100%' }} variant='error'>
+          {t(form.formState.errors.time.message ?? '')}
         </Alert>
       )}
 
       {form.formState.errors.timeZone && (
-        <Alert style={{ width: '100%' }} variant="error">
-          {form.formState.errors.timeZone.message}
+        <Alert style={{ width: '100%' }} variant='error'>
+          {t(form.formState.errors.timeZone.message ?? '')}
         </Alert>
       )}
 
       <Button onPress={form.handleSubmit(handleFormSubmit)}>
-        <ButtonIcon name="calendar-outline" />
-        <ButtonText>Book Appointment</ButtonText>
+        <ButtonIcon name='calendar-outline' />
+        <ButtonText>{t('bookAppointment')}</ButtonText>
       </Button>
     </View>
   );

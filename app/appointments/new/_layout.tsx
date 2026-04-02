@@ -1,40 +1,43 @@
-import { Stack } from "expo-router";
-import { theme } from "@/components/ui/theme";
+import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { theme } from '@/components/ui/theme';
 
 export default function NewAppointmentLayout() {
+  const { t } = useTranslation();
+
   return (
     <Stack
       screenOptions={{
         headerStyle: {
           backgroundColor: theme.background,
         },
-        headerTitleAlign: "center",
+        headerTitleAlign: 'center',
         headerTintColor: theme.foreground,
         headerShadowVisible: false,
       }}
     >
       <Stack.Screen
-        name="index"
+        name='index'
         options={{
-          title: "Select Service",
+          title: t('selectService'),
         }}
       />
       <Stack.Screen
-        name="availability"
+        name='availability'
         options={{
-          title: "Select Date & Time",
+          title: t('selectDateTime'),
         }}
       />
       <Stack.Screen
-        name="details"
+        name='details'
         options={{
-          title: "Additional Details",
+          title: t('additionalDetails'),
         }}
       />
       <Stack.Screen
-        name="summary"
+        name='summary'
         options={{
-          title: "Confirm Booking",
+          title: t('confirmBooking'),
         }}
       />
     </Stack>

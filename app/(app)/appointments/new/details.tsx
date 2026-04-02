@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -10,6 +11,7 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { BookingProgressStepper } from '@/components/booking/BookingProgressStepper';
@@ -18,18 +20,17 @@ import { theme } from '@/components/ui/theme';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyContent } from '@/core/components';
 import { useBookingStore } from '@/core/services/store/useBookingStore';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 
 const detailsSchema = z.object({
-  comments: z
-    .string()
-    .max(500, 'Comments must be less than 500 characters')
-    .optional(),
+  comments: z.string().max(500, 'commentsMaxLength').optional(),
 });
 
 type DetailsFormData = z.infer<typeof detailsSchema>;
 
 export default function BookingDetailsScreen() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { service, staffMember, start, end, updateState, comments } =
     useBookingStore();
 
@@ -45,19 +46,17 @@ export default function BookingDetailsScreen() {
   if (!service || !staffMember || !start || !end) {
     return (
       <EmptyContent
-        title="Missing booking information"
-        subtitle="Please go back and complete the previous steps"
-        icon="alert-circle-outline"
+        title={t('missingBookingInformation')}
+        subtitle={t('completePreviousSteps')}
+        icon='alert-circle-outline'
       />
     );
   }
 
   const onSubmit = (data: DetailsFormData) => {
     updateState({ comments: data.comments });
-    Toast.show({
-      type: 'success',
-      text1: 'Details saved',
-      text2: 'Please review your appointment',
+    toast.success(t('detailsSaved'), {
+      description: t('reviewAppointmentBeforeConfirm'),
     });
     router.push('/(app)/appointments/new/summary');
   };
@@ -71,25 +70,24 @@ export default function BookingDetailsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
         <View style={styles.content}>
           <BookingProgressStepper currentStep={2} />
 
           <View style={styles.header}>
-            <ThemedText style={styles.title}>Add Details</ThemedText>
+            <ThemedText style={styles.title}>{t('addDetails')}</ThemedText>
             <ThemedText style={styles.subtitle}>
-              Add any additional information or special requests for your
-              appointment
+              {t('addDetailsSubtitle')}
             </ThemedText>
           </View>
 
           <View style={styles.field}>
             <ThemedText style={styles.label}>
-              Comments or Special Requests (Optional)
+              {t('commentsSpecialRequestsOptional')}
             </ThemedText>
             <Controller
               control={control}
-              name="comments"
+              name='comments'
               render={({ field: { onChange, value } }) => (
                 <>
                   <TextInput
@@ -97,13 +95,16 @@ export default function BookingDetailsScreen() {
                     multiline
                     numberOfLines={6}
                     maxLength={500}
-                    placeholder="Add any comments or special requests..."
+                    placeholder={t('addCommentsPlaceholder')}
                     placeholderTextColor={theme.mutedForeground}
                     value={value}
                     onChangeText={onChange}
                   />
                   <ThemedText style={styles.charCount}>
-                    {commentValue?.length || 0} / 500 characters
+                    {t('charactersCounter', {
+                      count: commentValue?.length || 0,
+                      max: 500,
+                    })}
                   </ThemedText>
                 </>
               )}
@@ -113,15 +114,15 @@ export default function BookingDetailsScreen() {
           <View style={styles.actions}>
             <Button
               onPress={handleBack}
-              variant="outline"
+              variant='outline'
               style={styles.button}
             >
-              <ButtonIcon name="arrow-back-outline" />
-              <ButtonText>Back</ButtonText>
+              <ButtonIcon name='arrow-back-outline' />
+              <ButtonText>{t('back')}</ButtonText>
             </Button>
             <Button onPress={handleSubmit(onSubmit)} style={styles.button}>
-              <ButtonText>Continue</ButtonText>
-              <ButtonIcon name="arrow-forward-outline" />
+              <ButtonText>{t('continue')}</ButtonText>
+              <ButtonIcon name='arrow-forward-outline' />
             </Button>
           </View>
         </View>

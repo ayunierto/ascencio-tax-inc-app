@@ -1,14 +1,19 @@
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Card, CardContent } from '@/components/ui';
 import { theme } from '@/components/ui/theme';
 import { useServices } from '@/core/services/hooks/useServices';
 import { useBookingStore } from '@/core/services/store/useBookingStore';
 import { Ionicons } from '@expo/vector-icons';
+import type { Service } from '@ascencio/shared/interfaces';
+import { useTranslation } from 'react-i18next';
 
 export default function SelectServiceScreen() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { data: servicesResponse, isLoading } = useServices();
   const { updateState, resetBooking } = useBookingStore();
 
@@ -17,7 +22,7 @@ export default function SelectServiceScreen() {
     resetBooking();
   }, [resetBooking]);
 
-  const handleSelectService = (service: any) => {
+  const handleSelectService = (service: Service) => {
     updateState({ service });
     router.push('/(app)/appointments/new/availability');
   };
@@ -25,7 +30,7 @@ export default function SelectServiceScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ThemedText>Loading services...</ThemedText>
+        <ThemedText>{t('loadingServices')}</ThemedText>
       </View>
     );
   }
@@ -33,17 +38,23 @@ export default function SelectServiceScreen() {
   if (!servicesResponse || servicesResponse.items.length === 0) {
     return (
       <View style={styles.centered}>
-        <ThemedText>No services available</ThemedText>
+        <ThemedText>{t('noServicesAvailable')}</ThemedText>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: insets.bottom + 24 },
+      ]}
+    >
       <View style={styles.header}>
-        <ThemedText style={styles.title}>Select a Service</ThemedText>
+        <ThemedText style={styles.title}>{t('selectService')}</ThemedText>
         <ThemedText style={styles.subtitle}>
-          {"Choose the service you'd like to book"}
+          {t('chooseServiceToBook')}
         </ThemedText>
       </View>
 
@@ -57,7 +68,7 @@ export default function SelectServiceScreen() {
               <CardContent style={styles.serviceContent}>
                 <View style={styles.serviceIcon}>
                   <Ionicons
-                    name="briefcase-outline"
+                    name='briefcase-outline'
                     size={32}
                     color={theme.primary}
                   />
@@ -68,7 +79,7 @@ export default function SelectServiceScreen() {
                   </ThemedText>
                 </View>
                 <Ionicons
-                  name="chevron-forward"
+                  name='chevron-forward'
                   size={24}
                   color={theme.mutedForeground}
                 />

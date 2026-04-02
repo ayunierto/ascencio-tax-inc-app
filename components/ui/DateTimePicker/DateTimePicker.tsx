@@ -25,10 +25,55 @@ import { Button, ButtonText } from '../Button';
 import { theme } from '../theme';
 import { ThemedText } from '../ThemedText';
 
+/**
+ * DateTimePicker UI Components
+ *
+ * Este archivo expone dos APIs:
+ * - `DateTimeInput`: componente controlado (sin dependencia de React Hook Form).
+ * - `DateTimeField`: wrapper para React Hook Form usando `Controller`.
+ *
+ * Objetivos del componente:
+ * - Unificar UX de fecha/hora en iOS y Android.
+ * - Simplificar validación visual (error/helper/disabled/clear).
+ * - Evitar bugs de desfase de día por zona horaria en campos de solo fecha.
+ */
+
+/**
+ * Convierte una fecha local a ISO en UTC al mediodía.
+ *
+ * Motivo:
+ * - Si se guarda una fecha como `YYYY-MM-DDT00:00:00.000Z`, usuarios en zonas
+ *   horarias negativas pueden verla como el día anterior al renderizar en local.
+ * - Usar mediodía UTC evita ese corrimiento para casos "date-only".
+ *
+ * @param date Fecha seleccionada por el usuario.
+ * @returns ISO string en UTC al mediodía del mismo día calendario.
+ */
+const toUtcNoonIso = (date: Date): string => {
+  return new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0),
+  ).toISOString();
+};
+
 interface DateTimePickerProps {
+  /**
+   * Modo del selector.
+   * - `date`: solo fecha calendario (sin hora).
+   * - `time`: solo hora.
+   * - `datetime`: fecha y hora.
+   */
   mode?: 'date' | 'time' | 'datetime';
+  /** Formato 24h para `time`/`datetime`. */
   is24Hour?: boolean;
+  /**
+   * Callback al cambiar el valor.
+   * Devuelve ISO string o `null` al limpiar/cancelar.
+   */
   onChange?: (date: string | null) => void;
+  /**
+   * Valor controlado del campo.
+   * Puede ser `string` ISO, `Date` o `null`.
+   */
   value?: string | null | Date;
   placeholder?: string;
   labelText?: string;
@@ -44,6 +89,37 @@ interface DateTimePickerProps {
   triggerStyle?: StyleProp<ViewStyle>;
   errorTextStyle?: StyleProp<TextStyle>;
 }
+
+/**
+ * DateTimeInput
+ *
+ * Componente controlado para seleccionar fecha/hora en iOS y Android.
+ *
+ * Reglas de uso recomendadas:
+ * - Usa `mode="date"` para campos de negocio tipo "fecha de emisión".
+ * - Usa `mode="datetime"` cuando la hora exacta sea relevante.
+ * - Usa siempre `onChange` + `value` para mantener estado controlado.
+ *
+ * Comportamiento por plataforma:
+ * - Android: abre picker nativo y cierra automáticamente al confirmar/cancelar.
+ * - iOS: usa modal con picker inline y botones de confirmación.
+ *
+ * Comportamiento de zona horaria en `mode="date"`:
+ * - Guarda la fecha como ISO en UTC al mediodía para evitar desfase de día.
+ * - Muestra la fecha en UTC para mantener el día calendario estable.
+ *
+ * Ejemplo controlado (sin RHF):
+ * ```tsx
+ * const [date, setDate] = useState<string | null>(null);
+ *
+ * <DateTimeInput
+ *   mode="date"
+ *   labelText="Fecha"
+ *   value={date}
+ *   onChange={setDate}
+ * />
+ * ```
+ */
 const DateTimeInput = ({
   mode = 'date',
   is24Hour = false,
@@ -100,7 +176,8 @@ const DateTimeInput = ({
           },
         )}`;
       default:
-        return parsedDate.toLocaleDateString();
+        // Date-only fields should not shift by timezone.
+        return parsedDate.toLocaleDateString([], { timeZone: 'UTC' });
     }
   }, [parsedDate, placeholder, mode, displayFormat, is24Hour]);
 
@@ -110,19 +187,27 @@ const DateTimeInput = ({
       if (Platform.OS === 'ios') {
         // En iOS no cerramos automáticamente
         if (selectedDate && onChange) {
-          onChange(selectedDate.toISOString());
+          onChange(
+            mode === 'date'
+              ? toUtcNoonIso(selectedDate)
+              : selectedDate.toISOString(),
+          );
         }
       } else {
         // En Android cerramos automáticamente
         setModalVisible(false);
         if (event.type === 'set' && selectedDate && onChange) {
-          onChange(selectedDate.toISOString());
+          onChange(
+            mode === 'date'
+              ? toUtcNoonIso(selectedDate)
+              : selectedDate.toISOString(),
+          );
         } else if (event.type === 'dismissed' && onChange) {
           onChange(null);
         }
       }
     },
-    [onChange],
+    [mode, onChange],
   );
 
   // Optimización: Memoizar handler de apertura
@@ -207,7 +292,7 @@ const DateTimeInput = ({
   return (
     <View style={containerStyle}>
       <TouchableOpacity
-        accessibilityRole="button"
+        accessibilityRole='button'
         accessibilityLabel={labelText || `Select ${mode}`}
         accessibilityState={{ disabled, selected: !!parsedDate }}
         accessibilityHint={`Opens ${mode} picker`}
@@ -222,13 +307,13 @@ const DateTimeInput = ({
 
         {clearable && parsedDate && (
           <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Clear date"
+            accessibilityRole='button'
+            accessibilityLabel='Clear date'
             onPress={handleClear}
             style={styles.clearBtn}
           >
             <Text style={styles.clearBtnText}>
-              <Ionicons name="close-outline" color={theme.primary} size={24} />
+              <Ionicons name='close-outline' color={theme.primary} size={24} />
             </Text>
           </TouchableOpacity>
         )}
@@ -237,13 +322,13 @@ const DateTimeInput = ({
         <Text style={styles.calendarIcon}>
           {mode === 'time' ? (
             <Ionicons
-              name="time-outline"
+              name='time-outline'
               color={error ? theme.destructive : theme.foreground}
               size={24}
             />
           ) : (
             <Ionicons
-              name="calendar-outline"
+              name='calendar-outline'
               color={error ? theme.destructive : theme.foreground}
               size={24}
             />
@@ -261,7 +346,7 @@ const DateTimeInput = ({
       {/* Modal para iOS */}
       {Platform.OS === 'ios' && (
         <Modal
-          animationType="slide"
+          animationType='slide'
           transparent={true}
           visible={modalVisible}
           onRequestClose={handleCloseModal}
@@ -274,11 +359,11 @@ const DateTimeInput = ({
               </Text>
 
               <RNDateTimePicker
-                testID="dateTimePicker"
+                testID='dateTimePicker'
                 value={parsedDate || new Date()}
                 mode={mode === 'datetime' ? 'date' : mode}
                 is24Hour={is24Hour}
-                display="spinner"
+                display='spinner'
                 onChange={handleOnChange}
                 minimumDate={minimumDate}
                 maximumDate={maximumDate}
@@ -286,11 +371,11 @@ const DateTimeInput = ({
               />
 
               <View style={styles.modalButtons}>
-                <Button variant="outline" onPress={handleCloseModal}>
+                <Button variant='outline' onPress={handleCloseModal}>
                   <ButtonText>Cancel</ButtonText>
                 </Button>
                 <Button
-                  variant="default"
+                  variant='default'
                   onPress={() => {
                     handleCloseModal();
                   }}
@@ -306,7 +391,9 @@ const DateTimeInput = ({
   );
 };
 
-// Funciones helper
+/**
+ * Placeholder por defecto según modo.
+ */
 const getDefaultPlaceholder = (mode: 'date' | 'time' | 'datetime') => {
   switch (mode) {
     case 'time':
@@ -318,6 +405,16 @@ const getDefaultPlaceholder = (mode: 'date' | 'time' | 'datetime') => {
   }
 };
 
+/**
+ * Formateador simple para display custom.
+ *
+ * Tokens soportados:
+ * - `DD`, `MM`, `YYYY`, `HH`, `mm`
+ *
+ * Nota:
+ * - Este helper es intencionalmente básico.
+ * - Si se necesita i18n/formato avanzado, migrar a una librería dedicada.
+ */
 const formatDate = (date: Date, format: string): string => {
   // Implementación básica de formateo personalizado
   const day = String(date.getDate()).padStart(2, '0');
@@ -455,6 +552,11 @@ const styles = StyleSheet.create({
 
 // React Hook Form field wrapper
 
+/**
+ * Props del wrapper `DateTimeField` para React Hook Form.
+ *
+ * `DateTimeField` conecta `DateTimeInput` con RHF usando `Controller`.
+ */
 export type DateTimeFieldProps<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
@@ -465,6 +567,21 @@ export type DateTimeFieldProps<
   defaultValue?: string | null;
 };
 
+/**
+ * DateTimeField (React Hook Form)
+ *
+ * Este wrapper evita wiring manual entre `Controller` y `DateTimeInput`.
+ *
+ * Ejemplo:
+ * ```tsx
+ * <DateTimeField
+ *   control={control}
+ *   name="date"
+ *   mode="date"
+ *   labelText="Fecha"
+ * />
+ * ```
+ */
 export function DateTimeField<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,

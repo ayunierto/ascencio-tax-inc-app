@@ -1,6 +1,7 @@
 import { ScrollView, View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { BookingProgressStepper } from '@/components/booking/BookingProgressStepper';
@@ -14,6 +15,7 @@ import { toast } from 'sonner-native';
 
 export default function SelectAvailabilityScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { data: servicesResponse } = useServices();
   const { service } = useBookingStore();
 
@@ -21,10 +23,10 @@ export default function SelectAvailabilityScreen() {
     return (
       <EmptyContent
         title={t('servicesNotFound')}
-        icon="alert-circle-outline"
+        icon='alert-circle-outline'
         action={
           <Button onPress={() => router.push('/(app)/services')}>
-            <ButtonIcon name="arrow-back-outline" />
+            <ButtonIcon name='arrow-back-outline' />
             <ButtonText>{t('tryAdjustingSearch')}</ButtonText>
           </Button>
         }
@@ -35,8 +37,8 @@ export default function SelectAvailabilityScreen() {
   if (!servicesResponse) {
     return (
       <EmptyContent
-        title="Services not found"
-        subtitle="An unexpected error has occurred. Please try again later."
+        title={t('servicesNotFound')}
+        subtitle={t('genericTryAgainLater')}
       />
     );
   }
@@ -44,9 +46,9 @@ export default function SelectAvailabilityScreen() {
   if (!service.staffMembers || service.staffMembers.length === 0) {
     return (
       <EmptyContent
-        title="Staff not found"
-        subtitle="An unexpected error has occurred. The service has no assigned staff. Please contact the administrator."
-        icon="alert-circle-outline"
+        title={t('staffNotFound')}
+        subtitle={t('staffNotFoundDescription')}
+        icon='alert-circle-outline'
       />
     );
   }
@@ -57,20 +59,24 @@ export default function SelectAvailabilityScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+    >
       <View style={styles.content}>
         <BookingProgressStepper currentStep={1} />
 
         <View style={styles.header}>
-          <ThemedText style={styles.title}>Select your preferences</ThemedText>
+          <ThemedText style={styles.title}>
+            {t('selectYourPreferences')}
+          </ThemedText>
           <ThemedText style={styles.subtitle}>
-            Check out our availability and book the date and time that works for
-            you.
+            {t('selectPreferencesSubtitle')}
           </ThemedText>
         </View>
 
         <AvailabilityForm
-          services={servicesResponse?.items || []}
+          services={servicesResponse.items}
           selectedService={service}
           serviceStaff={service.staffMembers}
           onSubmit={handleBooking}

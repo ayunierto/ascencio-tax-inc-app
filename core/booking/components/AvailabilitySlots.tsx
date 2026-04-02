@@ -11,6 +11,7 @@ import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 import React, { useEffect, useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { getAvailabilityAction } from '../actions/get-availability.action';
 import { AvailableSlot } from '../interfaces/available-slot.interface';
@@ -28,6 +29,7 @@ const AvailabilitySlots = ({
   userTimeZone,
   onChange,
 }: AvailabilitySlotsProps) => {
+  const { t } = useTranslation();
   const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot>();
 
   const serviceId = form.watch('serviceId');
@@ -37,7 +39,6 @@ const AvailabilitySlots = ({
   const {
     isPending,
     isRefetching,
-    refetch,
     data,
     isError,
     error: availabilityError,
@@ -60,8 +61,6 @@ const AvailabilitySlots = ({
     if (!serviceId || !date) return; // staff opcional
     setSelectedSlot(undefined); // Reset selected slot when service or date changes
     form.resetField('time'); // Reset time when service or date changes
-    // Refetch availability when serviceId, staffId, or date changes
-    refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceId, staffId, date]);
 
@@ -95,7 +94,7 @@ const AvailabilitySlots = ({
   if (isError) {
     return (
       <EmptyContent
-        title="Failed to check availability"
+        title={t('failedCheckAvailability')}
         subtitle={
           availabilityError.response?.data.message || availabilityError.message
         }
@@ -104,14 +103,13 @@ const AvailabilitySlots = ({
   }
 
   if (isPending || isRefetching) {
-    return <Loader message="Checking availability..." />;
+    return <Loader message={t('checkingAvailability')} />;
   }
 
   if (data && data.length === 0) {
     return (
-      <Alert style={{ width: '100%' }} variant="warning">
-        There are no appointments available for this day. Please select another
-        day.
+      <Alert style={{ width: '100%' }} variant='warning'>
+        {t('noAppointmentsAvailableForDay')}
       </Alert>
     );
   }
@@ -138,7 +136,7 @@ const AvailabilitySlots = ({
             {title}
           </ThemedText>
           <ThemedText style={{ fontSize: 14, color: theme.mutedForeground }}>
-            ({slots.length} {slots.length === 1 ? 'slot' : 'slots'})
+            ({slots.length} {slots.length === 1 ? t('slot') : t('slots')})
           </ThemedText>
         </View>
         <View
@@ -150,7 +148,7 @@ const AvailabilitySlots = ({
         >
           {slots.map((slot) => (
             <Button
-              size="sm"
+              size='sm'
               key={slot.startTimeUTC}
               variant={
                 selectedSlot?.startTimeUTC === slot.startTimeUTC
@@ -163,7 +161,7 @@ const AvailabilitySlots = ({
               }}
               style={{ flex: 1, minWidth: 120, maxWidth: 150 }}
             >
-              <ButtonIcon name="time-outline" />
+              <ButtonIcon name='time-outline' />
               <ButtonText>
                 {convertUtcDateToLocalTime(
                   slot.startTimeUTC,
@@ -180,13 +178,13 @@ const AvailabilitySlots = ({
 
   return (
     <View style={{ width: '100%' }}>
-      {renderSlotGroup(groupedSlots.morning, 'Morning', 'sunny-outline')}
+      {renderSlotGroup(groupedSlots.morning, t('morning'), 'sunny-outline')}
       {renderSlotGroup(
         groupedSlots.afternoon,
-        'Afternoon',
+        t('afternoon'),
         'partly-sunny-outline',
       )}
-      {renderSlotGroup(groupedSlots.evening, 'Evening', 'moon-outline')}
+      {renderSlotGroup(groupedSlots.evening, t('evening'), 'moon-outline')}
     </View>
   );
 };

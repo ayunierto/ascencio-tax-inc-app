@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { FlatList, RefreshControl, View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppointmentCard } from '@/components/bookings/AppointmentCard';
 import { AppointmentListSkeleton } from '@/components/bookings/AppointmentCardSkeleton';
@@ -16,6 +17,7 @@ import { AxiosError } from 'axios';
 
 export default function PastAppointmentsScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const {
     data: pastAppointments,
     isLoading,
@@ -46,7 +48,7 @@ export default function PastAppointmentsScreen() {
           error.message ||
           t('errorLoadingAppointment')
         }
-        icon="alert-circle-outline"
+        icon='alert-circle-outline'
         onRetry={refetch}
       />
     );
@@ -62,11 +64,13 @@ export default function PastAppointmentsScreen() {
         <EmptyContent
           title={t('noPastAppointments')}
           subtitle={t('noPastAppointmentsDescription')}
-          icon="time-outline"
+          icon='time-outline'
         />
-        <View style={styles.buttonContainer}>
+        <View
+          style={[styles.buttonContainer, { marginBottom: insets.bottom + 8 }]}
+        >
           <Button onPress={handleBookNew}>
-            <ButtonIcon name="add-circle-outline" />
+            <ButtonIcon name='add-circle-outline' />
             <ButtonText>{t('bookAppointment')}</ButtonText>
           </Button>
         </View>
@@ -80,7 +84,10 @@ export default function PastAppointmentsScreen() {
         data={pastAppointments}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <AppointmentCard appointment={item} isPast />}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: insets.bottom + 16 },
+        ]}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}

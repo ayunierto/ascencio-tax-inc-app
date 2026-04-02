@@ -11,7 +11,7 @@ import { useServices } from '@/core/services/hooks/useServices';
 import { EmptyContent } from '@/core/components';
 import { useBookingStore } from '@/core/services/store/useBookingStore';
 import { useAuthStore } from '@/core/auth/store/useAuthStore';
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 import { StaffMember } from '@ascencio/shared/interfaces';
 import Loader from '@/components/Loader';
 
@@ -31,10 +31,8 @@ export default function ServiceDetailScreen() {
 
     if (authStatus !== 'authenticated') {
       router.push('/login');
-      Toast.show({
-        type: 'info',
-        text1: t('pleaseSignInToBook'),
-        text2: t('pleaseSignInDescription'),
+      toast.info(t('pleaseSignInToBook'), {
+        description: t('pleaseSignInDescription'),
       });
       return;
     }
@@ -51,7 +49,7 @@ export default function ServiceDetailScreen() {
       <EmptyContent
         title={t('serviceNotFound')}
         subtitle={t('serviceNotFoundDescription')}
-        icon="alert-circle-outline"
+        icon='alert-circle-outline'
       />
     );
   }
@@ -62,7 +60,7 @@ export default function ServiceDetailScreen() {
         title={service?.name || t('serviceDetails')}
         left={
           <HeaderButton onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <Ionicons name='arrow-back' size={24} color='#ffffff' />
           </HeaderButton>
         }
       />
@@ -73,11 +71,11 @@ export default function ServiceDetailScreen() {
             <Image
               source={{ uri: service.imageUrl }}
               style={styles.image}
-              resizeMode="cover"
+              resizeMode='cover'
             />
             {!service.isActive && (
               <View style={styles.inactiveBadge}>
-                <Ionicons name="alert-circle" size={16} color="#fff" />
+                <Ionicons name='alert-circle' size={16} color='#fff' />
                 <ThemedText style={styles.inactiveBadgeText}>
                   {t('currentlyUnavailable')}
                 </ThemedText>
@@ -96,7 +94,7 @@ export default function ServiceDetailScreen() {
               <CardContent style={styles.sectionContent}>
                 <View style={styles.sectionHeader}>
                   <Ionicons
-                    name="document-text-outline"
+                    name='document-text-outline'
                     size={20}
                     color={theme.primary}
                   />
@@ -117,7 +115,7 @@ export default function ServiceDetailScreen() {
               <CardContent style={styles.sectionContent}>
                 <View style={styles.sectionHeader}>
                   <Ionicons
-                    name="people-outline"
+                    name='people-outline'
                     size={20}
                     color={theme.primary}
                   />
@@ -131,7 +129,7 @@ export default function ServiceDetailScreen() {
                     <View key={staffMember.id} style={styles.staffItem}>
                       <View style={styles.staffAvatar}>
                         <Ionicons
-                          name="person"
+                          name='person'
                           size={20}
                           color={theme.primary}
                         />
@@ -166,7 +164,7 @@ export default function ServiceDetailScreen() {
             <CardContent style={styles.sectionContent}>
               <View style={styles.sectionHeader}>
                 <Ionicons
-                  name="globe-outline"
+                  name='globe-outline'
                   size={20}
                   color={theme.primary}
                 />
@@ -189,7 +187,7 @@ export default function ServiceDetailScreen() {
                     ]}
                   />
                   <Ionicons
-                    name="laptop-outline"
+                    name='laptop-outline'
                     size={20}
                     color={
                       service.isAvailableOnline
@@ -229,7 +227,7 @@ export default function ServiceDetailScreen() {
                     ]}
                   />
                   <Ionicons
-                    name="business-outline"
+                    name='business-outline'
                     size={20}
                     color={
                       !service.isAvailableOnline
@@ -266,8 +264,8 @@ export default function ServiceDetailScreen() {
           disabled={!service.isActive}
           style={styles.bookButton}
         >
-          <ButtonIcon name="calendar-outline" />
-          <ButtonText size="lg">
+          <ButtonIcon name='calendar-outline' />
+          <ButtonText size='lg'>
             {service.isActive ? t('bookNow') : t('currentlyUnavailable')}
           </ButtonText>
         </Button>
