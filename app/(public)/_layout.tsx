@@ -16,10 +16,10 @@ export default function PublicLayout() {
         headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="services" options={{ headerShown: false }} />
-      <Stack.Screen name="pricing" options={{ title: t('pricing') }} />
-      <Stack.Screen name="about" options={{ headerShown: false }} />
-      <Stack.Screen name="contact" options={{ headerShown: false }} />
+      <Stack.Screen name='services' options={{ headerShown: false }} />
+      <Stack.Screen name='pricing' options={{ title: t('pricing') }} />
+      <Stack.Screen name='about' options={{ headerShown: false }} />
+      <Stack.Screen name='contact' options={{ headerShown: false }} />
     </Stack>
   );
 }

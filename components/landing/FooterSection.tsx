@@ -58,7 +58,11 @@ export function FooterSection() {
             onPress={() => openUrl('https://www.instagram.com/ascenciotax/')}
             accessibilityRole='button'
           >
-            <Ionicons name='logo-instagram' size={18} color={theme.foreground} />
+            <Ionicons
+              name='logo-instagram'
+              size={18}
+              color={theme.foreground}
+            />
           </Pressable>
           <Pressable
             style={styles.socialButton}

@@ -78,15 +78,15 @@ export default function AboutScreen() {
         <View style={styles.heroCard}>
           <View style={styles.heroBadge}>
             <Ionicons name='people-outline' size={14} color={theme.primary} />
-            <Text style={[styles.heroBadgeText, { color: theme.primary }]}> 
+            <Text style={[styles.heroBadgeText, { color: theme.primary }]}>
               Ascencio Tax
             </Text>
           </View>
-          <Text style={[styles.title, { color: theme.foreground }]}> 
+          <Text style={[styles.title, { color: theme.foreground }]}>
             {t('aboutPageTitle')}
           </Text>
 
-          <Text style={[styles.lead, { color: theme.mutedForeground }]}> 
+          <Text style={[styles.lead, { color: theme.mutedForeground }]}>
             {t('aboutIntro')}
           </Text>
 
@@ -106,7 +106,9 @@ export default function AboutScreen() {
                 <Ionicons name={value.icon} size={18} color={theme.primary} />
               </View>
               <View style={styles.valueContent}>
-                <Text style={[styles.sectionTitle, { color: theme.foreground }]}> 
+                <Text
+                  style={[styles.sectionTitle, { color: theme.foreground }]}
+                >
                   {value.title}
                 </Text>
                 <Text

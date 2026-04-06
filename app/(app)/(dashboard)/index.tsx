@@ -73,7 +73,8 @@ export default function DashboardScreen() {
 
   const nextAppointment = [...(upcomingAppointments ?? [])].sort(
     (a, b) =>
-      DateTime.fromISO(a.start).toMillis() - DateTime.fromISO(b.start).toMillis(),
+      DateTime.fromISO(a.start).toMillis() -
+      DateTime.fromISO(b.start).toMillis(),
   )[0];
 
   const nextAppointmentDateTime = nextAppointment
@@ -176,7 +177,12 @@ export default function DashboardScreen() {
         ]}
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing && !loadingUpcoming && !loadingPast && !loadingInvoices}
+            refreshing={
+              isRefreshing &&
+              !loadingUpcoming &&
+              !loadingPast &&
+              !loadingInvoices
+            }
             onRefresh={refreshDashboard}
             tintColor={theme.primary}
           />
@@ -188,9 +194,15 @@ export default function DashboardScreen() {
           <View style={styles.heroCard}>
             <View style={styles.heroTitleRow}>
               <View style={styles.heroSparkWrap}>
-                <Ionicons name='sparkles-outline' size={16} color={theme.primary} />
+                <Ionicons
+                  name='sparkles-outline'
+                  size={16}
+                  color={theme.primary}
+                />
               </View>
-              <ThemedText style={styles.heroKicker}>{t('dashboard')}</ThemedText>
+              <ThemedText style={styles.heroKicker}>
+                {t('dashboard')}
+              </ThemedText>
             </View>
 
             <ThemedText style={styles.heroGreeting}>
@@ -236,25 +248,42 @@ export default function DashboardScreen() {
         <View style={styles.nextAppointmentCard}>
           <View style={styles.nextAppointmentHeader}>
             <View style={styles.nextAppointmentIconWrap}>
-              <Ionicons name='calendar-outline' size={16} color={theme.primary} />
+              <Ionicons
+                name='calendar-outline'
+                size={16}
+                color={theme.primary}
+              />
             </View>
-            <Text style={[styles.nextAppointmentTitle, { color: theme.foreground }]}> 
+            <Text
+              style={[styles.nextAppointmentTitle, { color: theme.foreground }]}
+            >
               {t('upcomingAppointments')}
             </Text>
           </View>
 
           {nextAppointment ? (
             <>
-              <Text style={[styles.nextAppointmentService, { color: theme.foreground }]}> 
+              <Text
+                style={[
+                  styles.nextAppointmentService,
+                  { color: theme.foreground },
+                ]}
+              >
                 {nextAppointment.service.name}
               </Text>
               <Text
-                style={[styles.nextAppointmentMeta, { color: theme.mutedForeground }]}
+                style={[
+                  styles.nextAppointmentMeta,
+                  { color: theme.mutedForeground },
+                ]}
               >
                 {nextAppointmentDateTime}
               </Text>
               <Text
-                style={[styles.nextAppointmentMeta, { color: theme.mutedForeground }]}
+                style={[
+                  styles.nextAppointmentMeta,
+                  { color: theme.mutedForeground },
+                ]}
               >
                 {nextAppointment.staffMember.firstName}{' '}
                 {nextAppointment.staffMember.lastName}
@@ -271,11 +300,19 @@ export default function DashboardScreen() {
             </>
           ) : (
             <>
-              <Text style={[styles.nextAppointmentService, { color: theme.foreground }]}> 
+              <Text
+                style={[
+                  styles.nextAppointmentService,
+                  { color: theme.foreground },
+                ]}
+              >
                 {t('noAppointments')}
               </Text>
               <Text
-                style={[styles.nextAppointmentMeta, { color: theme.mutedForeground }]}
+                style={[
+                  styles.nextAppointmentMeta,
+                  { color: theme.mutedForeground },
+                ]}
               >
                 {t('noAppointmentsDescription')}
               </Text>
@@ -388,7 +425,10 @@ function ActionButton({
     >
       <View style={styles.actionHeader}>
         <View
-          style={[styles.actionIconContainer, { backgroundColor: `${color}20` }]}
+          style={[
+            styles.actionIconContainer,
+            { backgroundColor: `${color}20` },
+          ]}
         >
           <Ionicons name={icon} size={22} color={color} />
         </View>
@@ -418,12 +458,21 @@ function DashboardSkeleton() {
         <View style={[styles.skeletonBlock, styles.skeletonSectionTitle]} />
         <View style={styles.summaryPillsRow}>
           {Array.from({ length: 4 }).map((_, index) => (
-            <View key={`summary-skeleton-${index}`} style={styles.skeletonSummaryCard}>
+            <View
+              key={`summary-skeleton-${index}`}
+              style={styles.skeletonSummaryCard}
+            >
               <View style={styles.skeletonSummaryTop}>
-                <View style={[styles.skeletonBlock, styles.skeletonSummaryIcon]} />
-                <View style={[styles.skeletonBlock, styles.skeletonSummaryLabel]} />
+                <View
+                  style={[styles.skeletonBlock, styles.skeletonSummaryIcon]}
+                />
+                <View
+                  style={[styles.skeletonBlock, styles.skeletonSummaryLabel]}
+                />
               </View>
-              <View style={[styles.skeletonBlock, styles.skeletonSummaryValue]} />
+              <View
+                style={[styles.skeletonBlock, styles.skeletonSummaryValue]}
+              />
             </View>
           ))}
         </View>

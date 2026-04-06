@@ -65,7 +65,12 @@ export default function LandingPage() {
   // }, [authStatus]);
 
   return (
-    <View style={[styles.page, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.page,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
       <View style={styles.backgroundOrbTop} pointerEvents='none' />
       <View style={styles.backgroundOrbBottom} pointerEvents='none' />
 

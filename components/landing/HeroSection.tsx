@@ -15,8 +15,14 @@ export function HeroSection() {
     <View style={styles.heroSection}>
       <View style={styles.topRow}>
         <View style={styles.badge}>
-          <Ionicons name='shield-checkmark-outline' size={14} color={theme.primary} />
-          <ThemedText style={styles.badgeText}>{t('secureAndPrivate')}</ThemedText>
+          <Ionicons
+            name='shield-checkmark-outline'
+            size={14}
+            color={theme.primary}
+          />
+          <ThemedText style={styles.badgeText}>
+            {t('secureAndPrivate')}
+          </ThemedText>
         </View>
 
         {authStatus !== 'authenticated' && (

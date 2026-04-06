@@ -61,11 +61,7 @@ export default function ServicesScreen() {
         }
         right={
           <HeaderButton onPress={openBooking}>
-            <Ionicons
-              name='calendar-outline'
-              size={22}
-              color={theme.primary}
-            />
+            <Ionicons name='calendar-outline' size={22} color={theme.primary} />
           </HeaderButton>
         }
       />
@@ -81,14 +77,14 @@ export default function ServicesScreen() {
         <View style={styles.heroCard}>
           <View style={styles.heroBadge}>
             <Ionicons name='sparkles-outline' size={14} color={theme.primary} />
-            <Text style={[styles.heroBadgeText, { color: theme.primary }]}> 
+            <Text style={[styles.heroBadgeText, { color: theme.primary }]}>
               Tax & Accounting
             </Text>
           </View>
-          <Text style={[styles.title, { color: theme.foreground }]}> 
+          <Text style={[styles.title, { color: theme.foreground }]}>
             {t('servicesPageTitle')}
           </Text>
-          <Text style={[styles.lead, { color: theme.mutedForeground }]}> 
+          <Text style={[styles.lead, { color: theme.mutedForeground }]}>
             {t('servicesIntro')}
           </Text>
         </View>
@@ -99,11 +95,11 @@ export default function ServicesScreen() {
               <View style={styles.cardIconWrap}>
                 <Ionicons name={section.icon} size={18} color={theme.primary} />
               </View>
-              <Text style={[styles.cardTitle, { color: theme.foreground }]}> 
+              <Text style={[styles.cardTitle, { color: theme.foreground }]}>
                 {section.title}
               </Text>
             </View>
-            <Text style={[styles.cardText, { color: theme.mutedForeground }]}> 
+            <Text style={[styles.cardText, { color: theme.mutedForeground }]}>
               {section.description}
             </Text>
           </View>
@@ -118,14 +114,14 @@ export default function ServicesScreen() {
                 color={theme.primary}
               />
             </View>
-            <Text style={[styles.cardTitle, { color: theme.foreground }]}> 
+            <Text style={[styles.cardTitle, { color: theme.foreground }]}>
               {t('servicesIncomeTaxTitle')}
             </Text>
           </View>
-          <Text style={[styles.cardText, { color: theme.mutedForeground }]}> 
+          <Text style={[styles.cardText, { color: theme.mutedForeground }]}>
             {t('servicesIncomeTaxDesc')}
           </Text>
-          <Text style={[styles.cardSubtitle, { color: theme.primary }]}> 
+          <Text style={[styles.cardSubtitle, { color: theme.primary }]}>
             {t('servicesWeService')}
           </Text>
           <View style={styles.list}>
@@ -136,7 +132,7 @@ export default function ServicesScreen() {
                   size={14}
                   color={theme.primary}
                 />
-                <Text style={[styles.listItem, { color: theme.foreground }]}> 
+                <Text style={[styles.listItem, { color: theme.foreground }]}>
                   {item}
                 </Text>
               </View>

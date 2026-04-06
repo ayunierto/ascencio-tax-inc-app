@@ -103,16 +103,16 @@ export default function SignUpForm() {
 
         <Controller
           control={control}
-          name="firstName"
+          name='firstName'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               label={t('firstName')}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              autoCapitalize="words"
-              autoComplete="name"
-              returnKeyType="next"
+              autoCapitalize='words'
+              autoComplete='name'
+              returnKeyType='next'
               onSubmitEditing={() => lastNameRef.current?.focus()}
               blurOnSubmit={false}
               error={!!errors.firstName}
@@ -123,7 +123,7 @@ export default function SignUpForm() {
 
         <Controller
           control={control}
-          name="lastName"
+          name='lastName'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               ref={lastNameRef}
@@ -131,9 +131,9 @@ export default function SignUpForm() {
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              autoCapitalize="words"
-              autoComplete="name-family"
-              returnKeyType="next"
+              autoCapitalize='words'
+              autoComplete='name-family'
+              returnKeyType='next'
               onSubmitEditing={() => emailRef.current?.focus()}
               blurOnSubmit={false}
               errorMessage={getErrorMessage(errors.lastName)}
@@ -144,7 +144,7 @@ export default function SignUpForm() {
 
         <Controller
           control={control}
-          name="email"
+          name='email'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               ref={emailRef}
@@ -152,10 +152,10 @@ export default function SignUpForm() {
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              returnKeyType="next"
+              keyboardType='email-address'
+              autoCapitalize='none'
+              autoComplete='email'
+              returnKeyType='next'
               onSubmitEditing={() => phoneRef.current?.focus()}
               blurOnSubmit={false}
               errorMessage={getErrorMessage(errors.email)}
@@ -190,7 +190,7 @@ export default function SignUpForm() {
 
           <Controller
             control={control}
-            name="phoneNumber"
+            name='phoneNumber'
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 ref={phoneRef}
@@ -198,10 +198,10 @@ export default function SignUpForm() {
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
-                keyboardType="phone-pad"
-                autoCapitalize="none"
-                autoComplete="tel"
-                returnKeyType="next"
+                keyboardType='phone-pad'
+                autoCapitalize='none'
+                autoComplete='tel'
+                returnKeyType='next'
                 onSubmitEditing={() => passwordRef.current?.focus()}
                 blurOnSubmit={false}
                 rootStyle={authStyles.phoneInput}
@@ -214,7 +214,7 @@ export default function SignUpForm() {
 
         <Controller
           control={control}
-          name="password"
+          name='password'
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               ref={passwordRef}
@@ -222,10 +222,10 @@ export default function SignUpForm() {
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              autoCapitalize="none"
+              autoCapitalize='none'
               secureTextEntry
-              placeholder="Password"
-              returnKeyType="next"
+              placeholder='Password'
+              returnKeyType='next'
               onSubmitEditing={() => confirmPasswordRef.current?.focus()}
               blurOnSubmit={false}
               errorMessage={getErrorMessage(errors.password)}
