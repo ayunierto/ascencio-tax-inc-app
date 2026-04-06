@@ -10,7 +10,7 @@ export default function ExpensesLayout() {
         headerShown: false, // Usar CustomHeader personalizado
       }}
     >
-      <Stack.Screen name="index" options={{ title: t('myExpenses') }} />
+      <Stack.Screen name="(tabs)" options={{ title: t('myExpenses') }} />
       <Stack.Screen name="create" options={{ title: t('newExpense') }} />
       <Stack.Screen name="[id]" options={{ title: t('expenseDetails') }} />
       <Stack.Screen name="scan" options={{ title: t('scanReceipt') }} />

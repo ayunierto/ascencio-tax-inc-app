@@ -25,7 +25,7 @@ export default function SelectAvailabilityScreen() {
         title={t('servicesNotFound')}
         icon='alert-circle-outline'
         action={
-          <Button onPress={() => router.push('/(app)/services')}>
+          <Button onPress={() => router.push('/(app)/appointments/(tabs)/services')}>
             <ButtonIcon name='arrow-back-outline' />
             <ButtonText>{t('tryAdjustingSearch')}</ButtonText>
           </Button>

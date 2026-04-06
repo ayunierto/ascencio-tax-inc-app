@@ -68,7 +68,7 @@ export function CustomHeader({
             <ThemedText
               style={styles.title}
               numberOfLines={1}
-              ellipsizeMode="tail"
+              ellipsizeMode='tail'
             >
               {title}
             </ThemedText>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 80,
     justifyContent: 'flex-end',
-    gap: 12,
+    gap: 16,
   },
   title: {
     fontSize: 17,

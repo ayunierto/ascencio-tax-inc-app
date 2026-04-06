@@ -9,7 +9,7 @@ export default function ServicesScreen() {
   const clients = t('servicesClientsList', { returnObjects: true }) as string[];
 
   const openBooking = () => {
-    router.push('/services');
+    router.push('/(app)/appointments/(tabs)/services');
   };
 
   return (

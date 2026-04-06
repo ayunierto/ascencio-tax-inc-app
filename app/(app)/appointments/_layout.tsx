@@ -9,18 +9,7 @@ export default function AppointmentsLayout() {
         headerShown: false, // Usar CustomHeader personalizado
       }}
     >
-      <Stack.Screen
-        name="index"
-        options={{
-          title: t('myAppointments'),
-        }}
-      />
-      <Stack.Screen
-        name="past"
-        options={{
-          title: t('pastAppointments'),
-        }}
-      />
+      <Stack.Screen name='(tabs)' options={{ title: t('myAppointments') }} />
       <Stack.Screen
         name="new"
         options={{

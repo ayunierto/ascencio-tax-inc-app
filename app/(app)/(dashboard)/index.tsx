@@ -185,7 +185,7 @@ export default function DashboardScreen() {
           <ActionButton
             icon='calendar'
             label={t('createAppointment')}
-            onPress={() => router.push('/(app)/appointments/new/summary')}
+            onPress={() => router.push('/(app)/appointments/(tabs)/services')}
             color={theme.primary}
           />
           <ActionButton
@@ -203,7 +203,7 @@ export default function DashboardScreen() {
           <ActionButton
             icon='business-outline'
             label={t('newCompany')}
-            onPress={() => router.push('/(app)/companies/create')}
+            onPress={() => router.push('/(app)/invoices/companies/create')}
             color='#8b5cf6'
           />
         </View>

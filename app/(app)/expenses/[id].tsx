@@ -60,7 +60,7 @@ export default function EditExpenseScreen() {
   React.useEffect(() => {
     if (!id) {
       toast.error(t('invalidExpenseId'));
-      router.replace('/(app)/expenses');
+      router.replace('/(app)/expenses/(tabs)');
     }
   }, [id, t]);
 

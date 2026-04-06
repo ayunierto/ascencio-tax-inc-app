@@ -20,7 +20,7 @@ export default function AppLayout() {
 
   // Redirect to login if not authenticated
   if (authStatus !== 'authenticated' || !user) {
-    return <Redirect href="/login" />;
+    return <Redirect href='/login' />;
   }
 
   return (
@@ -35,7 +35,7 @@ export default function AppLayout() {
       }}
     >
       <Drawer.Screen
-        name="(dashboard)/index"
+        name='(dashboard)/index'
         options={{
           drawerLabel: t('dashboard'),
           title: t('dashboard'),
@@ -50,67 +50,39 @@ export default function AppLayout() {
       />
 
       <Drawer.Screen
-        name="companies"
+        name='invoices'
         options={{
-          drawerLabel: t('companies'),
-          title: t('companies'),
-          drawerIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'business' : 'business-outline'}
-              size={size}
-              color={theme.foreground}
-            />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
-        name="clients"
-        options={{
-          drawerLabel: t('myClients'),
-          title: t('myClients'),
-          drawerIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'people' : 'people-outline'}
-              size={size}
-              color={theme.foreground}
-            />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
-        name="expenses"
-        options={{
-          drawerLabel: t('expenses'),
-          title: t('expenses'),
-          drawerIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'cash' : 'cash-outline'}
-              size={size}
-              color={theme.foreground}
-            />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
-        name="invoices"
-        options={{
+          href: '/(app)/invoices/(tabs)',
           drawerLabel: t('invoices'),
           title: t('invoices'),
           drawerIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'document' : 'document-outline'}
               size={size}
-              color={theme.foreground}
+              color={color}
             />
           ),
         }}
       />
 
       <Drawer.Screen
-        name="appointments"
+        name='expenses'
+        options={{
+          href: '/(app)/expenses/(tabs)',
+          drawerLabel: t('expenses'),
+          title: t('expenses'),
+          drawerIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'cash' : 'cash-outline'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name='appointments'
         options={{
           headerShown: false,
           drawerLabel: t('myAppointments'),
@@ -119,37 +91,7 @@ export default function AppLayout() {
             <Ionicons
               name={focused ? 'calendar' : 'calendar-outline'}
               size={size}
-              color={theme.foreground}
-            />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
-        name="services"
-        options={{
-          drawerLabel: t('services'),
-          title: t('services'),
-          drawerIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'briefcase' : 'briefcase-outline'}
-              size={size}
-              color={theme.foreground}
-            />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
-        name="reports"
-        options={{
-          drawerLabel: t('reports'),
-          title: t('reports'),
-          drawerIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'bar-chart' : 'bar-chart-outline'}
-              size={size}
-              color={theme.foreground}
+              color={color}
             />
           ),
         }}
@@ -172,7 +114,7 @@ export default function AppLayout() {
       /> */}
 
       <Drawer.Screen
-        name="settings"
+        name='settings'
         options={{
           drawerLabel: t('settings'),
           title: t('settings'),
@@ -180,7 +122,7 @@ export default function AppLayout() {
             <Ionicons
               name={focused ? 'settings' : 'settings-outline'}
               size={size}
-              color={theme.foreground}
+              color={color}
             />
           ),
         }}

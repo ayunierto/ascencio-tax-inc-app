@@ -1,6 +1,5 @@
 import React from 'react';
 import { View } from 'react-native';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -35,7 +34,7 @@ export default function CreateInvoiceScreen() {
 
   const headerLeft = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-      <HeaderButton onPress={() => router.back()}>
+      <HeaderButton onPress={() => router.replace('/(app)/invoices/(tabs)')}>
         <Ionicons name='arrow-back' size={24} color='#ffffff' />
       </HeaderButton>
       {/* <HeaderButton

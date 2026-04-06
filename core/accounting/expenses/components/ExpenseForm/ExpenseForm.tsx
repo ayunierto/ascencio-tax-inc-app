@@ -155,6 +155,7 @@ export default function ExpenseForm({
   const createMutation = createExpenseMutation();
   const updateMutation = updateExpenseMutation();
   const deleteMutation = deleteExpenseMutation();
+  const goToExpensesList = () => router.replace('/(app)/expenses/(tabs)');
 
   const watchedImageUrl = watch('imageUrl');
   const previousImageUrlRef = useRef<string | undefined>(watchedImageUrl);
@@ -175,7 +176,7 @@ export default function ExpenseForm({
         // Mark image as saved to prevent cleanup
         imageUploaderRef.current?.markAsSaved();
         toast.success(t('expenseCreatedSuccessfully'));
-        setTimeout(() => router.back(), 500);
+        setTimeout(goToExpensesList, 500);
       }
     } catch (error: any) {
       console.error('Error saving expense:', error);
@@ -414,7 +415,15 @@ export default function ExpenseForm({
         <CustomHeader
           title={expense.id === 'new' ? t('newExpense') : t('expenseDetails')}
           left={
-            <HeaderButton onPress={() => router.back()}>
+            <HeaderButton
+              onPress={() => {
+                if (expense.id === 'new') {
+                  goToExpensesList();
+                  return;
+                }
+                router.back();
+              }}
+            >
               <Ionicons name='arrow-back' size={24} color='#ffffff' />
             </HeaderButton>
           }

@@ -60,6 +60,8 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
   const createCompany = createCompanyMutation();
   const updateCompany = updateCompanyMutation();
   const deleteCompany = deleteCompanyMutation();
+  const goToCompaniesList = () =>
+    router.replace('/(app)/invoices/(tabs)/companies');
 
   const onSubmit = async (values: CreateCompanyRequest) => {
     console.log('[COMPANY FORM] onSubmit called with values:', values);
@@ -105,8 +107,8 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
         imageUploaderRef.current?.markAsSaved();
         console.log('[COMPANY FORM] Showing success toast');
         toast.success(t('companyCreatedSuccessfully'));
-        console.log('[COMPANY FORM] Navigating back');
-        setTimeout(() => router.back(), 500);
+        console.log('[COMPANY FORM] Navigating to companies list');
+        setTimeout(goToCompaniesList, 500);
       }
     } catch (error: any) {
       console.error('[COMPANY FORM] Error saving company:', error);
@@ -160,7 +162,15 @@ export const CompanyForm = ({ company }: CompanyFormProps) => {
       <CustomHeader
         title={company.id === 'new' ? t('newCompany') : t('companyDetails')}
         left={
-          <HeaderButton onPress={() => router.back()}>
+          <HeaderButton
+            onPress={() => {
+              if (company.id === 'new') {
+                goToCompaniesList();
+                return;
+              }
+              router.back();
+            }}
+          >
             <Ionicons name='arrow-back' size={24} color='#ffffff' />
           </HeaderButton>
         }

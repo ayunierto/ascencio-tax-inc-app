@@ -24,7 +24,7 @@ export const ClientCard = ({
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/(app)/clients/${client.id}`)}
+      onPress={() => router.push(`/(app)/invoices/clients/${client.id}`)}
       disabled={isLoading}
       activeOpacity={0.7}
     >

@@ -17,12 +17,6 @@ export default function NewAppointmentLayout() {
       }}
     >
       <Stack.Screen
-        name='index'
-        options={{
-          title: t('selectService'),
-        }}
-      />
-      <Stack.Screen
         name='availability'
         options={{
           title: t('selectDateTime'),

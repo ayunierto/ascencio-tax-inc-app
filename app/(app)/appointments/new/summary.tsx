@@ -95,7 +95,7 @@ export default function BookingSummaryScreen() {
   const handleModalClose = () => {
     setShowSuccessModal(false);
     resetBooking();
-    router.push('/(app)/appointments');
+    router.push('/(app)/appointments/(tabs)');
   };
 
   const startDateTime = DateTime.fromISO(start, { zone: 'utc' }).setZone(

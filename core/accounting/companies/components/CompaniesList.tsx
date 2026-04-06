@@ -62,7 +62,7 @@ export const CompaniesList = () => {
         title={t('noCompaniesTitle')}
         subtitle={t('noCompaniesSubtitle')}
         action={
-          <Button onPress={() => router.push('/(app)/companies/create')}>
+          <Button onPress={() => router.push('/(app)/invoices/companies/create')}>
             <ButtonIcon name="add-circle-outline" />
             <ButtonText>{t('createCompany')}</ButtonText>
           </Button>

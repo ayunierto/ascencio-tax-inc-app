@@ -3,8 +3,14 @@ import { View } from 'react-native';
 import { DateTime } from 'luxon';
 import { useTranslation } from 'react-i18next';
 import { DateTimeInput } from '@/components/ui/DateTimePicker/DateTimePicker';
-import { Button, ButtonText } from '@/components/ui';
-import { ThemedText } from '../ui/ThemedText';
+import {
+  Button,
+  ButtonText,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui';
 
 interface DateRangePickerProps {
   startISO?: string | null;
@@ -48,41 +54,46 @@ export const DateRangePicker = ({
   }, [endISO]);
 
   return (
-    <View style={{ gap: 12 }}>
-      <ThemedText style={{ marginBottom: 8 }}>
-        {t('selectDateRange')}
-      </ThemedText>
+    <Card>
+      <CardHeader>
+        <CardTitle style={{ marginBottom: 8 }}>
+          {t('selectDateRange')}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <View style={{ gap: 12 }}>
+          <DateTimeInput
+            labelText={t('startDate')}
+            mode='date'
+            value={start}
+            onChange={(v) => setStart(v)}
+            displayFormat='MM/DD/YYYY'
+            clearable
+          />
 
-      <DateTimeInput
-        labelText={t('startDate')}
-        mode='date'
-        value={start}
-        onChange={(v) => setStart(v)}
-        displayFormat='MM/DD/YYYY'
-        clearable
-      />
+          <DateTimeInput
+            labelText={t('endDate')}
+            mode='date'
+            value={end}
+            onChange={(v) => setEnd(v)}
+            displayFormat='MM/DD/YYYY'
+            clearable
+          />
 
-      <DateTimeInput
-        labelText={t('endDate')}
-        mode='date'
-        value={end}
-        onChange={(v) => setEnd(v)}
-        displayFormat='MM/DD/YYYY'
-        clearable
-      />
-
-      <Button
-        variant='default'
-        onPress={() => {
-          // First, notify parent of current values
-          if (onChange) onChange(start, end);
-          // Then, if parent provided a generate handler, call it
-          if (onGenerate) onGenerate(start, end);
-        }}
-      >
-        <ButtonText>{t('generateReport')}</ButtonText>
-      </Button>
-    </View>
+          <Button
+            variant='default'
+            onPress={() => {
+              // First, notify parent of current values
+              if (onChange) onChange(start, end);
+              // Then, if parent provided a generate handler, call it
+              if (onGenerate) onGenerate(start, end);
+            }}
+          >
+            <ButtonText>{t('generateReport')}</ButtonText>
+          </Button>
+        </View>
+      </CardContent>
+    </Card>
   );
 };
 

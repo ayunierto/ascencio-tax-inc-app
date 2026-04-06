@@ -63,7 +63,7 @@ export const ClientsList = () => {
         title={t('noClientsTitle')}
         subtitle={t('noClientsSubtitle')}
         action={
-          <Button onPress={() => router.push('/(app)/clients/create')}>
+          <Button onPress={() => router.push('/(app)/invoices/clients/create')}>
             <ButtonIcon name="add-circle-outline" />
             <ButtonText>{t('createClient')}</ButtonText>
           </Button>

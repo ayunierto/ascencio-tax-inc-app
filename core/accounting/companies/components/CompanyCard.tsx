@@ -23,7 +23,7 @@ export const CompanyCard = ({
   const { t } = useTranslation();
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/(app)/companies/${company.id}`)}
+      onPress={() => router.push(`/(app)/invoices/companies/${company.id}`)}
       disabled={isLoading}
       activeOpacity={0.7}
     >

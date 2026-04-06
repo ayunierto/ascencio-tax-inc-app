@@ -376,6 +376,39 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
       return;
     }
 
+    const hasInvalidLineItemPrice = validLineItems.some(
+      (item) => toNumber(item.price, 0) <= 0,
+    );
+
+    if (hasInvalidLineItemPrice) {
+      toast.error(t('invoiceLineItemPriceMustBeGreaterThanZero'));
+      return;
+    }
+
+    const hasInvalidLineItemTotal = validLineItems.some((item) => {
+      const itemTotal = toNumber(item.quantity, 1) * toNumber(item.price, 0);
+      return itemTotal <= 0;
+    });
+
+    if (hasInvalidLineItemTotal) {
+      toast.error(t('invoiceLineItemTotalMustBeGreaterThanZero'));
+      return;
+    }
+
+    const subtotalFromValidItems = validLineItems.reduce(
+      (sum, item) => sum + toNumber(item.quantity, 1) * toNumber(item.price, 0),
+      0,
+    );
+    const effectiveTaxRate = toNumber(values.taxRate, 13);
+    const totalFromValidItems =
+      subtotalFromValidItems +
+      subtotalFromValidItems * (effectiveTaxRate / 100);
+
+    if (totalFromValidItems <= 0) {
+      toast.error(t('invoiceTotalMustBeGreaterThanZero'));
+      return;
+    }
+
     // Clean empty strings and convert to undefined for optional fields
     const cleanValue = (val: any) => {
       if (val === '' || val === null) return undefined;
@@ -436,7 +469,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
         if (result && result.id) {
           router.replace(`/(app)/invoices/${result.id}`);
         } else {
-          router.replace('/(app)/invoices');
+          router.replace('/(app)/invoices/(tabs)');
         }
       }
     } catch (error: any) {
@@ -496,7 +529,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
         ? t('newInvoice')
         : `${t('invoice')} #${invoice.invoiceNumber}`,
     });
-  }, [isNew, t, invoice.invoiceNumber]);
+  }, [isNew, t, invoice.invoiceNumber, navigation]);
 
   // Botones del header derecho
   const headerRightButtons = (

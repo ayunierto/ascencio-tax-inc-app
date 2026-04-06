@@ -145,7 +145,9 @@ export const InvoiceCard = ({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
-                  variant='ghost'
+                  style={{ position: 'absolute', bottom: 8, right: 8 }}
+                  variant='outline'
+                  size='icon'
                   disabled={isLoading}
                   isLoading={isLoading}
                 >
