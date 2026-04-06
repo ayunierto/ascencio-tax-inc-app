@@ -23,6 +23,7 @@ export const SignInForm = () => {
   const {
     signInWithGoogle,
     isLoading: isGoogleLoading,
+    isReady: isGoogleReady,
     // error: googleError,
   } = useGoogleSignIn();
 
@@ -93,7 +94,7 @@ export const SignInForm = () => {
         {/* Google Sign-In Button */}
         <Button
           variant='outline'
-          disabled={isGoogleLoading || isPending}
+          disabled={isGoogleLoading || isPending || !isGoogleReady}
           isLoading={isGoogleLoading || isPending}
           onPress={handleGoogleSignIn}
         >

@@ -16,3 +16,7 @@
 - verifica siempre que el codigo no este deprecado, si es asi actualizalo a la ultima version estable o verifica porque ha siedo cambiado.
 - valorar mucho siempre el manejo de errores correctamente segun plataforma o framework que estemos usando, no solo para mostrar un mensaje al usuario sino para evitar que el error se propague y cause problemas mayores.
 - siempre que se necesite una nueva funcionalidad o componente, primero verifica si ya existe en el proyecto.
+- quiero que mi app tenga estilos: “Modern Fintech SaaS Mobile”. Descripción más precisa para futuros prompts:
+“UI móvil tipo SaaS/fintech, dark corporate blue, tarjetas translúcidas suaves, bordes finos, iconografía clara, jerarquía tipográfica fuerte, microanimaciones de entrada escalonadas, layout limpio y accionable”.
+Keywords que puedes pegar directo:
+mobile-first fintech dashboard, soft glass cards, high contrast, rounded cards, icon chips, staggered fade-in, enterprise clean UI, bold but minimal.

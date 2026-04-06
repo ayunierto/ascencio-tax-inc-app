@@ -8,17 +8,20 @@ function FeatureCard({
   title,
   description,
 }: {
-  icon: any;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
 }) {
   return (
     <Card style={styles.featureCard}>
       <View style={styles.featureIconContainer}>
-        <Ionicons name={icon} size={32} color={theme.primary} />
+        <Ionicons name={icon} size={22} color={theme.primary} />
       </View>
-      <ThemedText style={styles.featureTitle}>{title}</ThemedText>
-      <ThemedText style={styles.featureDescription}>{description}</ThemedText>
+
+      <View style={styles.featureContent}>
+        <ThemedText style={styles.featureTitle}>{title}</ThemedText>
+        <ThemedText style={styles.featureDescription}>{description}</ThemedText>
+      </View>
     </Card>
   );
 }
@@ -27,33 +30,40 @@ export default FeatureCard;
 
 const styles = StyleSheet.create({
   featureCard: {
-    padding: 20,
+    width: '100%',
+    minHeight: 116,
+    padding: 14,
     borderRadius: 16,
-    alignItems: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
   },
   featureIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#f0f4ff',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${theme.primary}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginTop: 2,
+  },
+  featureContent: {
+    flex: 1,
   },
   featureTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
+    marginBottom: 4,
   },
   featureDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: theme.mutedForeground,
-    textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 19,
   },
 });

@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../components/ui';
+import { CustomHeader, HeaderButton, theme } from '../../components/ui';
 
 interface ValueItem {
   key: string;
@@ -13,6 +14,15 @@ interface ValueItem {
 
 export default function AboutScreen() {
   const { t } = useTranslation();
+
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/');
+  };
 
   const values: ValueItem[] = [
     {
@@ -42,63 +52,83 @@ export default function AboutScreen() {
   ];
 
   return (
-    <ScrollView
-      style={styles.page}
-      contentContainerStyle={[
-        styles.container,
-        { backgroundColor: theme.background },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.heroCard}>
-        <View style={styles.heroBadge}>
-          <Ionicons name='people-outline' size={14} color={theme.primary} />
-          <Text style={[styles.heroBadgeText, { color: theme.primary }]}>
-            Ascencio Tax
-          </Text>
-        </View>
-        <Text style={[styles.title, { color: theme.foreground }]}>
-          {t('aboutPageTitle')}
-        </Text>
+    <View style={styles.page}>
+      <CustomHeader
+        title={t('aboutUs')}
+        left={
+          <HeaderButton onPress={goBack}>
+            <Ionicons name='arrow-back' size={22} color={theme.foreground} />
+          </HeaderButton>
+        }
+        right={
+          <HeaderButton onPress={() => router.push('/(public)/contact')}>
+            <Ionicons name='mail-outline' size={22} color={theme.primary} />
+          </HeaderButton>
+        }
+      />
 
-        <Text style={[styles.lead, { color: theme.mutedForeground }]}>
-          {t('aboutIntro')}
-        </Text>
-
-        <Image
-          source={{
-            uri: 'https://static.wixstatic.com/media/c837a6_2a112783570b4cd994206741c4e0a1b9~mv2.png',
-          }}
-          style={styles.heroImage}
-          resizeMode='cover'
-        />
-      </View>
-
-      <View style={styles.valuesContainer}>
-        {values.map((value) => (
-          <View key={value.key} style={styles.valueCard}>
-            <View style={styles.valueIconWrap}>
-              <Ionicons name={value.icon} size={18} color={theme.primary} />
-            </View>
-            <View style={styles.valueContent}>
-              <Text style={[styles.sectionTitle, { color: theme.foreground }]}>
-                {value.title}
-              </Text>
-              <Text
-                style={[styles.sectionText, { color: theme.mutedForeground }]}
-              >
-                {value.description}
-              </Text>
-            </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: theme.background },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroCard}>
+          <View style={styles.heroBadge}>
+            <Ionicons name='people-outline' size={14} color={theme.primary} />
+            <Text style={[styles.heroBadgeText, { color: theme.primary }]}> 
+              Ascencio Tax
+            </Text>
           </View>
-        ))}
-      </View>
-    </ScrollView>
+          <Text style={[styles.title, { color: theme.foreground }]}> 
+            {t('aboutPageTitle')}
+          </Text>
+
+          <Text style={[styles.lead, { color: theme.mutedForeground }]}> 
+            {t('aboutIntro')}
+          </Text>
+
+          <Image
+            source={{
+              uri: 'https://static.wixstatic.com/media/c837a6_2a112783570b4cd994206741c4e0a1b9~mv2.png',
+            }}
+            style={styles.heroImage}
+            resizeMode='cover'
+          />
+        </View>
+
+        <View style={styles.valuesContainer}>
+          {values.map((value) => (
+            <View key={value.key} style={styles.valueCard}>
+              <View style={styles.valueIconWrap}>
+                <Ionicons name={value.icon} size={18} color={theme.primary} />
+              </View>
+              <View style={styles.valueContent}>
+                <Text style={[styles.sectionTitle, { color: theme.foreground }]}> 
+                  {value.title}
+                </Text>
+                <Text
+                  style={[styles.sectionText, { color: theme.mutedForeground }]}
+                >
+                  {value.description}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   page: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  scroll: {
     flex: 1,
     backgroundColor: theme.background,
   },

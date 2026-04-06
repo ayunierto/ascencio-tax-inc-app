@@ -29,8 +29,6 @@ export function FeaturesSection() {
 
   return (
     <View style={styles.featuresSection}>
-      {/* <ThemedText style={styles.sectionTitle}>Why Choose Us?</ThemedText> */}
-
       <View style={styles.featuresList}>
         {FEATURES.map((feature) => (
           <FeatureCard
@@ -47,16 +45,10 @@ export function FeaturesSection() {
 
 const styles = StyleSheet.create({
   featuresSection: {
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
   },
-  // sectionTitle: {
-  //   fontSize: 28,
-  //   fontWeight: 'bold',
-  //   marginBottom: 32,
-  //   textAlign: 'center',
-  // },
   featuresList: {
-    gap: 16,
+    gap: 12,
   },
 });

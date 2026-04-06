@@ -2,7 +2,6 @@ import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../ui';
 import { Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
 
 export function FooterSection() {
   const { t } = useTranslation();
@@ -11,6 +10,12 @@ export function FooterSection() {
   const contactEmail = 'ascenciotaxinc@gmail.com';
   const contactPhone = '(416) 658 1208';
   const contactPageUrl = 'https://www.ascenciotax.com/contact-us';
+
+  const openUrl = (url: string) => {
+    Linking.openURL(url).catch((err) =>
+      console.error('Failed to open url', err),
+    );
+  };
 
   const openMaps = (address: string) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -31,174 +36,76 @@ export function FooterSection() {
 
   const openEmail = (email: string) => {
     const url = `mailto:${email}`;
-    Linking.openURL(url).catch((err) =>
-      console.error('Failed to open email', err),
-    );
+    openUrl(url);
   };
 
   return (
     <View style={styles.footer}>
-      {/* <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View style={styles.footerDivider} />
+      <View style={styles.footerCard}>
+        <Text style={styles.footerTitle}>Ascencio Tax Inc.</Text>
+        <Text style={styles.footerSubtitle}>{t('contactPageSubtitle')}</Text>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: theme.gap,
-            alignItems: 'center',
-            backgroundColor: 'black',
-            paddingVertical: 4,
-            paddingHorizontal: 18,
-            borderRadius: theme.radius,
-          }}
-        >
-          <Ionicons name='logo-apple' size={48} color={theme.foreground} />
-
-          <View style={{ flexDirection: 'column' }}>
-            <Text style={{ color: theme.foreground }}>
-              {t('availableOnThe')}
-            </Text>
-            <Text
-              style={{
-                color: theme.foreground,
-                fontSize: 16,
-                fontWeight: '600',
-              }}
-            >
-              {t('appStore')}
-            </Text>
-          </View>
+        <View style={styles.socialRow}>
+          <Pressable
+            style={styles.socialButton}
+            onPress={() => openUrl('https://www.facebook.com/ascenciotaxinc')}
+            accessibilityRole='button'
+          >
+            <Ionicons name='logo-facebook' size={18} color={theme.foreground} />
+          </Pressable>
+          <Pressable
+            style={styles.socialButton}
+            onPress={() => openUrl('https://www.instagram.com/ascenciotax/')}
+            accessibilityRole='button'
+          >
+            <Ionicons name='logo-instagram' size={18} color={theme.foreground} />
+          </Pressable>
+          <Pressable
+            style={styles.socialButton}
+            onPress={() => openUrl(contactPageUrl)}
+            accessibilityRole='button'
+          >
+            <Ionicons name='open-outline' size={18} color={theme.foreground} />
+          </Pressable>
         </View>
-      </View> */}
 
-      {/* <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          gap: theme.gap,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: theme.gap,
-            alignItems: 'center',
-            backgroundColor: 'black',
-            paddingVertical: 4,
-            paddingHorizontal: 18,
-            borderRadius: theme.radius,
-          }}
-        >
-          <Ionicons name='logo-google-playstore' size={48} color='white' />
+        <View style={styles.infoList}>
+          <Pressable
+            accessibilityRole='link'
+            onPress={() => openMaps(contactAddress)}
+            style={styles.infoRow}
+          >
+            <Ionicons name='location-outline' size={16} color={theme.primary} />
+            <Text style={styles.infoText}>{contactAddress}</Text>
+          </Pressable>
 
-          <View style={{ flexDirection: 'column' }}>
-            <Text style={{ color: theme.foreground }}>
-              {t('availableOnThe')}
-            </Text>
-            <Text
-              style={{
-                color: theme.foreground,
-                fontSize: 16,
-                fontWeight: '600',
-              }}
-            >
-              {t('googlePlay')}
-            </Text>
-          </View>
+          <Pressable
+            accessibilityRole='link'
+            onPress={() => openEmail(contactEmail)}
+            style={styles.infoRow}
+          >
+            <Ionicons name='mail-outline' size={16} color={theme.primary} />
+            <Text style={styles.infoText}>{contactEmail}</Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole='button'
+            onPress={() => openPhone(contactPhone)}
+            style={styles.infoRow}
+          >
+            <Ionicons name='call-outline' size={16} color={theme.primary} />
+            <Text style={styles.infoText}>{contactPhone}</Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole='link'
+            onPress={() => openUrl(contactPageUrl)}
+            style={styles.infoRow}
+          >
+            <Ionicons name='globe-outline' size={16} color={theme.primary} />
+            <Text style={styles.infoText}>{contactPageUrl}</Text>
+          </Pressable>
         </View>
-      </View> */}
-
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: theme.gap,
-          justifyContent: 'center',
-        }}
-      >
-        <Link href='https://www.facebook.com/ascenciotaxinc' target='_blank'>
-          <Ionicons name='logo-facebook' size={30} color={theme.foreground} />
-        </Link>
-        <Link href='https://www.instagram.com/ascenciotax/' target='_blank'>
-          <Ionicons name='logo-instagram' size={30} color={theme.foreground} />
-        </Link>
-        <Link href={contactPageUrl} target='_blank'>
-          <Ionicons name='open-outline' size={30} color={theme.foreground} />
-        </Link>
-      </View>
-
-      <View style={{ paddingHorizontal: 24, paddingVertical: 10, gap: 8 }}>
-        <Pressable
-          accessibilityRole='link'
-          onPress={() => openMaps(contactAddress)}
-          style={{ alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              color: theme.foreground,
-              textAlign: 'center',
-              textDecorationLine: 'underline',
-            }}
-          >
-            {contactAddress}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole='link'
-          onPress={() => openEmail(contactEmail)}
-          style={{ alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              color: theme.foreground,
-              textAlign: 'center',
-              textDecorationLine: 'underline',
-            }}
-          >
-            {contactEmail}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole='button'
-          onPress={() => openPhone(contactPhone)}
-          style={{ alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              color: theme.foreground,
-              textAlign: 'center',
-              textDecorationLine: 'underline',
-            }}
-          >
-            {contactPhone}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole='link'
-          onPress={() => Linking.openURL(contactPageUrl)}
-          style={{ alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              color: theme.foreground,
-              textAlign: 'center',
-              textDecorationLine: 'underline',
-            }}
-          >
-            {contactPageUrl}
-          </Text>
-        </Pressable>
       </View>
 
       <View>
@@ -214,22 +121,69 @@ export function FooterSection() {
 
 const styles = StyleSheet.create({
   footer: {
-    paddingTop: 48,
-    paddingBottom: 32,
-    paddingHorizontal: 24,
-    borderTopWidth: 1,
-    borderTopColor: theme.primary,
-    gap: 12,
+    paddingTop: 10,
+    paddingBottom: 28,
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  footerCard: {
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    backgroundColor: theme.card,
+    padding: 14,
+  },
+  footerTitle: {
+    color: theme.foreground,
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  footerSubtitle: {
+    color: theme.mutedForeground,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  socialButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.popover,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+  },
+  infoList: {
+    gap: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  infoText: {
+    color: theme.foreground,
+    fontSize: 13,
+    lineHeight: 18,
+    flex: 1,
   },
   footerDivider: {
     height: 1,
-    backgroundColor: theme.primary,
-    marginVertical: 16,
+    backgroundColor: theme.border,
+    marginVertical: 10,
   },
 
   footerCopyright: {
     fontSize: 12,
-    color: '#6b7280',
+    color: theme.mutedForeground,
     textAlign: 'center',
     lineHeight: 18,
     fontWeight: '500',

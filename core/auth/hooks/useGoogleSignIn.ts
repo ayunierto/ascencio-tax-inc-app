@@ -4,6 +4,7 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import { isAxiosError } from 'axios';
+import { useMobileConfigStore } from '@/core/config/store/useMobileConfigStore';
 import { useAuthStore } from '../store/useAuthStore';
 
 export const useGoogleSignIn = () => {
@@ -11,10 +12,18 @@ export const useGoogleSignIn = () => {
   const [error, setError] = useState<Error | null>(null);
   const [isReady, setIsReady] = useState(false);
   const { signInWithGoogle } = useAuthStore();
+  const loadMobileConfig = useMobileConfigStore((state) => state.loadConfig);
+  const googleWebClientId = useMobileConfigStore(
+    (state) => state.config?.googleWebClientId,
+  );
+
+  useEffect(() => {
+    void loadMobileConfig();
+  }, [loadMobileConfig]);
 
   useEffect(() => {
     // Configurar Google Sign-In
-    const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+    const webClientId = googleWebClientId?.trim();
 
     if (webClientId) {
       GoogleSignin.configure({
@@ -23,13 +32,17 @@ export const useGoogleSignIn = () => {
       });
       setIsReady(true);
     } else {
-      console.warn('EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID no está configurado');
+      console.warn('googleWebClientId no está configurado en mobile-config');
       setIsReady(false);
     }
-  }, []);
+  }, [googleWebClientId]);
 
   const signInWithGoogleAsync = async () => {
     try {
+      if (!isReady) {
+        throw new Error('googleSignInNotReady');
+      }
+
       setIsLoading(true);
       setError(null);
 

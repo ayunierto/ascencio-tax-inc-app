@@ -33,7 +33,7 @@ export default function AccountScreen() {
   const { countryCodes } = useCountryCodes();
   const [callingCode, setCallingCode] = useState<string | undefined>();
   const { t } = useTranslation();
-  const { location } = useIPGeolocation();
+  const { callingCode: detectedCallingCode } = useIPGeolocation();
 
   const {
     control,
@@ -51,11 +51,11 @@ export default function AccountScreen() {
   });
 
   useEffect(() => {
-    if (location && !('error' in location)) {
-      setCallingCode(`+${location.location.calling_code}`);
-      setValue('countryCode', `+${location.location.calling_code}`);
+    if (detectedCallingCode) {
+      setCallingCode(detectedCallingCode);
+      setValue('countryCode', detectedCallingCode);
     }
-  }, [location, setValue]);
+  }, [detectedCallingCode, setValue]);
 
   const updateProfile = useUpdateProfileMutation();
 

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "google:sha": "node ./scripts/google-signin/collect-android-fingerprints.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",

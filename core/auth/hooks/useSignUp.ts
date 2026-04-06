@@ -21,17 +21,9 @@ export interface ValidationError {
 }
 
 export const useSignUp = () => {
-  const { location } = useIPGeolocation();
+  const { callingCode: detectedCallingCode } = useIPGeolocation();
   const [callingCode, setCallingCode] = useState<string | undefined>();
   const { signUp } = useAuthStore();
-
-  // Set the initial calling code based on the user's location
-  useEffect(() => {
-    if (location && !('error' in location)) {
-      setCallingCode(`+${location.location.calling_code}`);
-      setValue('countryCode', `+${location.location.calling_code}`);
-    }
-  }, [location]);
 
   const {
     control,
@@ -51,6 +43,14 @@ export const useSignUp = () => {
       // countryCode: callingCode,
     },
   });
+
+  // Set the initial calling code based on the user's location
+  useEffect(() => {
+    if (detectedCallingCode) {
+      setCallingCode(detectedCallingCode);
+      setValue('countryCode', detectedCallingCode);
+    }
+  }, [detectedCallingCode, setValue]);
 
   const mutation = useMutation<
     SignUpResponse,

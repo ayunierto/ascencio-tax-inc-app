@@ -1,3 +1,5 @@
+import { getCloudinaryCloudName } from '@/core/config/store/useMobileConfigStore';
+
 const TEMP_RECEIPT_FOLDER_REGEX = /(^|\/)temp_(files|receipts)\//;
 
 const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
@@ -16,7 +18,7 @@ export const resolveReceiptImageUrl = (value?: string): string | undefined => {
   if (!value) return undefined;
   if (isHttpUrl(value)) return value;
 
-  const cloudinaryCloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const cloudinaryCloudName = getCloudinaryCloudName();
   if (!cloudinaryCloudName) {
     return undefined;
   }

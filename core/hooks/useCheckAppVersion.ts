@@ -1,7 +1,8 @@
 import * as Application from 'expo-application';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import { api } from '../api/api';
+import { useMobileConfigStore } from '../config/store/useMobileConfigStore';
 
 const IOS_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
 const ANDROID_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
@@ -21,8 +22,24 @@ export function useCheckAppVersion() {
   const [checking, setChecking] = useState(true);
   const [updateRequired, setUpdateRequired] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const loadMobileConfig = useMobileConfigStore((state) => state.loadConfig);
+  const mobileConfig = useMobileConfigStore((state) => state.config);
 
-  const checkVersion = async () => {
+  const resolvedStoreUrls = useMemo(
+    () => ({
+      ios:
+        mobileConfig?.appStoreUrl?.trim() ||
+        IOS_STORE_URL ||
+        'https://apps.apple.com/',
+      android:
+        mobileConfig?.playStoreUrl?.trim() ||
+        ANDROID_STORE_URL ||
+        'https://play.google.com/store/apps/details?id=com.ayunierto.ascenciotaxinc',
+    }),
+    [mobileConfig?.appStoreUrl, mobileConfig?.playStoreUrl],
+  );
+
+  const checkVersion = useCallback(async () => {
     try {
       const platform = Platform.OS;
       const { data } = await api.get(`/app/version?platform=${platform}`);
@@ -39,9 +56,8 @@ export function useCheckAppVersion() {
 
       const storeUrl =
         Platform.OS === 'ios'
-          ? IOS_STORE_URL
-          : ANDROID_STORE_URL ||
-            'https://play.google.com/store/apps/details?id=com.ayunierto.ascenciotaxinc';
+          ? resolvedStoreUrls.ios
+          : resolvedStoreUrls.android;
 
       const releaseNotesText = data.releaseNotes
         ? `\n\n${String(data.releaseNotes)}`
@@ -92,11 +108,16 @@ export function useCheckAppVersion() {
     } finally {
       setChecking(false);
     }
-  };
+  }, [resolvedStoreUrls.android, resolvedStoreUrls.ios]);
 
   useEffect(() => {
-    checkVersion();
-  }, []);
+    const initialize = async () => {
+      await loadMobileConfig();
+      await checkVersion();
+    };
+
+    void initialize();
+  }, [checkVersion, loadMobileConfig]);
 
   return {
     checking,

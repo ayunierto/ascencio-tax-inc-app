@@ -1266,7 +1266,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                       ref={imageUploaderRef}
                       value={value}
                       onChange={(imageRef) =>
-                        onChange(resolveStoredImageUrl(imageRef))
+                        onChange(resolveStoredImageUrl(imageRef) ?? imageRef)
                       }
                       folder='temp_files'
                       onUploadingChange={setIsLogoUploading}

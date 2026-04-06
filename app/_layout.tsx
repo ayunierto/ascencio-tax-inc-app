@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Toaster } from 'sonner-native';
 import { SubscriptionProvider } from '@/core/subscription/SubscriptionContext';
+import { useMobileConfigStore } from '@/core/config/store/useMobileConfigStore';
 
 import '../i18n/index';
 
@@ -39,6 +40,12 @@ export const unstable_settings = {
 // const REVENUE_CAT_ANDROID_KEY = 'goog_YOUR_ANDROID_KEY_HERE';
 
 export default function RootLayout() {
+  const loadMobileConfig = useMobileConfigStore((state) => state.loadConfig);
+
+  useEffect(() => {
+    void loadMobileConfig();
+  }, [loadMobileConfig]);
+
   useEffect(() => {
     if (Platform.OS !== 'android') {
       return;

@@ -8,6 +8,7 @@ import {
   ImageSource,
 } from './types';
 import { cloudinaryStorageProvider } from './cloudinaryStorage';
+import { useMobileConfigStore } from '@/core/config/store/useMobileConfigStore';
 
 const RECEIPT_FOLDER_REGEX = /(^|\/)temp_receipts(\/|$)/;
 
@@ -68,6 +69,11 @@ export const useImageHandlerController = ({
   onReplaceTempDeleteError,
   onCleanupError,
 }: UseImageHandlerControllerArgs): ImageHandlerContextValue => {
+  const loadMobileConfig = useMobileConfigStore((state) => state.loadConfig);
+  const cloudinaryCloudName = useMobileConfigStore(
+    (state) => state.config?.cloudinaryCloudName,
+  );
+
   const [uploading, setUploading] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
@@ -86,11 +92,15 @@ export const useImageHandlerController = ({
   }, [onCleanupError]);
 
   useEffect(() => {
+    void loadMobileConfig();
+  }, [loadMobileConfig]);
+
+  useEffect(() => {
     setLocalImageUrl(cloudinaryStorageProvider.resolveUrl(value));
     if (value && !cloudinaryStorageProvider.isRemoteUrl(value)) {
       tempImageRef.current = value;
     }
-  }, [value]);
+  }, [value, cloudinaryCloudName]);
 
   useEffect(() => {
     return () => {

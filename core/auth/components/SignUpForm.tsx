@@ -1,16 +1,17 @@
-import { useMemo, useRef } from 'react';
-import { FlatList, TextInput, View } from 'react-native';
+import { useRef } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { toast } from 'sonner-native';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { useCountryCodes } from '@/core/hooks';
-import { useSignUp } from '../hooks';
-import { SignUpRequest, parseZodIssueMessage } from '@ascencio/shared';
-import { Button, ButtonText } from '@/components/ui/Button';
+import { useGoogleSignIn, useSignUp } from '../hooks';
+import { SignUpRequest } from '@ascencio/shared';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
 import { ErrorBox } from './ErrorBox';
 import { Input } from '@/components/ui/Input';
+import { ThemedText } from '@/components/ui/ThemedText';
 import {
   Select,
   SelectContent,
@@ -19,12 +20,18 @@ import {
 } from '@/components/ui/Select';
 import { authStyles } from '../styles/authStyles';
 import { getErrorMessage } from '@/utils/getErrorMessage';
+import { theme } from '@/components/ui/theme';
 
 export default function SignUpForm() {
   const { t } = useTranslation();
   const { countryCodes } = useCountryCodes();
 
   const { errors, control, handleSubmit, signUp, setError } = useSignUp();
+  const {
+    signInWithGoogle,
+    isLoading: isGoogleLoading,
+    isReady: isGoogleReady,
+  } = useGoogleSignIn();
 
   // Refs for input navigation
   const lastNameRef = useRef<TextInput>(null);
@@ -58,10 +65,41 @@ export default function SignUpForm() {
     });
   };
 
+  const handleGoogleSignUp = async () => {
+    try {
+      await signInWithGoogle();
+      toast.success(t('signUpSuccess'));
+      router.replace('/(app)/(dashboard)');
+    } catch (error: unknown) {
+      const errorMessageKey =
+        error instanceof Error ? error.message : 'googleSignInError';
+      toast.error(t(errorMessageKey));
+      console.error('Google Sign-Up Error:', error);
+    }
+  };
+
   return (
     <>
       <View style={authStyles.fieldsContainer}>
         <ErrorBox message={getErrorMessage(errors.root)} />
+
+        <Button
+          variant='outline'
+          disabled={isGoogleLoading || signUp.isPending || !isGoogleReady}
+          isLoading={isGoogleLoading || signUp.isPending}
+          onPress={handleGoogleSignUp}
+        >
+          <ButtonIcon name='logo-google' />
+          <ButtonText>{t('signUpWithGoogle')}</ButtonText>
+        </Button>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.dividerLine} />
+          <ThemedText style={styles.dividerText}>
+            {t('orContinueWith')}
+          </ThemedText>
+          <View style={styles.dividerLine} />
+        </View>
 
         <Controller
           control={control}
@@ -209,3 +247,21 @@ export default function SignUpForm() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.border,
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    fontSize: 14,
+    color: theme.muted,
+  },
+});

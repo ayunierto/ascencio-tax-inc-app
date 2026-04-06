@@ -1,9 +1,9 @@
 import { UploadSignaturePayload } from '@ascencio/shared';
 import { api } from '@/core/api/api';
+import { getCloudinaryCloudName } from '@/core/config/store/useMobileConfigStore';
 import { UploadResult } from './types';
 import { ImageStorageProvider } from './storage-provider';
 
-const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const TEMP_IMAGE_FOLDER_REGEX = /(^|\/)temp_(files|receipts)(\/|$)/;
 
 export const isRemoteUrl = (value?: string): boolean =>
@@ -12,8 +12,11 @@ export const isRemoteUrl = (value?: string): boolean =>
 export const resolveStoredImageUrl = (value?: string): string | undefined => {
   if (!value) return undefined;
   if (isRemoteUrl(value)) return value;
-  if (!CLOUDINARY_CLOUD_NAME) return undefined;
-  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${value}`;
+
+  const cloudinaryCloudName = getCloudinaryCloudName();
+  if (!cloudinaryCloudName) return undefined;
+
+  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${value}`;
 };
 
 export const extractPublicIdFromCloudinaryUrl = (
