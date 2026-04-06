@@ -14,3 +14,5 @@
 - si necesitamos gestos de estado usa zustand
 - para estilos usa chadcn ui, si necesitamos un componente que no tenemos en nuestro codigo lo instalamos medienta la cli de chadcn nunca creando codigo desde cero para garantizar la compatibilidad con las versiones usadas.
 - verifica siempre que el codigo no este deprecado, si es asi actualizalo a la ultima version estable o verifica porque ha siedo cambiado.
+- valorar mucho siempre el manejo de errores correctamente segun plataforma o framework que estemos usando, no solo para mostrar un mensaje al usuario sino para evitar que el error se propague y cause problemas mayores.
+- siempre que se necesite una nueva funcionalidad o componente, primero verifica si ya existe en el proyecto.

@@ -112,13 +112,13 @@ export default function AppLayout() {
       /> */}
 
       <Drawer.Screen
-        name='settings'
+        name='contact'
         options={{
-          drawerLabel: t('settings'),
-          title: t('settings'),
+          drawerLabel: t('contact'),
+          title: t('contact'),
           drawerIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'settings' : 'settings-outline'}
+              name={focused ? 'chatbubble' : 'chatbubble-outline'}
               size={size}
               color={color}
             />
@@ -127,13 +127,13 @@ export default function AppLayout() {
       />
 
       <Drawer.Screen
-        name='contact'
+        name='settings'
         options={{
-          drawerLabel: t('contact'),
-          title: t('contact'),
+          drawerLabel: t('settings'),
+          title: t('settings'),
           drawerIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'chatbubble' : 'chatbubble-outline'}
+              name={focused ? 'settings' : 'settings-outline'}
               size={size}
               color={color}
             />
