@@ -176,6 +176,13 @@
 
   "accountCreated": "¡Bienvenido! Cuenta creada",
   "accountCreatedDescription": "¡Notamos que es tu primera vez aquí. Tu cuenta ha sido creada con éxito!",
+
+  "readMore": "Leer más",
+
+  "select": "Seleccionar",
+  "details": "Detalles",
+  "review": "Revisar",
+
   "and": "y",
   "loading": "Cargando...",
   "error": "Error",

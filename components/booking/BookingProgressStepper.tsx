@@ -2,6 +2,7 @@ import { theme } from '@/components/ui/theme';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 interface Step {
@@ -16,15 +17,16 @@ interface BookingProgressStepperProps {
 }
 
 const DEFAULT_STEPS: Step[] = [
-  { number: 1, label: 'Select', icon: 'calendar-outline' },
-  { number: 2, label: 'Details', icon: 'clipboard-outline' },
-  { number: 3, label: 'Review', icon: 'checkmark-circle-outline' },
+  { number: 1, label: 'select', icon: 'calendar-outline' },
+  { number: 2, label: 'details', icon: 'clipboard-outline' },
+  { number: 3, label: 'review', icon: 'checkmark-circle-outline' },
 ];
 
 export const BookingProgressStepper = ({
   currentStep,
   steps = DEFAULT_STEPS,
 }: BookingProgressStepperProps) => {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -61,7 +63,7 @@ export const BookingProgressStepper = ({
               >
                 {isCompleted ? (
                   <Ionicons
-                    name="checkmark"
+                    name='checkmark'
                     size={24}
                     color={theme.background}
                   />
@@ -69,7 +71,9 @@ export const BookingProgressStepper = ({
                   <Ionicons
                     name={step.icon}
                     size={20}
-                    color={isActive ? theme.primaryForeground : theme.mutedForeground}
+                    color={
+                      isActive ? theme.primaryForeground : theme.mutedForeground
+                    }
                   />
                 )}
               </View>
@@ -79,13 +83,14 @@ export const BookingProgressStepper = ({
                 style={{
                   fontSize: 11,
                   fontWeight: isActive || isCompleted ? '600' : '400',
-                  color: isActive || isCompleted
-                    ? theme.foreground
-                    : theme.mutedForeground,
+                  color:
+                    isActive || isCompleted
+                      ? theme.foreground
+                      : theme.mutedForeground,
                   textAlign: 'center',
                 }}
               >
-                {step.label}
+                {t(step.label)}
               </ThemedText>
             </View>
 

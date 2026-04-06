@@ -180,6 +180,12 @@
   "accountCreated": "Welcome! Account Created",
   "accountCreatedDescription": "We noticed this is your first time here. Your account has been created successfully!",
 
+  "readMore": "Read More",
+
+  "select": "Select",
+  "details": "Details",
+  "review": "Review",
+
   "and": "and",
   "loading": "Loading...",
   "error": "Error",

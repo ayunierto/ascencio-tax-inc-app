@@ -6,6 +6,7 @@ import { Card, CardContent } from '../ui/Card';
 import { theme } from '../ui/theme';
 import { ThemedText } from '../ui/ThemedText';
 import { Service } from '@ascencio/shared/interfaces';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceCardProps {
   service: Service;
@@ -13,6 +14,7 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard = ({ service, selectService }: ServiceCardProps) => {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -103,7 +105,7 @@ export const ServiceCard = ({ service, selectService }: ServiceCardProps) => {
                   <Ionicons
                     size={16}
                     color={theme.mutedForeground}
-                    name="time-outline"
+                    name='time-outline'
                   />
                   <ThemedText
                     style={{ fontSize: 13, color: theme.mutedForeground }}
@@ -149,11 +151,11 @@ export const ServiceCard = ({ service, selectService }: ServiceCardProps) => {
               {/* Read More Button */}
               <Button
                 onPress={() => selectService(service)}
-                size="sm"
+                size='sm'
                 style={{ marginTop: 8 }}
-                variant="outline"
+                variant='outline'
               >
-                <ButtonText>Read More</ButtonText>
+                <ButtonText>{t('readMore')}</ButtonText>
               </Button>
             </View>
           </View>
