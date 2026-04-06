@@ -5,6 +5,10 @@ node_modules/
 yarn-error.log
 
 
+
+credentials.json
+
+
 # Expo
 .expo/
 dist/

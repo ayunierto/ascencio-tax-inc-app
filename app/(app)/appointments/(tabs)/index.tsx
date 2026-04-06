@@ -3,14 +3,14 @@ import React from 'react';
 import { FlatList, RefreshControl, View, StyleSheet } from 'react-native';
 import { toast } from 'sonner-native';
 import { useTranslation } from 'react-i18next';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppointmentCard } from '@/components/bookings/AppointmentCard';
+import { AppointmentsBottomAction } from '@/components/bookings/AppointmentsBottomAction';
 import { AppointmentListSkeleton } from '@/components/bookings/AppointmentCardSkeleton';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
-import { theme, CustomHeader, HeaderButton } from '@/components/ui';
+import { theme } from '@/components/ui';
+import { DrawerPageHeader } from '@/components/ui/DrawerPageHeader';
 import { ThemedText } from '@/components/themed-text';
 import { cancelAppointment } from '@/core/appointments/actions/cancel-appointment.action';
 import { getUserAppointments } from '@/core/appointments/actions/get-user-appointments.action';
@@ -23,7 +23,6 @@ import { AxiosError } from 'axios';
 export default function AppointmentsUpcomingTabScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const queryClient = useQueryClient();
 
   const {
@@ -76,16 +75,7 @@ export default function AppointmentsUpcomingTabScreen() {
   if (isError) {
     return (
       <View style={styles.container}>
-        <CustomHeader
-          title={t('appointments')}
-          left={
-            <HeaderButton
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <Ionicons name='menu' size={24} color='#ffffff' />
-            </HeaderButton>
-          }
-        />
+        <DrawerPageHeader title={t('appointments')} />
         <EmptyContent
           title={t('error')}
           subtitle={
@@ -106,16 +96,7 @@ export default function AppointmentsUpcomingTabScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <CustomHeader
-          title={t('appointments')}
-          left={
-            <HeaderButton
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <Ionicons name='menu' size={24} color='#ffffff' />
-            </HeaderButton>
-          }
-        />
+        <DrawerPageHeader title={t('appointments')} />
         <AppointmentListSkeleton />
       </View>
     );
@@ -124,46 +105,26 @@ export default function AppointmentsUpcomingTabScreen() {
   if (!pendingAppointments || pendingAppointments.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <CustomHeader
-          title={t('appointments')}
-          left={
-            <HeaderButton
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <Ionicons name='menu' size={24} color='#ffffff' />
-            </HeaderButton>
-          }
-        />
+        <DrawerPageHeader title={t('appointments')} />
         <EmptyContent
           title={t('noAppointments')}
           subtitle={t('noAppointmentsDescription')}
           icon='calendar-outline'
         />
-        <View style={styles.buttonContainer}>
-          <Button
-            onPress={handleBookNew}
-            style={[styles.buttonSpacing, { marginBottom: insets.bottom + 8 }]}
-          >
+        <AppointmentsBottomAction bottomInset={insets.bottom}>
+          <Button onPress={handleBookNew}>
             <ButtonIcon name='add-circle-outline' />
             <ButtonText>{t('bookAppointment')}</ButtonText>
           </Button>
-        </View>
+        </AppointmentsBottomAction>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <CustomHeader
-        title={t('appointments')}
-        left={
-          <HeaderButton
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          >
-            <Ionicons name='menu' size={24} color='#ffffff' />
-          </HeaderButton>
-        }
-      />
+      <DrawerPageHeader title={t('appointments')} />
+
       <View style={styles.header}>
         <ThemedText style={styles.headerTitle}>
           {t('upcomingAppointments')}
@@ -193,12 +154,12 @@ export default function AppointmentsUpcomingTabScreen() {
         }
       />
 
-      <View style={[styles.fab, { bottom: insets.bottom + 16 }]}>
+      <AppointmentsBottomAction bottomInset={insets.bottom}>
         <Button onPress={handleBookNew}>
           <ButtonIcon name='add-circle-outline' />
           <ButtonText>{t('bookNew')}</ButtonText>
         </Button>
-      </View>
+      </AppointmentsBottomAction>
     </View>
   );
 }
@@ -227,18 +188,6 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
     backgroundColor: theme.background,
-  },
-  buttonContainer: {
-    marginTop: 24,
-    paddingHorizontal: 16,
-  },
-  buttonSpacing: {
-    marginBottom: 8,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 16,
-    left: 16,
+    paddingBottom: 100,
   },
 });

@@ -134,6 +134,21 @@ export default function AppLayout() {
           ),
         }}
       />
+
+      <Drawer.Screen
+        name='contact'
+        options={{
+          drawerLabel: t('contact'),
+          title: t('contact'),
+          drawerIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? 'chatbubble' : 'chatbubble-outline'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Drawer>
   );
 }

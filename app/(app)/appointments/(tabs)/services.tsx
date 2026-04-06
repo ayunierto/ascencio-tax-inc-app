@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { ServiceCard } from '@/components/home/ServiceCard';
-import { ServiceListSkeleton } from '@/components/home/ServiceCardSkeleton';
+import { ServiceCardSkeleton } from '@/components/home/ServiceCardSkeleton';
 import {
   theme,
   CustomHeader,
@@ -19,6 +19,13 @@ import { EmptyContent } from '@/core/components';
 import { useServices } from '@/core/services/hooks/useServices';
 import { Service } from '@ascencio/shared/interfaces';
 import { DrawerActions } from '@react-navigation/native';
+
+type ServiceListItem =
+  | Service
+  | {
+      id: string;
+      __skeleton: true;
+    };
 
 export default function AppointmentsServicesTabScreen() {
   const { t } = useTranslation();
@@ -34,6 +41,10 @@ export default function AppointmentsServicesTabScreen() {
     isRefetching,
   } = useServices();
 
+  const isLoadingServices = isPending && !servicesResponse;
+
+  const services = servicesResponse?.items ?? [];
+
   const selectService = (service: Service): void => {
     router.push({
       pathname: '/(app)/appointments/services/[id]',
@@ -41,34 +52,19 @@ export default function AppointmentsServicesTabScreen() {
     });
   };
 
-  const filteredServices = servicesResponse?.items.filter((service) =>
+  const filteredServices = services.filter((service) =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  if (isError)
-    return (
-      <EmptyContent
-        title={t('error')}
-        subtitle={error.response?.data.message || error.message}
-      />
-    );
+  const skeletonItems: ServiceListItem[] = [
+    { id: 'skeleton-1', __skeleton: true },
+    { id: 'skeleton-2', __skeleton: true },
+    { id: 'skeleton-3', __skeleton: true },
+  ];
 
-  if (isPending) return <ServiceListSkeleton />;
-
-  if (!servicesResponse || servicesResponse.items.length === 0) {
-    return (
-      <EmptyContent
-        title={t('noServicesTitle')}
-        subtitle={t('noServicesSubtitle')}
-        action={
-          <Button onPress={refetch}>
-            <ButtonIcon name='reload' />
-            {t('retry')}
-          </Button>
-        }
-      />
-    );
-  }
+  const listData: ServiceListItem[] = isLoadingServices
+    ? skeletonItems
+    : filteredServices;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -83,14 +79,20 @@ export default function AppointmentsServicesTabScreen() {
         }
       />
       <FlatList
-        data={filteredServices}
-        renderItem={({ item }) => (
-          <ServiceCard
-            key={item.id}
-            service={item}
-            selectService={selectService}
-          />
-        )}
+        data={listData}
+        renderItem={({ item }) => {
+          if ('__skeleton' in item) {
+            return <ServiceCardSkeleton />;
+          }
+
+          return (
+            <ServiceCard
+              key={item.id}
+              service={item}
+              selectService={selectService}
+            />
+          );
+        }}
         ListHeaderComponent={
           <Input
             placeholder={t('searchServices')}
@@ -103,10 +105,34 @@ export default function AppointmentsServicesTabScreen() {
           />
         }
         ListEmptyComponent={
-          <EmptyContent
-            title={t('noResultsFound')}
-            subtitle={t('tryAdjustingSearch')}
-          />
+          isError ? (
+            <EmptyContent
+              title={t('error')}
+              subtitle={error.response?.data.message || error.message}
+              action={
+                <Button onPress={refetch}>
+                  <ButtonIcon name='reload' />
+                  {t('retry')}
+                </Button>
+              }
+            />
+          ) : services.length === 0 ? (
+            <EmptyContent
+              title={t('noServicesTitle')}
+              subtitle={t('noServicesSubtitle')}
+              action={
+                <Button onPress={refetch}>
+                  <ButtonIcon name='reload' />
+                  {t('retry')}
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyContent
+              title={t('noResultsFound')}
+              subtitle={t('tryAdjustingSearch')}
+            />
+          )
         }
         contentContainerStyle={{
           padding: 10,

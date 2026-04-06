@@ -17,8 +17,9 @@ export default function ContactScreen() {
   const { t } = useTranslation();
 
   const address = '1219 St Clair Ave West Suite G15, Toronto, ON M6E 1B5';
-  const phone = '(416) 658-1208';
+  const phone = '(416) 658 1208';
   const email = 'ascenciotaxinc@gmail.com';
+  const contactPageUrl = 'https://www.ascenciotax.com/contact-us';
 
   const staff = [
     {
@@ -40,10 +41,10 @@ export default function ContactScreen() {
       whatsapp: '+14166581208',
     },
     {
-      name: 'Luciana Vega Villarreal',
+      name: 'Andrea Velasquez Ochoa',
       role: 'Administrative Assistant',
       image:
-        'https://static.wixstatic.com/media/5b9531_0f3807d717364c16b70e225399d95563~mv2.jpg',
+        'https://static.wixstatic.com/media/5b9531_93df9e8ed20f46bd97ceba5166d91d9d~mv2.jpeg',
       facebook: 'https://www.facebook.com/ascenciotaxinc',
       instagram: 'https://www.instagram.com/ascenciotax/',
       whatsapp: '+14166581208',
@@ -101,9 +102,9 @@ export default function ContactScreen() {
         <Pressable
           onPress={() => openPhone(phone)}
           style={styles.row}
-          accessibilityRole="button"
+          accessibilityRole='button'
         >
-          <Ionicons name="call" size={20} color={theme.foreground} />
+          <Ionicons name='call' size={20} color={theme.foreground} />
           <Text style={[styles.rowText, { color: theme.foreground }]}>
             {phone}
           </Text>
@@ -112,9 +113,9 @@ export default function ContactScreen() {
         <Pressable
           onPress={() => openEmail(email)}
           style={styles.row}
-          accessibilityRole="link"
+          accessibilityRole='link'
         >
-          <Ionicons name="mail" size={20} color={theme.foreground} />
+          <Ionicons name='mail' size={20} color={theme.foreground} />
           <Text style={[styles.rowText, { color: theme.foreground }]}>
             {email}
           </Text>
@@ -123,27 +124,30 @@ export default function ContactScreen() {
         <Pressable
           onPress={() => openMaps(address)}
           style={styles.row}
-          accessibilityRole="link"
+          accessibilityRole='link'
         >
-          <Ionicons name="location" size={20} color={theme.foreground} />
+          <Ionicons name='location' size={20} color={theme.foreground} />
           <Text style={[styles.rowText, { color: theme.foreground }]}>
             {address}
           </Text>
         </Pressable>
 
         <View style={styles.socialRow}>
-          <Link href="https://www.facebook.com/ascenciotaxinc" target="_blank">
-            <Ionicons name="logo-facebook" size={26} color={theme.foreground} />
+          <Link href='https://www.facebook.com/ascenciotaxinc' target='_blank'>
+            <Ionicons name='logo-facebook' size={26} color={theme.foreground} />
           </Link>
-          <Link href="https://www.instagram.com/ascenciotax/" target="_blank">
+          <Link href='https://www.instagram.com/ascenciotax/' target='_blank'>
             <Ionicons
-              name="logo-instagram"
+              name='logo-instagram'
               size={26}
               color={theme.foreground}
             />
           </Link>
-          <Link href="https://twitter.com/ascenciotax" target="_blank">
-            <Ionicons name="logo-twitter" size={26} color={theme.foreground} />
+          <Link href='https://wa.me/14166581208' target='_blank'>
+            <Ionicons name='logo-whatsapp' size={26} color={theme.foreground} />
+          </Link>
+          <Link href={contactPageUrl} target='_blank'>
+            <Ionicons name='open-outline' size={26} color={theme.foreground} />
           </Link>
         </View>
       </View>
@@ -168,21 +172,21 @@ export default function ContactScreen() {
               <View style={styles.memberActions}>
                 <Pressable onPress={() => Linking.openURL(m.facebook)}>
                   <Ionicons
-                    name="logo-facebook"
+                    name='logo-facebook'
                     size={20}
                     color={theme.foreground}
                   />
                 </Pressable>
                 <Pressable onPress={() => Linking.openURL(m.instagram)}>
                   <Ionicons
-                    name="logo-instagram"
+                    name='logo-instagram'
                     size={20}
                     color={theme.foreground}
                   />
                 </Pressable>
                 <Pressable onPress={() => openWhatsApp(m.whatsapp)}>
                   <Ionicons
-                    name="logo-whatsapp"
+                    name='logo-whatsapp'
                     size={20}
                     color={theme.foreground}
                   />

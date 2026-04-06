@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: theme.muted,
+    backgroundColor: theme.primary + '30',
     borderRadius: 10,
   },
   staffAvatar: {
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: theme.muted,
+    backgroundColor: theme.primary + '10',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'transparent',

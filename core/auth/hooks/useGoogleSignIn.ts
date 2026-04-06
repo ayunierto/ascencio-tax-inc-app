@@ -57,7 +57,6 @@ export const useGoogleSignIn = () => {
         errorMessageKey = 'googleSignInError';
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         errorMessageKey = 'googleSignInError';
-      } else if (err.code === statusCodes.DEVELOPER_ERROR) {
         errorMessageKey = 'googleSignInDeveloperError';
       } else if (isAxiosError(err) && !err.response) {
         errorMessageKey = 'networkConnectionError';

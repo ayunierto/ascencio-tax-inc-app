@@ -3,13 +3,13 @@ import React from 'react';
 import { FlatList, RefreshControl, View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
 
 import { AppointmentCard } from '@/components/bookings/AppointmentCard';
+import { AppointmentsBottomAction } from '@/components/bookings/AppointmentsBottomAction';
 import { AppointmentListSkeleton } from '@/components/bookings/AppointmentCardSkeleton';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
-import { theme, CustomHeader, HeaderButton } from '@/components/ui';
+import { theme } from '@/components/ui';
+import { DrawerPageHeader } from '@/components/ui/DrawerPageHeader';
 import { getUserAppointments } from '@/core/appointments/actions/get-user-appointments.action';
 import { Appointment } from '@/core/appointments/interfaces/appointmentResponse';
 import { EmptyContent } from '@/core/components';
@@ -20,7 +20,6 @@ import { AxiosError } from 'axios';
 export default function AppointmentsPastTabScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const {
     data: pastAppointments,
     isLoading,
@@ -45,16 +44,7 @@ export default function AppointmentsPastTabScreen() {
   if (isError) {
     return (
       <View style={styles.container}>
-        <CustomHeader
-          title={t('appointments')}
-          left={
-            <HeaderButton
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <Ionicons name='menu' size={24} color='#ffffff' />
-            </HeaderButton>
-          }
-        />
+        <DrawerPageHeader title={t('appointments')} />
         <EmptyContent
           title={t('error')}
           subtitle={
@@ -72,16 +62,7 @@ export default function AppointmentsPastTabScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <CustomHeader
-          title={t('appointments')}
-          left={
-            <HeaderButton
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <Ionicons name='menu' size={24} color='#ffffff' />
-            </HeaderButton>
-          }
-        />
+        <DrawerPageHeader title={t('appointments')} />
         <AppointmentListSkeleton />
       </View>
     );
@@ -90,33 +71,21 @@ export default function AppointmentsPastTabScreen() {
   if (!pastAppointments || pastAppointments.length === 0) {
     return (
       <View style={styles.container}>
-        <CustomHeader
-          title={t('appointments')}
-          left={
-            <HeaderButton
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <Ionicons name='menu' size={24} color='#ffffff' />
-            </HeaderButton>
-          }
-        />
+        <DrawerPageHeader title={t('appointments')} />
+
         <View style={styles.emptyContainer}>
           <EmptyContent
             title={t('noPastAppointments')}
             subtitle={t('noPastAppointmentsDescription')}
             icon='time-outline'
           />
-          <View
-            style={[
-              styles.buttonContainer,
-              { marginBottom: insets.bottom + 8 },
-            ]}
-          >
+
+          <AppointmentsBottomAction bottomInset={insets.bottom}>
             <Button onPress={handleBookNew}>
               <ButtonIcon name='add-circle-outline' />
               <ButtonText>{t('bookAppointment')}</ButtonText>
             </Button>
-          </View>
+          </AppointmentsBottomAction>
         </View>
       </View>
     );
@@ -124,16 +93,8 @@ export default function AppointmentsPastTabScreen() {
 
   return (
     <View style={styles.container}>
-      <CustomHeader
-        title={t('appointments')}
-        left={
-          <HeaderButton
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          >
-            <Ionicons name='menu' size={24} color='#ffffff' />
-          </HeaderButton>
-        }
-      />
+      <DrawerPageHeader title={t('appointments')} />
+
       <FlatList
         data={pastAppointments}
         keyExtractor={(item) => item.id}
@@ -168,8 +129,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-  },
-  buttonContainer: {
-    marginTop: 24,
+    paddingBottom: 100,
   },
 });

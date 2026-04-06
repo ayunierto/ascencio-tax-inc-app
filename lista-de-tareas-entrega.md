@@ -1,9 +1,11 @@
 # Listas de tareas para entregar la app
 
 ## Tareas para entregar la app
+
 Crear proyecto en Firebase Console y configurar la app para usar Firebase Authentication.
 
 ## Tareas post-producción (Android / iOS)
+
 - Generar release keystore y conservarlo seguro.
 - Obtener SHA-1 y SHA-256 del certificado de release.
 - Registrar SHA-1/SHA-256 en Firebase Console (app Android).
@@ -18,3 +20,4 @@ Crear proyecto en Firebase Console y configurar la app para usar Firebase Authen
 - Probar flujos de login en dispositivos reales (debug y release).
 - Verificar permisos y privacidad antes de publicar.
 - Publicar en Play Store / App Store y monitorizar errores.
+- Crear proyecto de firebase en la cuenta de la empresa y transferir la propiedad del proyecto a la cuenta de la empresa.

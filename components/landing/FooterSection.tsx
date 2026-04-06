@@ -6,6 +6,11 @@ import { Link } from 'expo-router';
 
 export function FooterSection() {
   const { t } = useTranslation();
+  const contactAddress =
+    '1219 St Clair Ave West Suite G15, Toronto, ON M6E 1B5';
+  const contactEmail = 'ascenciotaxinc@gmail.com';
+  const contactPhone = '(416) 658 1208';
+  const contactPageUrl = 'https://www.ascenciotax.com/contact-us';
 
   const openMaps = (address: string) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -119,23 +124,21 @@ export function FooterSection() {
           justifyContent: 'center',
         }}
       >
-        <Link href='https://www.facebook.com/ascenciotax' target='_blank'>
+        <Link href='https://www.facebook.com/ascenciotaxinc' target='_blank'>
           <Ionicons name='logo-facebook' size={30} color={theme.foreground} />
-        </Link>
-        <Link href='https://twitter.com/ascenciotax' target='_blank'>
-          <Ionicons name='logo-twitter' size={30} color={theme.foreground} />
         </Link>
         <Link href='https://www.instagram.com/ascenciotax/' target='_blank'>
           <Ionicons name='logo-instagram' size={30} color={theme.foreground} />
+        </Link>
+        <Link href={contactPageUrl} target='_blank'>
+          <Ionicons name='open-outline' size={30} color={theme.foreground} />
         </Link>
       </View>
 
       <View style={{ paddingHorizontal: 24, paddingVertical: 10, gap: 8 }}>
         <Pressable
           accessibilityRole='link'
-          onPress={() =>
-            openMaps('1219 St Clair Ave West Suite G15, Toronto, ON M6E 1B5')
-          }
+          onPress={() => openMaps(contactAddress)}
           style={{ alignItems: 'center' }}
         >
           <Text
@@ -145,13 +148,13 @@ export function FooterSection() {
               textDecorationLine: 'underline',
             }}
           >
-            1219 St Clair Ave West Suite G15, Toronto, ON M6E 1B5
+            {contactAddress}
           </Text>
         </Pressable>
 
         <Pressable
           accessibilityRole='link'
-          onPress={() => openEmail('ascenciotaxinc@gmail.com')}
+          onPress={() => openEmail(contactEmail)}
           style={{ alignItems: 'center' }}
         >
           <Text
@@ -161,13 +164,13 @@ export function FooterSection() {
               textDecorationLine: 'underline',
             }}
           >
-            ascenciotaxinc@gmail.com
+            {contactEmail}
           </Text>
         </Pressable>
 
         <Pressable
           accessibilityRole='button'
-          onPress={() => openPhone('(416) 658-1208')}
+          onPress={() => openPhone(contactPhone)}
           style={{ alignItems: 'center' }}
         >
           <Text
@@ -177,7 +180,23 @@ export function FooterSection() {
               textDecorationLine: 'underline',
             }}
           >
-            (416) 658-1208
+            {contactPhone}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole='link'
+          onPress={() => Linking.openURL(contactPageUrl)}
+          style={{ alignItems: 'center' }}
+        >
+          <Text
+            style={{
+              color: theme.foreground,
+              textAlign: 'center',
+              textDecorationLine: 'underline',
+            }}
+          >
+            {contactPageUrl}
           </Text>
         </Pressable>
       </View>
