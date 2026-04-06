@@ -1,5 +1,3 @@
-import { Redirect } from 'expo-router';
+import ContactScreen from '../(public)/contact';
 
-export default function ContactScreen() {
-  return <Redirect href='/(public)/contact' />;
-}
+export default ContactScreen;

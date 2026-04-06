@@ -210,7 +210,6 @@
   "updateSuccess": "Actualizado con éxito.",
   "resourceNotFound": "Recurso no encontrado.",
 
-  "dashboard": "Dashboard",
   "expenses": "Gastos",
   "invoices": "Facturas",
   "appointments": "Citas",
@@ -674,7 +673,7 @@
   "logOut": "Cerrar sesión",
   "account": "Cuenta",
   "termsOfUse": "Términos de uso",
-  "panel": "Panel",
+  "dashboard": "Dashboard",
   "scanning": "Escaneando...",
 
   "appStore": "App Store",

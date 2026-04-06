@@ -38,7 +38,7 @@ export function FooterSection() {
 
   return (
     <View style={styles.footer}>
-      <View
+      {/* <View
         style={{
           flex: 1,
           flexDirection: 'row',
@@ -76,9 +76,9 @@ export function FooterSection() {
             </Text>
           </View>
         </View>
-      </View>
+      </View> */}
 
-      <View
+      {/* <View
         style={{
           flex: 1,
           flexDirection: 'row',
@@ -115,7 +115,7 @@ export function FooterSection() {
             </Text>
           </View>
         </View>
-      </View>
+      </View> */}
 
       <View
         style={{

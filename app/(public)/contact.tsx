@@ -8,10 +8,10 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../components/ui';
+import { CustomHeader, HeaderButton, theme } from '../../components/ui';
 
 export default function ContactScreen() {
   const { t } = useTranslation();
@@ -83,204 +83,356 @@ export default function ContactScreen() {
     );
   };
 
+  const openUrl = (url: string) => {
+    Linking.openURL(url).catch((err) =>
+      console.error('Failed to open url', err),
+    );
+  };
+
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/');
+  };
+
   return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.container,
-        { backgroundColor: theme.background },
-      ]}
-    >
-      <Text style={[styles.description, { color: theme.foreground }]}>
-        {t('contactPageSubtitle')}
-      </Text>
+    <View style={styles.page}>
+      <CustomHeader
+        title={t('contact')}
+        left={
+          <HeaderButton onPress={goBack}>
+            <Ionicons name='arrow-back' size={22} color={theme.foreground} />
+          </HeaderButton>
+        }
+        right={
+          <HeaderButton onPress={() => openUrl(contactPageUrl)}>
+            <Ionicons name='open-outline' size={22} color={theme.primary} />
+          </HeaderButton>
+        }
+      />
 
-      <View style={styles.card}>
-        <Text style={[styles.cardTitle, { color: theme.primary }]}>
-          {t('letsChat')}
-        </Text>
-
-        <Pressable
-          onPress={() => openPhone(phone)}
-          style={styles.row}
-          accessibilityRole='button'
-        >
-          <Ionicons name='call' size={20} color={theme.foreground} />
-          <Text style={[styles.rowText, { color: theme.foreground }]}>
-            {phone}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroCard}>
+          <Text style={[styles.heroTitle, { color: theme.foreground }]}>
+            {t('letsChat')}
           </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => openEmail(email)}
-          style={styles.row}
-          accessibilityRole='link'
-        >
-          <Ionicons name='mail' size={20} color={theme.foreground} />
-          <Text style={[styles.rowText, { color: theme.foreground }]}>
-            {email}
+          <Text style={[styles.description, { color: theme.muted }]}>
+            {t('contactPageSubtitle')}
           </Text>
-        </Pressable>
 
-        <Pressable
-          onPress={() => openMaps(address)}
-          style={styles.row}
-          accessibilityRole='link'
-        >
-          <Ionicons name='location' size={20} color={theme.foreground} />
-          <Text style={[styles.rowText, { color: theme.foreground }]}>
-            {address}
-          </Text>
-        </Pressable>
+          <View style={styles.quickActionsGrid}>
+            <Pressable
+              onPress={() => openPhone(phone)}
+              style={styles.quickAction}
+              accessibilityRole='button'
+            >
+              <Ionicons name='call-outline' size={18} color={theme.primary} />
+              <Text
+                style={[styles.quickActionText, { color: theme.foreground }]}
+              >
+                Call
+              </Text>
+            </Pressable>
 
-        <View style={styles.socialRow}>
-          <Link href='https://www.facebook.com/ascenciotaxinc' target='_blank'>
-            <Ionicons name='logo-facebook' size={26} color={theme.foreground} />
-          </Link>
-          <Link href='https://www.instagram.com/ascenciotax/' target='_blank'>
-            <Ionicons
-              name='logo-instagram'
-              size={26}
-              color={theme.foreground}
-            />
-          </Link>
-          <Link href='https://wa.me/14166581208' target='_blank'>
-            <Ionicons name='logo-whatsapp' size={26} color={theme.foreground} />
-          </Link>
-          <Link href={contactPageUrl} target='_blank'>
-            <Ionicons name='open-outline' size={26} color={theme.foreground} />
-          </Link>
+            <Pressable
+              onPress={() => openEmail(email)}
+              style={styles.quickAction}
+              accessibilityRole='button'
+            >
+              <Ionicons name='mail-outline' size={18} color={theme.primary} />
+              <Text
+                style={[styles.quickActionText, { color: theme.foreground }]}
+              >
+                Email
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => openWhatsApp('+14166581208')}
+              style={styles.quickAction}
+              accessibilityRole='button'
+            >
+              <Ionicons name='logo-whatsapp' size={18} color={theme.primary} />
+              <Text
+                style={[styles.quickActionText, { color: theme.foreground }]}
+              >
+                WhatsApp
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => openMaps(address)}
+              style={styles.quickAction}
+              accessibilityRole='button'
+            >
+              <Ionicons
+                name='navigate-outline'
+                size={18}
+                color={theme.primary}
+              />
+              <Text
+                style={[styles.quickActionText, { color: theme.foreground }]}
+              >
+                Mapa
+              </Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
 
-      {/* Team members */}
-      <View style={styles.teamContainer}>
-        <Text
-          style={[styles.cardTitle, { color: theme.primary, width: '100%' }]}
-        >
-          {t('ourTeam')}
-        </Text>
-        <View style={styles.teamGrid}>
+        <View style={styles.infoCard}>
+          <Pressable onPress={() => openPhone(phone)} style={styles.row}>
+            <Ionicons name='call' size={20} color={theme.foreground} />
+            <Text style={[styles.rowText, { color: theme.foreground }]}>
+              {phone}
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={() => openEmail(email)} style={styles.row}>
+            <Ionicons name='mail' size={20} color={theme.foreground} />
+            <Text style={[styles.rowText, { color: theme.foreground }]}>
+              {email}
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={() => openMaps(address)} style={styles.row}>
+            <Ionicons name='location' size={20} color={theme.foreground} />
+            <Text style={[styles.rowText, { color: theme.foreground }]}>
+              {address}
+            </Text>
+          </Pressable>
+
+          <View style={styles.socialRow}>
+            <Pressable
+              onPress={() => openUrl('https://www.facebook.com/ascenciotaxinc')}
+              style={styles.socialButton}
+              accessibilityRole='button'
+            >
+              <Ionicons
+                name='logo-facebook'
+                size={20}
+                color={theme.foreground}
+              />
+            </Pressable>
+            <Pressable
+              onPress={() => openUrl('https://www.instagram.com/ascenciotax/')}
+              style={styles.socialButton}
+              accessibilityRole='button'
+            >
+              <Ionicons
+                name='logo-instagram'
+                size={20}
+                color={theme.foreground}
+              />
+            </Pressable>
+            <Pressable
+              onPress={() => openUrl('https://wa.me/14166581208')}
+              style={styles.socialButton}
+              accessibilityRole='button'
+            >
+              <Ionicons
+                name='logo-whatsapp'
+                size={20}
+                color={theme.foreground}
+              />
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.teamContainer}>
+          <Text style={[styles.sectionTitle, { color: theme.primary }]}>
+            {t('ourTeam')}
+          </Text>
+
           {staff.map((m) => (
             <View key={m.name} style={styles.memberCard}>
               <Image source={{ uri: m.image }} style={styles.memberImage} />
-              <Text style={[styles.memberName, { color: theme.foreground }]}>
-                {m.name}
-              </Text>
-              <Text style={[styles.memberRole, { color: theme.muted }]}>
-                {m.role}
-              </Text>
-              <View style={styles.memberActions}>
-                <Pressable onPress={() => Linking.openURL(m.facebook)}>
-                  <Ionicons
-                    name='logo-facebook'
-                    size={20}
-                    color={theme.foreground}
-                  />
-                </Pressable>
-                <Pressable onPress={() => Linking.openURL(m.instagram)}>
-                  <Ionicons
-                    name='logo-instagram'
-                    size={20}
-                    color={theme.foreground}
-                  />
-                </Pressable>
-                <Pressable onPress={() => openWhatsApp(m.whatsapp)}>
-                  <Ionicons
-                    name='logo-whatsapp'
-                    size={20}
-                    color={theme.foreground}
-                  />
-                </Pressable>
+              <View style={styles.memberContent}>
+                <Text style={[styles.memberName, { color: theme.foreground }]}>
+                  {m.name}
+                </Text>
+                <Text style={[styles.memberRole, { color: theme.muted }]}>
+                  {m.role}
+                </Text>
+                <View style={styles.memberActions}>
+                  <Pressable
+                    onPress={() => openUrl(m.facebook)}
+                    style={styles.memberIconButton}
+                  >
+                    <Ionicons
+                      name='logo-facebook'
+                      size={18}
+                      color={theme.foreground}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => openUrl(m.instagram)}
+                    style={styles.memberIconButton}
+                  >
+                    <Ionicons
+                      name='logo-instagram'
+                      size={18}
+                      color={theme.foreground}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => openWhatsApp(m.whatsapp)}
+                    style={styles.memberIconButton}
+                  >
+                    <Ionicons
+                      name='logo-whatsapp'
+                      size={18}
+                      color={theme.foreground}
+                    />
+                  </Pressable>
+                </View>
               </View>
             </View>
           ))}
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  scroll: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
   container: {
-    padding: 20,
-    alignItems: 'center',
-    paddingTop: 40,
+    padding: 16,
+    gap: 14,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 16,
-    marginBottom: 20,
-    maxWidth: 680,
-  },
-  card: {
-    width: '100%',
+  heroCard: {
     padding: 18,
     borderRadius: theme.radius,
     backgroundColor: theme.card,
-    marginBottom: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
   },
-  cardTitle: {
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  quickAction: {
+    width: '48%',
+    minHeight: 44,
+    borderRadius: theme.radius,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    backgroundColor: theme.popover,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  infoCard: {
+    width: '100%',
+    padding: 16,
+    borderRadius: theme.radius,
+    backgroundColor: theme.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: 2,
+  },
+  teamContainer: {
+    width: '100%',
+    gap: 10,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
+    gap: 10,
+    paddingVertical: 10,
   },
   rowText: {
-    marginLeft: 8,
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
   },
   socialRow: {
     flexDirection: 'row',
-    gap: 18,
-    marginTop: 12,
-  },
-  backLink: {
+    gap: 10,
     marginTop: 8,
   },
-  teamContainer: {
-    width: '100%',
-    marginTop: 8,
-  },
-  teamGrid: {
-    width: '100%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'space-between',
+  socialButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.popover,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
   },
   memberCard: {
-    width: '48%',
+    width: '100%',
     padding: 12,
     borderRadius: theme.radius,
     backgroundColor: theme.popover,
-    alignItems: 'center',
-    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    flexDirection: 'row',
+    gap: 12,
   },
   memberImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 96,
-    marginBottom: 8,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+  },
+  memberContent: {
+    flex: 1,
   },
   memberName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
   memberRole: {
     fontSize: 13,
-    marginBottom: 8,
+    marginTop: 2,
+    marginBottom: 10,
   },
   memberActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
+  },
+  memberIconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
   },
 });

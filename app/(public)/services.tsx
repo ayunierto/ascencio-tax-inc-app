@@ -2,11 +2,40 @@ import React from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../components/ui';
+
+interface ServiceSectionItem {
+  key: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  description: string;
+}
 
 export default function ServicesScreen() {
   const { t } = useTranslation();
   const clients = t('servicesClientsList', { returnObjects: true }) as string[];
+
+  const serviceSections: ServiceSectionItem[] = [
+    {
+      key: 'business-registrations',
+      icon: 'business-outline',
+      title: t('servicesBusinessRegistrationsTitle'),
+      description: t('servicesBusinessRegistrationsDesc'),
+    },
+    {
+      key: 'reporting',
+      icon: 'document-text-outline',
+      title: t('servicesReportingTitle'),
+      description: t('servicesReportingDesc'),
+    },
+    {
+      key: 'benefits',
+      icon: 'shield-checkmark-outline',
+      title: t('servicesBenefitsTitle'),
+      description: t('servicesBenefitsDesc'),
+    },
+  ];
 
   const openBooking = () => {
     router.push('/(app)/appointments/(tabs)/services');
@@ -14,65 +43,77 @@ export default function ServicesScreen() {
 
   return (
     <ScrollView
+      style={styles.page}
       contentContainerStyle={[
         styles.container,
         { backgroundColor: theme.background },
       ]}
+      showsVerticalScrollIndicator={false}
     >
-      <Text style={[styles.title, { color: theme.foreground }]}>
-        {t('servicesPageTitle')}
-      </Text>
-      <Text style={[styles.lead, { color: theme.foreground }]}>
-        {t('servicesIntro')}
-      </Text>
-
-      <View style={styles.card}>
-        <Text style={[styles.cardTitle, { color: theme.primary }]}>
-          {t('servicesBusinessRegistrationsTitle')}
+      <View style={styles.heroCard}>
+        <View style={styles.heroBadge}>
+          <Ionicons name='sparkles-outline' size={14} color={theme.primary} />
+          <Text style={[styles.heroBadgeText, { color: theme.primary }]}>
+            Tax & Accounting
+          </Text>
+        </View>
+        <Text style={[styles.title, { color: theme.foreground }]}>
+          {t('servicesPageTitle')}
         </Text>
-        <Text style={[styles.cardText, { color: theme.foreground }]}>
-          {t('servicesBusinessRegistrationsDesc')}
+        <Text style={[styles.lead, { color: theme.mutedForeground }]}>
+          {t('servicesIntro')}
         </Text>
       </View>
 
+      {serviceSections.map((section) => (
+        <View key={section.key} style={styles.card}>
+          <View style={styles.cardTitleRow}>
+            <View style={styles.cardIconWrap}>
+              <Ionicons name={section.icon} size={18} color={theme.primary} />
+            </View>
+            <Text style={[styles.cardTitle, { color: theme.foreground }]}>
+              {section.title}
+            </Text>
+          </View>
+          <Text style={[styles.cardText, { color: theme.mutedForeground }]}>
+            {section.description}
+          </Text>
+        </View>
+      ))}
+
       <View style={styles.card}>
-        <Text style={[styles.cardTitle, { color: theme.primary }]}>
-          {t('servicesIncomeTaxTitle')}
-        </Text>
-        <Text style={[styles.cardText, { color: theme.foreground }]}>
+        <View style={styles.cardTitleRow}>
+          <View style={styles.cardIconWrap}>
+            <Ionicons
+              name='calculator-outline'
+              size={18}
+              color={theme.primary}
+            />
+          </View>
+          <Text style={[styles.cardTitle, { color: theme.foreground }]}>
+            {t('servicesIncomeTaxTitle')}
+          </Text>
+        </View>
+        <Text style={[styles.cardText, { color: theme.mutedForeground }]}>
           {t('servicesIncomeTaxDesc')}
         </Text>
-        <Text style={[styles.cardSubtitle, { color: theme.foreground }]}>
+        <Text style={[styles.cardSubtitle, { color: theme.primary }]}>
           {t('servicesWeService')}
         </Text>
         <View style={styles.list}>
           {clients.map((item: string) => (
-            <Text
-              key={item}
-              style={[styles.listItem, { color: theme.foreground }]}
-            >
-              • {item}
-            </Text>
+            <View key={item} style={styles.listItemRow}>
+              <Ionicons
+                name='checkmark-circle'
+                size={14}
+                color={theme.primary}
+              />
+              <Text style={[styles.listItem, { color: theme.foreground }]}>
+                {item}
+              </Text>
+            </View>
           ))}
         </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={[styles.cardTitle, { color: theme.primary }]}>
-          {t('servicesReportingTitle')}
-        </Text>
-        <Text style={[styles.cardText, { color: theme.foreground }]}>
-          {t('servicesReportingDesc')}
-        </Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={[styles.cardTitle, { color: theme.primary }]}>
-          {t('servicesBenefitsTitle')}
-        </Text>
-        <Text style={[styles.cardText, { color: theme.foreground }]}>
-          {t('servicesBenefitsDesc')}
-        </Text>
       </View>
 
       <Pressable
@@ -80,47 +121,93 @@ export default function ServicesScreen() {
         onPress={openBooking}
         accessibilityRole='button'
       >
-        <Text style={{ color: theme.primaryForeground }}>
-          {t('servicesCTA')}
-        </Text>
+        <Ionicons
+          name='calendar-outline'
+          size={18}
+          color={theme.primaryForeground}
+        />
+        <Text style={styles.ctaText}>{t('servicesCTA')}</Text>
       </Pressable>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
   container: {
-    padding: 20,
-    paddingTop: 36,
+    padding: 16,
+    gap: 12,
+  },
+  heroCard: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 20,
+    backgroundColor: theme.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+  },
+  heroBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    backgroundColor: theme.popover,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    marginBottom: 10,
+  },
+  heroBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   lead: {
-    fontSize: 16,
-    textAlign: 'center',
-    maxWidth: 720,
-    marginBottom: 18,
-    color: '#fff',
+    fontSize: 15,
+    lineHeight: 22,
   },
   card: {
     width: '100%',
     padding: 16,
-    borderRadius: theme.radius,
+    borderRadius: 16,
     backgroundColor: theme.card,
-    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+  },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  cardIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.popover,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
-    marginBottom: 6,
+    flex: 1,
   },
   cardText: {
     fontSize: 14,
-    marginBottom: 8,
+    lineHeight: 20,
+    marginBottom: 6,
   },
   cardSubtitle: {
     fontSize: 14,
@@ -129,21 +216,32 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   list: {
-    marginLeft: 6,
+    marginTop: 2,
+    gap: 6,
+  },
+  listItemRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
   },
   listItem: {
     fontSize: 14,
-    marginVertical: 2,
+    flex: 1,
+    lineHeight: 20,
   },
   cta: {
-    marginTop: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: theme.radius,
+    marginTop: 6,
+    minHeight: 50,
+    borderRadius: 14,
     backgroundColor: theme.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
-  backLink: {
-    marginTop: 14,
-    alignSelf: 'flex-start',
+  ctaText: {
+    color: theme.primaryForeground,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

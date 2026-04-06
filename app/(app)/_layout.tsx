@@ -95,15 +95,6 @@ export default function AppLayout() {
         }}
       />
 
-      <Drawer.Screen
-        name='appointments/services/[id]'
-        options={{
-          drawerLabel: () => null,
-          title: '',
-          drawerItemStyle: { display: 'none' },
-        }}
-      />
-
       {/* <Drawer.Screen
         name="subscription"
         options={{
