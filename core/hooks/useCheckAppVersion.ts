@@ -1,8 +1,10 @@
 import * as Application from 'expo-application';
-import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import { api } from '../api/api';
+
+const IOS_STORE_URL = process.env.EXPO_PUBLIC_APP_STORE_URL;
+const ANDROID_STORE_URL = process.env.EXPO_PUBLIC_PLAY_STORE_URL;
 
 const compareVersions = (v1: string, v2: string) => {
   const a = v1.split('.').map(Number);
@@ -28,26 +30,37 @@ export function useCheckAppVersion() {
       const installed = Application.nativeApplicationVersion;
       if (!installed) return;
       const needsForceUpdate =
-        compareVersions(installed, data.minSupportedVersion) === -1;
+        compareVersions(installed, data.minSupportedVersion) === -1 ||
+        (Boolean(data.forceUpdate) &&
+          compareVersions(installed, data.latestVersion) === -1);
 
       const hasNewVersion =
         compareVersions(installed, data.latestVersion) === -1;
 
+      const storeUrl =
+        Platform.OS === 'ios'
+          ? IOS_STORE_URL
+          : ANDROID_STORE_URL ||
+            'https://play.google.com/store/apps/details?id=com.ayunierto.ascenciotaxinc';
+
+      const releaseNotesText = data.releaseNotes
+        ? `\n\n${String(data.releaseNotes)}`
+        : '';
+
       if (needsForceUpdate) {
         setUpdateRequired(true);
 
-        const storeUrl =
-          Platform.OS === 'ios'
-            ? 'https://apps.apple.com/app/idTU_APP_ID'
-            : 'https://play.google.com/store/apps/details?id=TU_APP_ID';
-
         Alert.alert(
           'Required Update',
-          'An important update is required to continue using the application. Please update to the latest version.',
+          `An important update is required to continue using the application. Please update to the latest version.${releaseNotesText}`,
           [
             {
               text: 'Update',
-              onPress: () => Linking.openURL(storeUrl),
+              onPress: () => {
+                if (storeUrl) {
+                  Linking.openURL(storeUrl);
+                }
+              },
             },
           ],
           { cancelable: false },
@@ -60,23 +73,17 @@ export function useCheckAppVersion() {
 
         Alert.alert(
           'New Version Available',
-          '"A new version of the application is available. Would you like to update it now?"',
+          `A new version of the application is available. Would you like to update it now?${releaseNotesText}`,
           [
             {
-              text: '"Update"',
+              text: 'Update',
               onPress: async () => {
-                try {
-                  const update = await Updates.checkForUpdateAsync();
-                  if (update.isAvailable) {
-                    await Updates.fetchUpdateAsync();
-                    await Updates.reloadAsync();
-                  }
-                } catch (e) {
-                  console.log('Error OTA Update', e);
+                if (storeUrl) {
+                  await Linking.openURL(storeUrl);
                 }
               },
             },
-            { text: '"Later"', style: 'cancel' },
+            { text: 'Later', style: 'cancel' },
           ],
         );
       }

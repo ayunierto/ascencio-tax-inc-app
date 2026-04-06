@@ -19,11 +19,13 @@ import { getUserAppointments } from '@/core/appointments/actions/get-user-appoin
 import { useAuthStore } from '@/core/auth/store/useAuthStore';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { DateTime } from 'luxon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DashboardScreen() {
   const { authStatus, user } = useAuthStore();
   const navigation = useNavigation();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   // User-specific data
   const { data: upcomingAppointments, isLoading: loadingUpcoming } = useQuery({
     queryKey: ['appointments', 'pending'],
@@ -60,7 +62,7 @@ export default function DashboardScreen() {
   if (loadingUpcoming || loadingPast || loadingInvoices) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color={theme.primary} />
+        <ActivityIndicator size='large' color={theme.primary} />
         <Text style={[styles.loadingText, { color: theme.foreground }]}>
           {t('loading')}
         </Text>
@@ -75,7 +77,7 @@ export default function DashboardScreen() {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Ionicons
-          name="alert-circle-outline"
+          name='alert-circle-outline'
           size={64}
           color={theme.destructive}
         />
@@ -92,7 +94,10 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.contentContainer}
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingBottom: insets.bottom + 24 },
+      ]}
     >
       {/* Greeting Header */}
       {authStatus === 'authenticated' && user && (
@@ -116,33 +121,33 @@ export default function DashboardScreen() {
         </Text>
         <View style={styles.metricsGrid}>
           <MetricCard
-            icon="time-outline"
+            icon='time-outline'
             label={t('upcomingAppointments')}
             value={(upcomingAppointments?.length ?? 0).toString()}
-            color="#f59e0b"
+            color='#f59e0b'
           />
           <MetricCard
-            icon="calendar-outline"
+            icon='calendar-outline'
             label={t('pastAppointments')}
             value={(pastAppointments?.length ?? 0).toString()}
-            color="#8b5cf6"
+            color='#8b5cf6'
           />
           <MetricCard
-            icon="document-text-outline"
+            icon='document-text-outline'
             label={t('totalInvoices')}
             value={(invoices?.items.length ?? 0).toString()}
-            color="#10b981"
+            color='#10b981'
           />
           <MetricCard
-            icon="alert-circle-outline"
+            icon='alert-circle-outline'
             label={t('overdueInvoices')}
             value={(
               invoices?.items.filter((i) => i.status === 'overdue').length ?? 0
             ).toString()}
-            color="#ef4444"
+            color='#ef4444'
           />
           <MetricCard
-            icon="checkmark-circle-outline"
+            icon='checkmark-circle-outline'
             label={t('paidInvoices')}
             value={(
               invoices?.items.filter((i) => i.status === 'paid').length ?? 0
@@ -150,7 +155,7 @@ export default function DashboardScreen() {
             color={theme.success}
           />
           <MetricCard
-            icon="cash-outline"
+            icon='cash-outline'
             label={t('balanceDue')}
             value={`$${(
               invoices?.items?.reduce(
@@ -158,15 +163,15 @@ export default function DashboardScreen() {
                 0,
               ) || 0
             ).toFixed(2)}`}
-            color="#eab308"
+            color='#eab308'
           />
           <MetricCard
-            icon="briefcase-outline"
+            icon='briefcase-outline'
             label={t('totalServices')}
             value={new Set(
               (upcomingAppointments ?? []).map((a) => a.service?.id ?? ''),
             ).size.toString()}
-            color="#06b6d4"
+            color='#06b6d4'
           />
         </View>
       </View>
@@ -178,28 +183,28 @@ export default function DashboardScreen() {
         </Text>
         <View style={styles.actionsContainer}>
           <ActionButton
-            icon="calendar"
+            icon='calendar'
             label={t('createAppointment')}
             onPress={() => router.push('/(app)/appointments/new/summary')}
             color={theme.primary}
           />
           <ActionButton
-            icon="receipt-outline"
+            icon='receipt-outline'
             label={t('addExpense')}
             onPress={() => router.push('/(app)/expenses/create')}
-            color="#10b981"
+            color='#10b981'
           />
           <ActionButton
-            icon="document-text-outline"
+            icon='document-text-outline'
             label={t('createInvoice')}
-            onPress={() => router.push('/(app)/invoices/new')}
-            color="#f59e0b"
+            onPress={() => router.push('/(app)/invoices/create')}
+            color='#f59e0b'
           />
           <ActionButton
-            icon="business-outline"
+            icon='business-outline'
             label={t('newCompany')}
             onPress={() => router.push('/(app)/companies/create')}
-            color="#8b5cf6"
+            color='#8b5cf6'
           />
         </View>
       </View>

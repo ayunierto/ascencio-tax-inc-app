@@ -231,6 +231,9 @@
   "myServices": "My Services",
   "serviceDetails": "Service Details",
   "settings": "Settings",
+  "language": "Language",
+  "english": "English",
+  "spanish": "Spanish",
   "myAccount": "My Account",
   "subscriptions": "Subscriptions",
   "deleteAccount": "Delete Account",
@@ -657,7 +660,7 @@
   "logOut": "Log out",
   "account": "Account",
   "termsOfUse": "Terms of Use",
-  "panel": "Panel",
+  "panel": "Dashboard",
   "scanning": "Scanning...",
 
   "appStore": "App Store",

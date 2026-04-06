@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,16 +14,41 @@ import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import {
+  AppLanguage,
+  persistLanguagePreference,
+  toSupportedLanguage,
+} from '@/i18n/language';
 
 export default function ProfileIndexScreen() {
   const { logout, user } = useAuthStore();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false);
+
+  const currentLanguage = useMemo(
+    () => toSupportedLanguage(i18n.resolvedLanguage) ?? 'en',
+    [i18n.resolvedLanguage],
+  );
 
   const handleLogout = async () => {
     await logout();
     router.replace('/');
+  };
+
+  const handleLanguageChange = async (language: AppLanguage) => {
+    if (language === currentLanguage || isUpdatingLanguage) {
+      return;
+    }
+
+    setIsUpdatingLanguage(true);
+    try {
+      await i18n.changeLanguage(language);
+      await persistLanguagePreference(language);
+    } finally {
+      setIsUpdatingLanguage(false);
+    }
   };
 
   const blurhash =
@@ -37,7 +62,7 @@ export default function ProfileIndexScreen() {
           <HeaderButton
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           >
-            <Ionicons name="menu" size={24} color="#ffffff" />
+            <Ionicons name='menu' size={24} color='#ffffff' />
           </HeaderButton>
         }
       />
@@ -57,12 +82,12 @@ export default function ProfileIndexScreen() {
                   style={{ width: 60, height: 60, borderRadius: 30 }}
                   source={{ uri: user.imageUrl }}
                   placeholder={{ blurhash }}
-                  contentFit="fill"
+                  contentFit='fill'
                   transition={1000}
                 />
               ) : (
                 <View style={styles.avatarContainer}>
-                  <Ionicons name="person" size={32} color={theme.primary} />
+                  <Ionicons name='person' size={32} color={theme.primary} />
                 </View>
               )}
 
@@ -73,7 +98,7 @@ export default function ProfileIndexScreen() {
                 <ThemedText style={styles.userEmail}>{user?.email}</ThemedText>
               </View>
               <Ionicons
-                name="chevron-forward"
+                name='chevron-forward'
                 size={20}
                 color={theme.mutedForeground}
               />
@@ -97,11 +122,54 @@ export default function ProfileIndexScreen() {
         </View> */}
 
         <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>{t('language')}</ThemedText>
+          <Card>
+            <CardContent style={styles.cardContent}>
+              <TouchableOpacity
+                onPress={() => handleLanguageChange('en')}
+                style={styles.languageItem}
+                activeOpacity={0.7}
+              >
+                <ThemedText style={styles.languageLabel}>
+                  {t('english')}
+                </ThemedText>
+                {currentLanguage === 'en' ? (
+                  <Ionicons
+                    name='checkmark-circle'
+                    size={20}
+                    color={theme.primary}
+                  />
+                ) : null}
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <TouchableOpacity
+                onPress={() => handleLanguageChange('es')}
+                style={styles.languageItem}
+                activeOpacity={0.7}
+              >
+                <ThemedText style={styles.languageLabel}>
+                  {t('spanish')}
+                </ThemedText>
+                {currentLanguage === 'es' ? (
+                  <Ionicons
+                    name='checkmark-circle'
+                    size={20}
+                    color={theme.primary}
+                  />
+                ) : null}
+              </TouchableOpacity>
+            </CardContent>
+          </Card>
+        </View>
+
+        <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>{t('legal')}</ThemedText>
           <Card>
             <CardContent style={styles.cardContent}>
               <ListItem
-                icon="book-outline"
+                icon='book-outline'
                 label={t('termsOfUse')}
                 external
                 onPress={() =>
@@ -110,7 +178,7 @@ export default function ProfileIndexScreen() {
               />
               <View style={styles.divider} />
               <ListItem
-                icon="shield-checkmark-outline"
+                icon='shield-checkmark-outline'
                 label={t('privacyPolicy')}
                 external
                 onPress={() =>
@@ -131,8 +199,8 @@ export default function ProfileIndexScreen() {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Button variant="destructive" fullWidth onPress={handleLogout}>
-          <ButtonIcon name="log-out-outline" />
+        <Button variant='destructive' fullWidth onPress={handleLogout}>
+          <ButtonIcon name='log-out-outline' />
           <ButtonText>{t('logOut')}</ButtonText>
         </Button>
       </View>
@@ -196,6 +264,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.border,
     marginLeft: 50,
     opacity: 0.5,
+  },
+  languageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  languageLabel: {
+    fontSize: 16,
+    color: theme.foreground,
   },
   appInfo: {
     alignItems: 'center',

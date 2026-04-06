@@ -210,12 +210,15 @@
   "updateSuccess": "Actualizado con éxito.",
   "resourceNotFound": "Recurso no encontrado.",
 
-  "dashboard": "Tablero",
+  "dashboard": "Dashboard",
   "expenses": "Gastos",
   "invoices": "Facturas",
   "appointments": "Citas",
   "services": "Servicios",
   "settings": "Configuraciones",
+  "language": "Idioma",
+  "english": "Inglés",
+  "spanish": "Español",
 
   "myAccount": "Mi cuenta",
   "subscriptions": "Suscripciones",

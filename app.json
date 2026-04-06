@@ -7,6 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "ascenciotaxinc",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#002e5d",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ayunierto.ascenciotaxinc",
@@ -19,6 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "backgroundColor": "#002e5d",
       "package": "com.ayunierto.ascenciotaxinc"
     },
     "web": {
@@ -43,6 +45,14 @@
       "expo-secure-store",
 
       "expo-localization",
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "barStyle": "light",
+          "visibility": "visible"
+        }
+      ],
       [
         "expo-camera",
         {

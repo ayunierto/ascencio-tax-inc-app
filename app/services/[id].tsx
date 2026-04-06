@@ -14,9 +14,11 @@ import { useAuthStore } from '@/core/auth/store/useAuthStore';
 import { toast } from 'sonner-native';
 import { StaffMember } from '@ascencio/shared/interfaces';
 import Loader from '@/components/Loader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ServiceDetailScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: servicesResponse, isPending } = useServices();
   const { updateState } = useBookingStore();
@@ -64,8 +66,14 @@ export default function ServiceDetailScreen() {
           </HeaderButton>
         }
       />
-      <ScrollView style={styles.container}>
-        <View style={styles.content}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 120 },
+        ]}
+      >
+        <View>
           {/* Service Image */}
           <View style={styles.imageContainer}>
             <Image
@@ -258,7 +266,7 @@ export default function ServiceDetailScreen() {
         </View>
       </ScrollView>
       {/* Fixed Bottom Button */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
         <Button
           onPress={handleBookNow}
           disabled={!service.isActive}

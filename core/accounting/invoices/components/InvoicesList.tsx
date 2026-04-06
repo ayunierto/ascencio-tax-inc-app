@@ -41,8 +41,10 @@ export const InvoicesList = () => {
         toast.success(t('deleteSuccess'));
         setDeletingId(null);
       },
-      onError: () => {
-        toast.error(t('canNotDelete'));
+      onError: (error: any) => {
+        toast.error(
+          t(error?.response?.data?.message || error?.message || 'canNotDelete'),
+        );
         setDeletingId(null);
       },
     });
@@ -55,7 +57,7 @@ export const InvoicesList = () => {
       invoices?.items.reduce((sum, inv) => sum + Number(inv.total), 0) ?? 0,
     pending:
       invoices?.items.filter(
-        (i) => i.status === 'draft' || i.status === 'issued'
+        (i) => i.status === 'draft' || i.status === 'issued',
       ).length ?? 0,
     paid: invoices?.items.filter((i) => i.status === 'paid').length ?? 0,
   };
@@ -63,11 +65,11 @@ export const InvoicesList = () => {
   if (isError) {
     return (
       <EmptyContent
-        title="loadError"
+        title='loadError'
         subtitle={error?.response?.data.message || error?.message}
         action={
           <Button onPress={() => refetch()}>
-            <ButtonIcon name="refresh" />
+            <ButtonIcon name='refresh' />
           </Button>
         }
       />
@@ -166,11 +168,11 @@ export const InvoicesList = () => {
         >
           <SelectTrigger placeholder={t('filterByStatus')} />
           <SelectContent>
-            <SelectItem label={t('allStatuses')} value="all" />
-            <SelectItem label={t('pending')} value="pending" />
-            <SelectItem label={t('paid')} value="paid" />
-            <SelectItem label={t('overdue')} value="overdue" />
-            <SelectItem label={t('canceled')} value="canceled" />
+            <SelectItem label={t('allStatuses')} value='all' />
+            <SelectItem label={t('pending')} value='pending' />
+            <SelectItem label={t('paid')} value='paid' />
+            <SelectItem label={t('overdue')} value='overdue' />
+            <SelectItem label={t('canceled')} value='canceled' />
           </SelectContent>
         </Select>
       </View>
@@ -181,7 +183,7 @@ export const InvoicesList = () => {
           subtitle={t('noInvoicesSubtitle')}
           action={
             <Button onPress={() => router.push('/(app)/invoices/create')}>
-              <ButtonIcon name="add-circle-outline" />
+              <ButtonIcon name='add-circle-outline' />
               <ButtonText>{t('createInvoice')}</ButtonText>
             </Button>
           }

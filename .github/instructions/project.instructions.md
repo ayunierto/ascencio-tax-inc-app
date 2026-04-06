@@ -13,3 +13,4 @@
 - quiero que mi codigo sea siempre escalable y reutilizable
 - si necesitamos gestos de estado usa zustand
 - para estilos usa chadcn ui, si necesitamos un componente que no tenemos en nuestro codigo lo instalamos medienta la cli de chadcn nunca creando codigo desde cero para garantizar la compatibilidad con las versiones usadas.
+- verifica siempre que el codigo no este deprecado, si es asi actualizalo a la ultima version estable o verifica porque ha siedo cambiado.

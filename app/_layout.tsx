@@ -1,15 +1,18 @@
 import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
+import * as SystemUI from 'expo-system-ui';
 import 'react-native-reanimated';
 // ⚠️ TEMPORARY: Commented out for testing
-// import { useEffect } from 'react';
-// import { Platform } from 'react-native';
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
 // import Purchases from 'react-native-purchases';
 
 import { CustomTheme } from '@/theme/CustomTheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Toaster } from 'sonner-native';
 import { SubscriptionProvider } from '@/core/subscription/SubscriptionContext';
 
@@ -36,6 +39,18 @@ export const unstable_settings = {
 // const REVENUE_CAT_ANDROID_KEY = 'goog_YOUR_ANDROID_KEY_HERE';
 
 export default function RootLayout() {
+  useEffect(() => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    void SystemUI.setBackgroundColorAsync(CustomTheme.colors.background);
+
+    // In edge-to-edge mode, Android may ignore nav background color,
+    // but style still helps on 3-button navigation devices.
+    NavigationBar.setStyle('dark');
+  }, []);
+
   // ⚠️ TEMPORARY: Commented out for testing - RevenueCat initialization disabled
   // useEffect(() => {
   //   // Initialize RevenueCat
@@ -50,32 +65,39 @@ export default function RootLayout() {
   // }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: CustomTheme.colors.background }}
+    >
       <QueryClientProvider client={queryClient}>
         <SubscriptionProvider>
-          <ThemeProvider value={CustomTheme}>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              {/* Root index - handles initial routing logic */}
-              <Stack.Screen name='index' options={{ headerShown: false }} />
+          <SafeAreaProvider>
+            <ThemeProvider value={CustomTheme}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                }}
+              >
+                {/* Root index - handles initial routing logic */}
+                <Stack.Screen name='index' options={{ headerShown: false }} />
 
-              {/* Auth routes - accessible without authentication */}
-              <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+                {/* Auth routes - accessible without authentication */}
+                <Stack.Screen name='(auth)' options={{ headerShown: false }} />
 
-              {/* Public routes - accessible without authentication */}
-              <Stack.Screen name='(public)' options={{ headerShown: false }} />
+                {/* Public routes - accessible without authentication */}
+                <Stack.Screen
+                  name='(public)'
+                  options={{ headerShown: false }}
+                />
 
-              {/* Protected routes - requires authentication */}
-              <Stack.Screen name='(app)' options={{ headerShown: false }} />
-            </Stack>
+                {/* Protected routes - requires authentication */}
+                <Stack.Screen name='(app)' options={{ headerShown: false }} />
+              </Stack>
 
-            <StatusBar style='light' />
+              <StatusBar style='light' />
 
-            <Toaster />
-          </ThemeProvider>
+              <Toaster />
+            </ThemeProvider>
+          </SafeAreaProvider>
         </SubscriptionProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>

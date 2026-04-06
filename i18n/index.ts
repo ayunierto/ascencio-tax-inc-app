@@ -1,13 +1,12 @@
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 
+import { getDeviceLanguage, getStoredLanguagePreference } from './language';
 import { resources } from './resources';
 
 const i18n = createInstance();
 
-// Obtiene el idioma principal del dispositivo
-const deviceLanguage = Localization.getLocales()[0]?.languageCode ?? 'en';
+const deviceLanguage = getDeviceLanguage();
 
 i18n.use(initReactI18next).init({
   resources,
@@ -20,5 +19,15 @@ i18n.use(initReactI18next).init({
 
   compatibilityJSON: 'v4',
 });
+
+void (async () => {
+  const storedLanguage = await getStoredLanguagePreference();
+
+  if (!storedLanguage || storedLanguage === i18n.resolvedLanguage) {
+    return;
+  }
+
+  await i18n.changeLanguage(storedLanguage);
+})();
 
 export default i18n;

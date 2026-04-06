@@ -173,7 +173,8 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   });
 
   const selectedCompany = useMemo(() => {
-    const fallbackCompanyId = companies.length === 1 ? companies[0].id : undefined;
+    const fallbackCompanyId =
+      companies.length === 1 ? companies[0].id : undefined;
     const effectiveCompanyId = watchedFromCompanyId || fallbackCompanyId;
     if (!effectiveCompanyId) return undefined;
     return companies.find((company) => company.id === effectiveCompanyId);
@@ -214,6 +215,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const isDraft = invoice.status === 'draft';
   const canEdit = isDraft || invoice.status === 'canceled';
   const canIssue = isDraft && !isNew;
+  const canDelete = isDraft && !isNew;
 
   // Prevent state updates after unmount
   const isMounted = useRef(true);
@@ -513,7 +515,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
         </HeaderButton>
       )}
 
-      {!isNew && canEdit && (
+      {canDelete && (
         <HeaderButton onPress={handleDeleteInvoice} hitSlop={12}>
           {isDeleting ? (
             <ActivityIndicator size='small' color={theme.destructive} />
@@ -1230,7 +1232,9 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
                     <ImageUploader
                       ref={imageUploaderRef}
                       value={value}
-                      onChange={(imageRef) => onChange(resolveStoredImageUrl(imageRef))}
+                      onChange={(imageRef) =>
+                        onChange(resolveStoredImageUrl(imageRef))
+                      }
                       folder='temp_files'
                       onUploadingChange={setIsLogoUploading}
                     />

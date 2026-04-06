@@ -75,6 +75,7 @@ export const InvoiceCard = ({
 }: InvoiceCardProps) => {
   const { t } = useTranslation();
   const statusColor = getStatusColor(invoice.status);
+  const canDelete = invoice.status === 'draft';
 
   const getBillToName = () => {
     if (invoice.billToClient) {
@@ -116,7 +117,7 @@ export const InvoiceCard = ({
             </View>
 
             <View style={styles.billTo}>
-              <Ionicons name="person-outline" size={14} color={theme.muted} />
+              <Ionicons name='person-outline' size={14} color={theme.muted} />
               <ThemedText style={styles.billToText} numberOfLines={1}>
                 {getBillToName()}
               </ThemedText>
@@ -140,34 +141,36 @@ export const InvoiceCard = ({
             )}
           </View>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                disabled={isLoading}
-                isLoading={isLoading}
-              >
-                <ButtonIcon
-                  name="trash-outline"
-                  style={{ color: theme.destructive }}
-                />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('thisActionCannotBeUndone')}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                <AlertDialogAction onPress={() => handleDelete(invoice.id)}>
-                  {t('delete')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {canDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant='ghost'
+                  disabled={isLoading}
+                  isLoading={isLoading}
+                >
+                  <ButtonIcon
+                    name='trash-outline'
+                    style={{ color: theme.destructive }}
+                  />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('thisActionCannotBeUndone')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onPress={() => handleDelete(invoice.id)}>
+                    {t('delete')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </CardContent>
       </Card>
     </TouchableOpacity>
