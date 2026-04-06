@@ -43,7 +43,9 @@ const UpdateCompanyScreen = () => {
         }
         action={
           <View style={{ marginTop: 16, flexDirection: 'row', gap: 8 }}>
-            <Button onPress={() => router.push('/(app)/invoices/(tabs)/companies')}>
+            <Button
+              onPress={() => router.push('/(app)/invoices/(tabs)/companies')}
+            >
               <ButtonIcon name='arrow-back' />
               <ButtonText>{t('goBack')}</ButtonText>
             </Button>

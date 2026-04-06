@@ -75,6 +75,7 @@ export default function ServiceDetailScreen() {
         ]}
       >
         <View>
+          {/* Service Image */}
           <View style={styles.imageContainer}>
             <Image
               source={{ uri: service.imageUrl }}
@@ -91,10 +92,12 @@ export default function ServiceDetailScreen() {
             )}
           </View>
 
+          {/* Service Header */}
           <View style={styles.header}>
             <ThemedText style={styles.title}>{service.name}</ThemedText>
           </View>
 
+          {/* Description Section */}
           {service.description && (
             <Card style={styles.section}>
               <CardContent style={styles.sectionContent}>
@@ -115,6 +118,7 @@ export default function ServiceDetailScreen() {
             </Card>
           )}
 
+          {/* Staff Section */}
           {service.staffMembers && service.staffMembers.length > 0 && (
             <Card style={styles.section}>
               <CardContent style={styles.sectionContent}>
@@ -164,6 +168,7 @@ export default function ServiceDetailScreen() {
             </Card>
           )}
 
+          {/* Service Availability */}
           <Card style={styles.section}>
             <CardContent style={styles.sectionContent}>
               <View style={styles.sectionHeader}>
@@ -261,6 +266,7 @@ export default function ServiceDetailScreen() {
           </Card>
         </View>
       </ScrollView>
+      {/* Fixed Bottom Button */}
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
         <Button
           onPress={handleBookNow}
@@ -319,17 +325,57 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    paddingBottom: 8,
+    gap: 8,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: theme.foreground,
-    marginBottom: 4,
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: `${theme.primary}15`,
+    borderRadius: 12,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.primary,
+  },
+  quickInfo: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  infoCard: {
+    flex: 1,
+  },
+  infoCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+  },
+  infoCardText: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: theme.mutedForeground,
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   section: {
     marginHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sectionContent: {
     padding: 16,
@@ -343,12 +389,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.foreground,
   },
   description: {
     fontSize: 14,
     color: theme.mutedForeground,
-    lineHeight: 22,
+    lineHeight: 20,
   },
   staffList: {
     gap: 12,
@@ -356,26 +401,22 @@ const styles = StyleSheet.create({
   staffItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: theme.muted,
-    borderRadius: 10,
+    gap: 12,
   },
   staffAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: `${theme.primary}20`,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: `${theme.primary}15`,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
   staffInfo: {
     flex: 1,
   },
   staffName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.foreground,
+    fontSize: 15,
+    fontWeight: '500',
     marginBottom: 4,
   },
   staffStatus: {
@@ -390,50 +431,49 @@ const styles = StyleSheet.create({
     backgroundColor: theme.mutedForeground,
   },
   statusDotActive: {
-    backgroundColor: theme.success,
+    backgroundColor: '#22c55e',
   },
   staffStatusText: {
     fontSize: 12,
     color: theme.mutedForeground,
   },
   availabilityList: {
-    gap: 10,
+    gap: 16,
   },
   availabilityItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
     padding: 12,
-    backgroundColor: theme.muted,
-    borderRadius: 10,
+    backgroundColor: `${theme.mutedForeground}30`,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   availabilityItemActive: {
-    borderColor: theme.primary,
-    backgroundColor: `${theme.primary}10`,
+    backgroundColor: `${theme.primary}40`,
+    borderColor: `${theme.primary}30`,
   },
   availabilityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: theme.mutedForeground,
-    marginRight: 12,
   },
   availabilityDotActive: {
-    backgroundColor: theme.primary,
+    backgroundColor: '#22c55e',
   },
   availabilityText: {
     flex: 1,
-    marginLeft: 12,
   },
   availabilityLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.foreground,
+    color: theme.mutedForeground,
     marginBottom: 2,
   },
   availabilityLabelActive: {
-    color: theme.primary,
+    color: theme.foreground,
   },
   availabilityStatus: {
     fontSize: 12,
@@ -444,8 +484,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: 12,
-    paddingHorizontal: 16,
+    padding: 16,
     backgroundColor: theme.background,
     borderTopWidth: 1,
     borderTopColor: theme.border,

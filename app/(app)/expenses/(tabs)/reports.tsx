@@ -102,7 +102,9 @@ export default function ExpenseReportsTabScreen() {
                 size={48}
                 color={theme.mutedForeground}
               />
-              <ThemedText style={styles.emptyText}>{t('noReportsYet')}</ThemedText>
+              <ThemedText style={styles.emptyText}>
+                {t('noReportsYet')}
+              </ThemedText>
               <ThemedText style={styles.emptySubtext}>
                 {t('generateFirstReport')}
               </ThemedText>

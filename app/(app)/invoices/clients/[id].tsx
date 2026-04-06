@@ -43,7 +43,9 @@ const UpdateClientScreen = () => {
         }
         action={
           <View style={{ marginTop: 16, flexDirection: 'row', gap: 8 }}>
-            <Button onPress={() => router.push('/(app)/invoices/(tabs)/clients')}>
+            <Button
+              onPress={() => router.push('/(app)/invoices/(tabs)/clients')}
+            >
               <ButtonIcon name='arrow-back' />
               <ButtonText>{t('goBack')}</ButtonText>
             </Button>

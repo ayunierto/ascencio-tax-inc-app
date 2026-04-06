@@ -24,7 +24,9 @@ export default function InvoiceCompaniesTabScreen() {
           </HeaderButton>
         }
         right={
-          <HeaderButton onPress={() => router.push('/(app)/invoices/companies/create')}>
+          <HeaderButton
+            onPress={() => router.push('/(app)/invoices/companies/create')}
+          >
             <Ionicons
               name='add-circle-outline'
               size={24}

@@ -44,11 +44,11 @@ export const ClientsList = () => {
   if (isError) {
     return (
       <EmptyContent
-        title="loadError"
+        title='loadError'
         subtitle={error?.response?.data.message || error?.message}
         action={
           <Button onPress={() => refetch()}>
-            <ButtonIcon name="refresh" />
+            <ButtonIcon name='refresh' />
           </Button>
         }
       />
@@ -64,7 +64,7 @@ export const ClientsList = () => {
         subtitle={t('noClientsSubtitle')}
         action={
           <Button onPress={() => router.push('/(app)/invoices/clients/create')}>
-            <ButtonIcon name="add-circle-outline" />
+            <ButtonIcon name='add-circle-outline' />
             <ButtonText>{t('createClient')}</ButtonText>
           </Button>
         }

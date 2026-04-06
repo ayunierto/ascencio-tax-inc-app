@@ -80,21 +80,21 @@ export default function EditExpenseScreen() {
         }}
       >
         <EmptyContent
-          title="Error"
+          title='Error'
           subtitle={
             error?.response?.data.message ||
             error?.message ||
             t('expenseNotFound')
           }
-          icon="sad-outline"
+          icon='sad-outline'
         />
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Button variant="outline" onPress={() => refetch()}>
-            <ButtonIcon name="refresh-outline" />
+          <Button variant='outline' onPress={() => refetch()}>
+            <ButtonIcon name='refresh-outline' />
             <ButtonText>{t('retry')}</ButtonText>
           </Button>
           <Button onPress={() => router.back()}>
-            <ButtonIcon name="arrow-back-outline" />
+            <ButtonIcon name='arrow-back-outline' />
             <ButtonText>{t('goBack')}</ButtonText>
           </Button>
         </View>
@@ -105,11 +105,11 @@ export default function EditExpenseScreen() {
   if (isErrorCategories) {
     return (
       <EmptyContent
-        title="Error"
+        title='Error'
         subtitle={
           errorCategories.response?.data.message || errorCategories.message
         }
-        icon="sad-outline"
+        icon='sad-outline'
       />
     );
   }
@@ -117,9 +117,9 @@ export default function EditExpenseScreen() {
   if (!categories || categories.length === 0) {
     return (
       <EmptyContent
-        title="Info"
-        subtitle="No categories available. Please contact support."
-        icon="information-circle-outline"
+        title='Info'
+        subtitle='No categories available. Please contact support.'
+        icon='information-circle-outline'
       />
     );
   }

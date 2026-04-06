@@ -11,7 +11,7 @@ export default function AppointmentsLayout() {
     >
       <Stack.Screen name='(tabs)' options={{ title: t('myAppointments') }} />
       <Stack.Screen
-        name="new"
+        name='new'
         options={{
           title: t('newAppointment'),
         }}

@@ -165,7 +165,9 @@ export default function AppointmentsUpcomingTabScreen() {
         }
       />
       <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>{t('upcomingAppointments')}</ThemedText>
+        <ThemedText style={styles.headerTitle}>
+          {t('upcomingAppointments')}
+        </ThemedText>
       </View>
 
       <FlatList

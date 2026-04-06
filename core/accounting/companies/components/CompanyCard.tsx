@@ -47,9 +47,9 @@ export const CompanyCard = ({
           </View>
 
           <DeleteConfirmationDialog onDelete={() => handleDelete(company.id)}>
-            <Button variant="ghost" disabled={isLoading} isLoading={isLoading}>
+            <Button variant='ghost' disabled={isLoading} isLoading={isLoading}>
               <ButtonIcon
-                name="trash-outline"
+                name='trash-outline'
                 style={{ color: theme.destructive }}
               />
             </Button>

@@ -10,9 +10,9 @@ export default function InvoicesLayout() {
         headerShown: false, // Ocultar header nativo, usar CustomHeader
       }}
     >
-      <Stack.Screen name="(tabs)" options={{ title: t('myInvoices') }} />
-      <Stack.Screen name="create" options={{ title: t('newInvoice') }} />
-      <Stack.Screen name="[id]" options={{ title: t('invoiceDetails') }} />
+      <Stack.Screen name='(tabs)' options={{ title: t('myInvoices') }} />
+      <Stack.Screen name='create' options={{ title: t('newInvoice') }} />
+      <Stack.Screen name='[id]' options={{ title: t('invoiceDetails') }} />
     </Stack>
   );
 }

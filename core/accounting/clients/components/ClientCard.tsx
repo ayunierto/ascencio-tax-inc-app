@@ -46,9 +46,9 @@ export const ClientCard = ({
           </View>
 
           <DeleteConfirmationDialog onDelete={() => handleDelete(client.id)}>
-            <Button variant="ghost" disabled={isLoading} isLoading={isLoading}>
+            <Button variant='ghost' disabled={isLoading} isLoading={isLoading}>
               <ButtonIcon
-                name="trash-outline"
+                name='trash-outline'
                 style={{ color: theme.destructive }}
               />
             </Button>

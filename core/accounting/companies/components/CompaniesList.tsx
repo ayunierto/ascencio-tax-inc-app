@@ -43,11 +43,11 @@ export const CompaniesList = () => {
   if (isError) {
     return (
       <EmptyContent
-        title="loadError"
+        title='loadError'
         subtitle={error?.response?.data.message || error?.message}
         action={
           <Button onPress={() => refetch()}>
-            <ButtonIcon name="refresh" />
+            <ButtonIcon name='refresh' />
           </Button>
         }
       />
@@ -62,8 +62,10 @@ export const CompaniesList = () => {
         title={t('noCompaniesTitle')}
         subtitle={t('noCompaniesSubtitle')}
         action={
-          <Button onPress={() => router.push('/(app)/invoices/companies/create')}>
-            <ButtonIcon name="add-circle-outline" />
+          <Button
+            onPress={() => router.push('/(app)/invoices/companies/create')}
+          >
+            <ButtonIcon name='add-circle-outline' />
             <ButtonText>{t('createCompany')}</ButtonText>
           </Button>
         }

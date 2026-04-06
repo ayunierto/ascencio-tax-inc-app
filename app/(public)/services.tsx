@@ -78,7 +78,7 @@ export default function ServicesScreen() {
       <Pressable
         style={styles.cta}
         onPress={openBooking}
-        accessibilityRole="button"
+        accessibilityRole='button'
       >
         <Text style={{ color: theme.primaryForeground }}>
           {t('servicesCTA')}

@@ -107,7 +107,10 @@ export default function AppointmentsPastTabScreen() {
             icon='time-outline'
           />
           <View
-            style={[styles.buttonContainer, { marginBottom: insets.bottom + 8 }]}
+            style={[
+              styles.buttonContainer,
+              { marginBottom: insets.bottom + 8 },
+            ]}
           >
             <Button onPress={handleBookNew}>
               <ButtonIcon name='add-circle-outline' />
