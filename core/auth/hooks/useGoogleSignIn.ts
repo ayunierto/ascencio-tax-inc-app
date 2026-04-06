@@ -12,9 +12,6 @@ export const useGoogleSignIn = () => {
   const [isReady, setIsReady] = useState(false);
   const { signInWithGoogle } = useAuthStore();
 
-  const apiUrl =
-    process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-
   useEffect(() => {
     // Configurar Google Sign-In
     const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
