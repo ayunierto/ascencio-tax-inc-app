@@ -52,7 +52,6 @@ export default function AppLayout() {
       <Drawer.Screen
         name='invoices'
         options={{
-          href: '/(app)/invoices/(tabs)',
           drawerLabel: t('invoices'),
           title: t('invoices'),
           drawerIcon: ({ color, size, focused }) => (
@@ -68,7 +67,6 @@ export default function AppLayout() {
       <Drawer.Screen
         name='expenses'
         options={{
-          href: '/(app)/expenses/(tabs)',
           drawerLabel: t('expenses'),
           title: t('expenses'),
           drawerIcon: ({ color, size, focused }) => (
@@ -94,6 +92,15 @@ export default function AppLayout() {
               color={color}
             />
           ),
+        }}
+      />
+
+      <Drawer.Screen
+        name='appointments/services/[id]'
+        options={{
+          drawerLabel: () => null,
+          title: '',
+          drawerItemStyle: { display: 'none' },
         }}
       />
 
