@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
+import Constants from 'expo-constants';
+import * as Application from 'expo-application';
 import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -31,6 +33,15 @@ export default function ProfileIndexScreen() {
     () => toSupportedLanguage(i18n.resolvedLanguage) ?? 'en',
     [i18n.resolvedLanguage],
   );
+
+  const appVersion = useMemo(() => {
+    return (
+      Application.nativeApplicationVersion ??
+      Constants?.expoConfig?.version ??
+      (Constants as any)?.manifest?.version ??
+      '1.0.0'
+    );
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -192,7 +203,7 @@ export default function ProfileIndexScreen() {
         {/* App Info */}
         <View style={styles.appInfo}>
           <ThemedText style={styles.appInfoText}>
-            {t('version')} 1.0.0
+            {t('version')} {appVersion}
           </ThemedText>
         </View>
       </ScrollView>

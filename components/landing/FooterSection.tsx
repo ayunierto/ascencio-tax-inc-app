@@ -1,10 +1,21 @@
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../ui';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
+import * as Application from 'expo-application';
 
 export function FooterSection() {
   const { t } = useTranslation();
+  const appVersion = useMemo(() => {
+    return (
+      Constants?.expoConfig?.version ??
+      Application?.nativeApplicationVersion ??
+      (Constants as any)?.manifest?.version ??
+      '1.0.0'
+    );
+  }, []);
   const contactAddress =
     '1219 St Clair Ave West Suite G15, Toronto, ON M6E 1B5';
   const contactEmail = 'ascenciotaxinc@gmail.com';
@@ -116,7 +127,7 @@ export function FooterSection() {
         <View style={styles.footerDivider} />
         <Text style={styles.footerCopyright}>
           © {new Date().getFullYear()} Ascencio Tax Inc.{' '}
-          {t('allRightsReserved')}
+          {t('allRightsReserved')} {appVersion ? ` v${appVersion}` : ''}
         </Text>
       </View>
     </View>

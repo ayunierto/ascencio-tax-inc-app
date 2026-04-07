@@ -1,4 +1,5 @@
 import * as Application from 'expo-application';
+import Constants from 'expo-constants';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import { api } from '../api/api';
@@ -44,7 +45,8 @@ export function useCheckAppVersion() {
       const platform = Platform.OS;
       const { data } = await api.get(`/app/version?platform=${platform}`);
 
-      const installed = Application.nativeApplicationVersion;
+      const installed =
+        Constants?.expoConfig?.version ?? Application.nativeApplicationVersion;
       if (!installed) return;
       const needsForceUpdate =
         compareVersions(installed, data.minSupportedVersion) === -1 ||
