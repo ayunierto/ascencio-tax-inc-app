@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Platform } from 'react-native';
 import {
   GoogleSignin,
   statusCodes,
@@ -24,15 +25,31 @@ export const useGoogleSignIn = () => {
   useEffect(() => {
     // Configurar Google Sign-In
     const webClientId = googleWebClientId?.trim();
+    const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
 
-    if (webClientId) {
+    const isIos = Platform.OS === 'ios';
+    const hasRequiredIds = isIos
+      ? !!webClientId && !!iosClientId
+      : !!webClientId;
+
+    if (hasRequiredIds) {
       GoogleSignin.configure({
         webClientId,
+        iosClientId,
         offlineAccess: false,
       });
       setIsReady(true);
     } else {
-      console.warn('googleWebClientId no está configurado en mobile-config');
+      if (!webClientId) {
+        console.warn('googleWebClientId no está configurado en mobile-config');
+      }
+
+      if (isIos && !iosClientId) {
+        console.warn(
+          'EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID no está configurado para iOS',
+        );
+      }
+
       setIsReady(false);
     }
   }, [googleWebClientId]);
@@ -46,8 +63,10 @@ export const useGoogleSignIn = () => {
       setIsLoading(true);
       setError(null);
 
-      // Verificar si Google Play Services está disponible
-      await GoogleSignin.hasPlayServices();
+      // Verificar Google Play Services solo en Android
+      if (Platform.OS === 'android') {
+        await GoogleSignin.hasPlayServices();
+      }
 
       // Iniciar el flujo de sign-in
       const userInfo = await GoogleSignin.signIn();
@@ -63,13 +82,23 @@ export const useGoogleSignIn = () => {
       await signInWithGoogle(idToken);
     } catch (err: any) {
       let errorMessageKey = 'googleSignInError';
+      const nativeMessage =
+        err instanceof Error
+          ? err.message
+          : typeof err?.message === 'string'
+            ? err.message
+            : '';
+      const isMissingIosUrlScheme =
+        Platform.OS === 'ios' &&
+        nativeMessage.includes('missing support for the following URL schemes');
 
       if (err.code === statusCodes.SIGN_IN_CANCELLED) {
         errorMessageKey = 'googleSignInError';
       } else if (err.code === statusCodes.IN_PROGRESS) {
         errorMessageKey = 'googleSignInError';
       } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        errorMessageKey = 'googleSignInError';
+        errorMessageKey = 'googleSignInDeveloperError';
+      } else if (isMissingIosUrlScheme) {
         errorMessageKey = 'googleSignInDeveloperError';
       } else if (isAxiosError(err) && !err.response) {
         errorMessageKey = 'networkConnectionError';

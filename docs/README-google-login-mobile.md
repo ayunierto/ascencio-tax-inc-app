@@ -6,6 +6,27 @@ Este documento describe, paso a paso, como dejar funcionando Google Sign-In en l
 2. `preview` (EAS internal builds)
 3. `production` (build publicada en Google Play)
 
+## Nota iOS (simulador y dispositivo)
+
+En iOS, `@react-native-google-signin/google-signin` necesita uno de estos 2 enfoques:
+
+1. `GoogleService-Info.plist` integrado en el proyecto nativo, o
+2. pasar `iosClientId` en `GoogleSignin.configure(...)`
+
+Este proyecto usa el enfoque 2 para Expo managed, por lo que debes definir:
+
+- `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=<tu_oauth_ios_client_id>`
+- plugin Expo en `app.json` con `iosUrlScheme` (reversed client id), por ejemplo:
+  `com.googleusercontent.apps.xxxxx` (valor `REVERSED_CLIENT_ID` del `GoogleService-Info.plist`)
+
+Si este valor falta, verás el error:
+
+`RNGoogleSignin: failed to determine clientID - GoogleService-Info.plist was not found and iosClientId was not provided`
+
+Si falta el URL scheme, verás:
+
+`Your app is missing support for the following URL schemes: com.googleusercontent.apps...`
+
 ## 1. Objetivo tecnico
 
 Para que Google Login funcione en Android de forma estable, debes registrar en Google Cloud Console y Firebase las huellas (`SHA-1` y `SHA-256`) de los certificados que firman la app en cada flujo real.
@@ -211,4 +232,7 @@ eas build --platform android --profile preview
 
 # Build production Android
 eas build --platform android --profile production
+
+# Build iOS simulator (development)
+eas build --platform ios --profile development
 ```
