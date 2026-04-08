@@ -24,7 +24,9 @@ export const useGoogleSignIn = () => {
 
   useEffect(() => {
     // Configurar Google Sign-In
-    const webClientId = googleWebClientId?.trim();
+    const webClientIdFromEnv =
+      process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
+    const webClientId = webClientIdFromEnv || googleWebClientId?.trim();
     const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
 
     const isIos = Platform.OS === 'ios';
@@ -41,7 +43,9 @@ export const useGoogleSignIn = () => {
       setIsReady(true);
     } else {
       if (!webClientId) {
-        console.warn('googleWebClientId no está configurado en mobile-config');
+        console.warn(
+          'googleWebClientId no está configurado ni en mobile-config ni en EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID',
+        );
       }
 
       if (isIos && !iosClientId) {

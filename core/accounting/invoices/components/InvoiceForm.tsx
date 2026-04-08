@@ -44,6 +44,16 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/Select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/AlertDialog';
 import { ImageUploader, ImageUploaderRef } from '@/components/ui/ImageUploader';
 import { resolveStoredImageUrl } from '@/components/ui/ImageHandler/cloudinaryStorage';
 import {
@@ -93,6 +103,7 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
+  const [isIssueDialogOpen, setIsIssueDialogOpen] = useState(false);
   const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [isManualClientEntry, setIsManualClientEntry] = useState(
     !invoice.billToClientId && !!invoice.billToName,
@@ -250,32 +261,31 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
   const handleIssueInvoice = async () => {
     if (!canIssue) return;
 
-    Alert.alert(t('issueInvoice'), t('issueInvoiceConfirmation'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('issue'),
-        onPress: async () => {
-          console.log('[INVOICE FORM] Issuing invoice:', invoice.id);
-          try {
-            const result = await issueInvoice.mutateAsync(invoice.id);
-            console.log('[INVOICE FORM] Invoice issued successfully:', result);
-            toast.success(t('invoiceIssued'));
-            router.back();
-          } catch (error: any) {
-            console.error('[INVOICE FORM] Error issuing invoice:', error);
-            console.error('[INVOICE FORM] Error response:', error.response);
-            console.error('[INVOICE FORM] Error data:', error.response?.data);
+    setIsIssueDialogOpen(true);
+  };
 
-            const errorMessage =
-              error.response?.data?.message ||
-              error.message ||
-              'unknownErrorOccurred';
-            console.error('[INVOICE FORM] Showing error toast:', errorMessage);
-            toast.error(t(errorMessage));
-          }
-        },
-      },
-    ]);
+  const confirmIssueInvoice = async () => {
+    if (!canIssue || issueInvoice.isPending) return;
+
+    console.log('[INVOICE FORM] Issuing invoice:', invoice.id);
+    try {
+      const result = await issueInvoice.mutateAsync(invoice.id);
+      console.log('[INVOICE FORM] Invoice issued successfully:', result);
+      setIsIssueDialogOpen(false);
+      toast.success(t('invoiceIssued'));
+      router.back();
+    } catch (error: any) {
+      console.error('[INVOICE FORM] Error issuing invoice:', error);
+      console.error('[INVOICE FORM] Error response:', error.response);
+      console.error('[INVOICE FORM] Error data:', error.response?.data);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'unknownErrorOccurred';
+      console.error('[INVOICE FORM] Showing error toast:', errorMessage);
+      toast.error(t(errorMessage));
+    }
   };
 
   const handleRecordPayment = async (data: any) => {
@@ -1400,6 +1410,26 @@ export const InvoiceForm = ({ invoice, headerLeft }: InvoiceFormProps) => {
           invoiceNumber={invoice.invoiceNumber}
           isSubmitting={recordPayment.isPending}
         />
+
+        <AlertDialog
+          open={isIssueDialogOpen}
+          onOpenChange={setIsIssueDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('issueInvoice')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('issueInvoiceConfirmation')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+              <AlertDialogAction onPress={confirmIssueInvoice}>
+                {issueInvoice.isPending ? t('loading') : t('issue')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </KeyboardAvoidingView>
     </>
   );

@@ -21,7 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "backgroundColor": "#002e5d",
-      "package": "com.ayunierto.ascenciotaxinc"
+      "package": "com.ascenciotax.ascenciotaxinc"
     },
     "web": {
       "bundler": "metro",
@@ -46,7 +46,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.1007923113225-lv8992gnol9moa4mgpmtq26f0rkojcn5"
+          "iosUrlScheme": "com.googleusercontent.apps.519032916581-5boec27sn68bochdu5cvc7paptfcl5dd"
         }
       ],
 

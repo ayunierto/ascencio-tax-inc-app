@@ -8,6 +8,7 @@ import {
   Animated,
   ViewStyle,
   TextStyle,
+  useWindowDimensions,
 } from 'react-native';
 import { theme } from './theme';
 import { Button, ButtonText } from './Button';
@@ -122,8 +123,11 @@ export function AlertDialogContent({
   style,
 }: AlertDialogContentProps) {
   const { open, setOpen } = useAlertDialog();
+  const { width } = useWindowDimensions();
   const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  const contentWidth = Math.max(0, Math.min(512, width - 32));
 
   React.useEffect(() => {
     if (open) {
@@ -146,7 +150,7 @@ export function AlertDialogContent({
     <Modal
       visible={open}
       transparent
-      animationType="none"
+      animationType='none'
       onRequestClose={() => setOpen(false)}
     >
       <Pressable style={styles.modalContainer} onPress={() => setOpen(false)}>
@@ -158,6 +162,7 @@ export function AlertDialogContent({
               {
                 transform: [{ scale: scaleAnim }],
                 opacity: fadeAnim,
+                width: contentWidth,
               },
               style,
             ]}
@@ -216,9 +221,10 @@ export function AlertDialogDescription({
 // Action
 type AlertDialogActionProps = {
   children: React.ReactNode;
-  onPress?: () => void;
+  onPress?: () => void | Promise<void>;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  disabled?: boolean;
 };
 
 export function AlertDialogAction({
@@ -226,16 +232,23 @@ export function AlertDialogAction({
   onPress,
   style,
   textStyle,
+  disabled = false,
 }: AlertDialogActionProps) {
   const { setOpen } = useAlertDialog();
 
-  const handlePress = () => {
+  const handlePress = async () => {
+    if (disabled) return;
     onPress?.();
     setOpen(false);
   };
 
   return (
-    <Button style={[style]} variant="destructive" onPress={handlePress}>
+    <Button
+      style={[style]}
+      variant='destructive'
+      onPress={handlePress}
+      disabled={disabled}
+    >
       <Text style={[styles.actionButtonText, textStyle]}>{children}</Text>
     </Button>
   );
@@ -244,9 +257,10 @@ export function AlertDialogAction({
 // Cancel
 type AlertDialogCancelProps = {
   children: React.ReactNode;
-  onPress?: () => void;
+  onPress?: () => void | Promise<void>;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  disabled?: boolean;
 };
 
 export function AlertDialogCancel({
@@ -254,16 +268,23 @@ export function AlertDialogCancel({
   onPress,
   style,
   textStyle,
+  disabled = false,
 }: AlertDialogCancelProps) {
   const { setOpen } = useAlertDialog();
 
-  const handlePress = () => {
+  const handlePress = async () => {
+    if (disabled) return;
     onPress?.();
     setOpen(false);
   };
 
   return (
-    <Button style={[style]} onPress={handlePress} variant="outline">
+    <Button
+      style={[style]}
+      onPress={handlePress}
+      variant='outline'
+      disabled={disabled}
+    >
       <ButtonText style={[textStyle]}>{children}</ButtonText>
     </Button>
   );
@@ -288,8 +309,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.background,
     borderRadius: 12,
     padding: 24,
-    width: '100%',
-    minWidth: 320,
     maxWidth: 512,
     gap: 16,
     shadowColor: '#000',
@@ -303,6 +322,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'flex-end',
     gap: 8,
     marginTop: 8,

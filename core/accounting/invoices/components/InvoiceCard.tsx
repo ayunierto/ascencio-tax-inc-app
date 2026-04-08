@@ -78,8 +78,17 @@ export const InvoiceCard = ({
   const canDelete = invoice.status === 'draft';
 
   const getBillToName = () => {
-    if (invoice.billToClient) {
+    if (invoice.billToName?.trim()) {
+      return invoice.billToName;
+    }
+    if (invoice.billToClient?.fullName?.trim()) {
       return invoice.billToClient.fullName;
+    }
+    if (invoice.billToEmail?.trim()) {
+      return invoice.billToEmail;
+    }
+    if (invoice.billToPhone?.trim()) {
+      return invoice.billToPhone;
     }
     return t('noRecipient');
   };
