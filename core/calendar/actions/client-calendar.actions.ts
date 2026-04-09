@@ -26,9 +26,12 @@ export const getClientCalendarConnectUrlAction = async (
   query?: ClientCalendarConnectQuery,
 ) => {
   return (
-    await api.get<ClientCalendarConnectResponse>('/calendar/oauth/client/connect', {
-      params: query,
-    })
+    await api.get<ClientCalendarConnectResponse>(
+      '/calendar/oauth/client/connect',
+      {
+        params: query,
+      },
+    )
   ).data;
 };
 

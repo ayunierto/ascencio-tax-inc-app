@@ -204,7 +204,10 @@ export default function ProfileIndexScreen() {
                   ) : null}
                   {clientCalendarStatus?.updatedAt ? (
                     <ThemedText style={styles.calendarMetaText}>
-                      {t('lastUpdated')}: {DateTime.fromISO(clientCalendarStatus.updatedAt).toLocaleString(DateTime.DATETIME_MED)}
+                      {t('lastUpdated')}:{' '}
+                      {DateTime.fromISO(
+                        clientCalendarStatus.updatedAt,
+                      ).toLocaleString(DateTime.DATETIME_MED)}
                     </ThemedText>
                   ) : null}
                 </View>

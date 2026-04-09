@@ -126,7 +126,8 @@ export const BookingSuccessModal = ({
   });
 
   const addToCalendarMutation = useMutation({
-    mutationFn: async () => getAppointmentAddToCalendarDataAction(appointment.id),
+    mutationFn: async () =>
+      getAppointmentAddToCalendarDataAction(appointment.id),
     onSuccess: async (result) => {
       await Linking.openURL(result.googleCalendarUrl);
       toast.success(t('calendarOpenGoogleSuccess'));
@@ -207,7 +208,9 @@ export const BookingSuccessModal = ({
           </View>
 
           {/* Title */}
-          <ThemedText style={styles.title}>{t('appointmentConfirmed')}</ThemedText>
+          <ThemedText style={styles.title}>
+            {t('appointmentConfirmed')}
+          </ThemedText>
           <ThemedText style={styles.subtitle}>
             {t('appointmentConfirmedDescription')}
           </ThemedText>
