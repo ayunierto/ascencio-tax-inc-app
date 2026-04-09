@@ -21,7 +21,7 @@ import type { Service, StaffMember } from '@ascencio/shared/interfaces';
 import { useBookingStore } from '@/core/services/store/useBookingStore';
 import { CalendarDay } from '../interfaces/calendar-day.interface';
 import {
-  AvailabilityRequest,
+  AvailabilityFormValues,
   availabilitySchema,
 } from '../schemas/availability.schema';
 import { AvailableSlot } from '../interfaces/available-slot.interface';
@@ -32,7 +32,7 @@ interface AvailabilityFormProps {
   selectedService: Service;
   serviceStaff: StaffMember[];
 
-  onSubmit: (values: AvailabilityRequest) => void;
+  onSubmit: (values: AvailabilityFormValues) => void;
 }
 
 const AvailabilityForm = ({
@@ -45,7 +45,7 @@ const AvailabilityForm = ({
   const { t } = useTranslation();
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const { updateState, staffMember } = useBookingStore();
-  const form = useForm<AvailabilityRequest>({
+  const form = useForm<AvailabilityFormValues>({
     resolver: zodResolver(availabilitySchema),
     defaultValues: {
       serviceId: selectedService.id,
@@ -54,7 +54,7 @@ const AvailabilityForm = ({
     },
   });
 
-  const handleFormSubmit = (values: AvailabilityRequest) => {
+  const handleFormSubmit = (values: AvailabilityFormValues) => {
     // El staff confirmado en store tiene prioridad (slot seleccionado).
     const selectedStaffMember =
       staffMember ?? serviceStaff.find((s) => s.id === values.staffId);

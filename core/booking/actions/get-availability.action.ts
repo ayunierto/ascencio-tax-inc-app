@@ -1,15 +1,9 @@
 import { api } from '@/core/api/api';
+import { type SearchAvailabilityRequest } from '@ascencio/shared';
 import { AvailableSlot } from '../interfaces/available-slot.interface';
 
-interface AvailabilityRequest {
-  serviceId: string;
-  date: string;
-  staffId?: string;
-  timeZone: string; // IANA, ej. "America/Lima", "America/Toronto", etc.
-}
-
 export const getAvailabilityAction = async (
-  data: AvailabilityRequest
+  data: SearchAvailabilityRequest,
 ): Promise<AvailableSlot[]> => {
   return (await api.post<AvailableSlot[]>('/availability', data)).data;
 };

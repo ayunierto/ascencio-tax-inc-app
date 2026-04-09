@@ -24,8 +24,15 @@ import { toast } from 'sonner-native';
 export default function BookingSummaryScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { service, staffMember, start, end, timeZone, comments, resetBooking } =
-    useBookingStore();
+  const {
+    service,
+    staffMember,
+    start: startTimeUTC,
+    end: endTimeUTC,
+    timeZone,
+    comments,
+    resetBooking,
+  } = useBookingStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [bookedAppointment, setBookedAppointment] =
     useState<Appointment | null>(null);
@@ -47,7 +54,7 @@ export default function BookingSummaryScreen() {
     },
   });
 
-  if (!service || !staffMember || !start || !timeZone || !end) {
+  if (!service || !staffMember || !startTimeUTC || !timeZone || !endTimeUTC) {
     return (
       <EmptyContent
         title={t('incompleteBookingInformation')}
@@ -61,8 +68,8 @@ export default function BookingSummaryScreen() {
       {
         serviceId: service.id,
         staffId: staffMember.id,
-        start,
-        end,
+        startTimeUTC,
+        endTimeUTC,
         timeZone,
         comments: comments || '',
       },
@@ -98,10 +105,12 @@ export default function BookingSummaryScreen() {
     router.push('/(app)/appointments/(tabs)');
   };
 
-  const startDateTime = DateTime.fromISO(start, { zone: 'utc' }).setZone(
+  const startDateTime = DateTime.fromISO(startTimeUTC, { zone: 'utc' }).setZone(
     timeZone,
   );
-  const endDateTime = DateTime.fromISO(end, { zone: 'utc' }).setZone(timeZone);
+  const endDateTime = DateTime.fromISO(endTimeUTC, { zone: 'utc' }).setZone(
+    timeZone,
+  );
 
   const duration = endDateTime.diff(startDateTime, 'minutes').minutes;
 

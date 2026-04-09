@@ -1,15 +1,8 @@
 import * as z from 'zod';
+import { searchAvailabilitySchema } from '@ascencio/shared';
 
-export const availabilitySchema = z.object({
-  serviceId: z.string().uuid({ message: 'invalidServiceIdFormat' }),
-  staffId: z.string().optional(),
-  date: z.string({
-    message: 'dateRequired',
-  }),
+export const availabilitySchema = searchAvailabilitySchema.extend({
   time: z.string({ message: 'timeRequired' }).min(4, 'timeRequired'),
-  timeZone: z.string({
-    message: 'timeZoneRequired',
-  }),
 });
 
-export type AvailabilityRequest = z.infer<typeof availabilitySchema>;
+export type AvailabilityFormValues = z.infer<typeof availabilitySchema>;

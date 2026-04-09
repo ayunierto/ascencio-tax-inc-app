@@ -62,18 +62,17 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
+          "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera to take photos of receipts and upload them for tax reporting purposes.",
+          "recordAudioAndroid": false
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
-          "isAccessMediaLocationEnabled": true,
-          "granularPermissions": ["audio", "photo"]
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photo library so you can select and upload photos of receipts for tax reporting.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save receipt images processed within the app to your photo library.",
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": ["photo"]
         }
       ]
     ],

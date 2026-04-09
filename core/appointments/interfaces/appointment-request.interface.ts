@@ -1,8 +1,8 @@
 export interface AppointmentRequest {
   serviceId: string; // UUID
   staffId: string; // UUID
-  start: string; // ISO local del usuario "YYYY-MM-DDTHH:mm"
-  end: string; // ISO local del usuario "YYYY-MM-DDTHH:mm"
+  startTimeUTC: string; // ISO UTC "YYYY-MM-DDTHH:mm:ss.sssZ"
+  endTimeUTC: string; // ISO UTC "YYYY-MM-DDTHH:mm:ss.sssZ"
   timeZone: string; // IANA time zone string. E.g., "America/New_York"
   comments?: string; // Optional comments
 }

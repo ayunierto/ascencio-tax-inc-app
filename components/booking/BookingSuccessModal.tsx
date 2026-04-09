@@ -1,14 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { DateTime } from 'luxon';
 import React, { useEffect, useRef } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Animated,
+  Linking,
   Modal,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { toast } from 'sonner-native';
 
+import { getAppointmentAddToCalendarDataAction } from '@/core/appointments/actions';
+import { getClientCalendarStatusAction } from '@/core/calendar/actions';
+import { startClientCalendarOAuth } from '@/core/calendar/utils/client-calendar-oauth';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
 import { theme } from '@/components/ui/theme';
 import { ThemedText } from '@/components/ui/ThemedText';
@@ -27,6 +34,7 @@ export const BookingSuccessModal = ({
   onClose,
   onViewAppointments,
 }: BookingSuccessModalProps) => {
+  const { t } = useTranslation();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const confettiAnims = useRef(
     Array.from({ length: 15 }, () => ({
@@ -85,6 +93,50 @@ export const BookingSuccessModal = ({
   }, [visible]);
 
   // TODO: Implement add-to-calendar functionality (expo-calendar).
+
+  const {
+    data: clientCalendarStatus,
+    isFetching: loadingClientCalendarStatus,
+    refetch: refetchClientCalendarStatus,
+  } = useQuery({
+    queryKey: ['client-calendar-status'],
+    queryFn: getClientCalendarStatusAction,
+    enabled: visible,
+  });
+
+  const connectCalendarMutation = useMutation({
+    mutationFn: async () =>
+      startClientCalendarOAuth('/appointments/new/summary'),
+    onSuccess: async (result) => {
+      if (result.status === 'success') {
+        toast.success(t('googleCalendarConnectedNow'));
+      } else if (result.status === 'error') {
+        toast.error(t('error'), {
+          description: result.error ?? t('genericTryAgainLater'),
+        });
+      }
+
+      await refetchClientCalendarStatus();
+    },
+    onError: () => {
+      toast.error(t('error'), {
+        description: t('genericTryAgainLater'),
+      });
+    },
+  });
+
+  const addToCalendarMutation = useMutation({
+    mutationFn: async () => getAppointmentAddToCalendarDataAction(appointment.id),
+    onSuccess: async (result) => {
+      await Linking.openURL(result.googleCalendarUrl);
+      toast.success(t('calendarOpenGoogleSuccess'));
+    },
+    onError: () => {
+      toast.error(t('error'), {
+        description: t('genericTryAgainLater'),
+      });
+    },
+  });
 
   const startDate = DateTime.fromISO(appointment.start);
   const now = DateTime.now();
@@ -155,9 +207,9 @@ export const BookingSuccessModal = ({
           </View>
 
           {/* Title */}
-          <ThemedText style={styles.title}>Booking Confirmed!</ThemedText>
+          <ThemedText style={styles.title}>{t('appointmentConfirmed')}</ThemedText>
           <ThemedText style={styles.subtitle}>
-            Your appointment has been successfully scheduled
+            {t('appointmentConfirmedDescription')}
           </ThemedText>
 
           {/* Appointment Details Card */}
@@ -190,7 +242,7 @@ export const BookingSuccessModal = ({
                 <View style={styles.detailRow}>
                   <Ionicons name='videocam' size={20} color={theme.primary} />
                   <ThemedText style={styles.detailText}>
-                    Online Meeting
+                    {t('onlineMeeting')}
                   </ThemedText>
                 </View>
               )}
@@ -199,35 +251,85 @@ export const BookingSuccessModal = ({
           {/* Countdown */}
           <View style={styles.countdownContainer}>
             <ThemedText style={styles.countdownLabel}>
-              Your appointment is in:
+              {t('appointmentStartsIn')}
             </ThemedText>
             <ThemedText style={styles.countdownValue}>
               {getCountdown()}
             </ThemedText>
           </View>
 
+          {/* Calendar Integration */}
+          <View style={styles.calendarCard}>
+            <View style={styles.calendarHeaderRow}>
+              <Ionicons name='logo-google' size={18} color={theme.primary} />
+              <ThemedText style={styles.calendarTitle}>
+                {t('calendarIntegration')}
+              </ThemedText>
+              <Ionicons
+                name={
+                  clientCalendarStatus?.connected
+                    ? 'checkmark-circle'
+                    : 'close-circle'
+                }
+                size={18}
+                color={
+                  clientCalendarStatus?.connected
+                    ? theme.success
+                    : theme.mutedForeground
+                }
+              />
+            </View>
+
+            <ThemedText style={styles.calendarHint}>
+              {loadingClientCalendarStatus
+                ? t('checkingAvailability')
+                : clientCalendarStatus?.connected
+                  ? t('calendarConnectedAddEventHint')
+                  : t('calendarNotConnectedAddEventHint')}
+            </ThemedText>
+
+            {clientCalendarStatus?.connected ? (
+              <Button
+                variant='outline'
+                onPress={() => addToCalendarMutation.mutate()}
+                isLoading={addToCalendarMutation.isPending}
+                style={styles.button}
+              >
+                <ButtonIcon name='calendar-outline' />
+                <ButtonText>
+                  {addToCalendarMutation.isPending
+                    ? t('addingToCalendar')
+                    : t('addToGoogleCalendar')}
+                </ButtonText>
+              </Button>
+            ) : (
+              <Button
+                variant='outline'
+                onPress={() => connectCalendarMutation.mutate()}
+                isLoading={connectCalendarMutation.isPending}
+                style={styles.button}
+              >
+                <ButtonIcon name='link-outline' />
+                <ButtonText>
+                  {connectCalendarMutation.isPending
+                    ? t('connectingGoogleCalendar')
+                    : t('connectGoogleCalendar')}
+                </ButtonText>
+              </Button>
+            )}
+          </View>
+
           {/* Action Buttons */}
           <View style={styles.buttonsContainer}>
-            {/* TODO: Uncomment when calendar functionality is implemented
-            <Button
-              variant="outline"
-              onPress={handleAddToCalendar}
-              style={styles.button}
-            >
-              <ButtonIcon name="calendar-outline" />
-              <ButtonText>Add to Calendar</ButtonText>
-            </Button>
-            */}
-
             <Button onPress={onViewAppointments} style={styles.button}>
               <ButtonIcon name='list-outline' />
-              <ButtonText>View My Bookings</ButtonText>
+              <ButtonText>{t('myAppointments')}</ButtonText>
             </Button>
           </View>
 
           {/* Close Button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <ThemedText style={styles.closeText}>Done</ThemedText>
+            <ThemedText style={styles.closeText}>{t('done')}</ThemedText>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -317,6 +419,29 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: theme.primary,
+  },
+  calendarCard: {
+    width: '100%',
+    borderRadius: theme.radius,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: 14,
+    gap: 10,
+    marginBottom: 20,
+  },
+  calendarHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calendarTitle: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  calendarHint: {
+    fontSize: 13,
+    color: theme.mutedForeground,
   },
   buttonsContainer: {
     width: '100%',

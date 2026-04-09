@@ -3,8 +3,11 @@ import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import Constants from 'expo-constants';
 import * as Application from 'expo-application';
+import { DateTime } from 'luxon';
 import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner-native';
 
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card/Card';
@@ -21,6 +24,11 @@ import {
   persistLanguagePreference,
   toSupportedLanguage,
 } from '@/i18n/language';
+import {
+  disconnectClientCalendarAction,
+  getClientCalendarStatusAction,
+} from '@/core/calendar/actions';
+import { startClientCalendarOAuth } from '@/core/calendar/utils/client-calendar-oauth';
 
 export default function ProfileIndexScreen() {
   const { logout, user } = useAuthStore();
@@ -28,6 +36,50 @@ export default function ProfileIndexScreen() {
   const navigation = useNavigation();
   const { t, i18n } = useTranslation();
   const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false);
+
+  const {
+    data: clientCalendarStatus,
+    isFetching: loadingClientCalendarStatus,
+    refetch: refetchClientCalendarStatus,
+  } = useQuery({
+    queryKey: ['client-calendar-status'],
+    queryFn: getClientCalendarStatusAction,
+  });
+
+  const connectClientCalendarMutation = useMutation({
+    mutationFn: async () => startClientCalendarOAuth('/settings'),
+    onSuccess: async (result) => {
+      if (result.status === 'success') {
+        toast.success(t('googleCalendarConnectedNow'));
+      } else if (result.status === 'error') {
+        toast.error(t('error'), {
+          description: result.error ?? t('genericTryAgainLater'),
+        });
+      }
+
+      await refetchClientCalendarStatus();
+    },
+    onError: (error) => {
+      console.error('Error connecting client calendar', error);
+      toast.error(t('error'), {
+        description: t('genericTryAgainLater'),
+      });
+    },
+  });
+
+  const disconnectClientCalendarMutation = useMutation({
+    mutationFn: disconnectClientCalendarAction,
+    onSuccess: async () => {
+      toast.success(t('success'));
+      await refetchClientCalendarStatus();
+    },
+    onError: (error) => {
+      console.error('Error disconnecting client calendar', error);
+      toast.error(t('error'), {
+        description: t('genericTryAgainLater'),
+      });
+    },
+  });
 
   const currentLanguage = useMemo(
     () => toSupportedLanguage(i18n.resolvedLanguage) ?? 'en',
@@ -131,6 +183,89 @@ export default function ProfileIndexScreen() {
             </CardContent>
           </Card>
         </View> */}
+
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>
+            {t('calendarIntegration')}
+          </ThemedText>
+          <Card>
+            <CardContent style={styles.cardContent}>
+              <View style={styles.calendarStatusRow}>
+                <View style={styles.calendarStatusInfo}>
+                  <ThemedText style={styles.calendarStatusLabel}>
+                    {clientCalendarStatus?.connected
+                      ? t('googleCalendarConnected')
+                      : t('googleCalendarNotConnected')}
+                  </ThemedText>
+                  {clientCalendarStatus?.email ? (
+                    <ThemedText style={styles.calendarMetaText}>
+                      {clientCalendarStatus.email}
+                    </ThemedText>
+                  ) : null}
+                  {clientCalendarStatus?.updatedAt ? (
+                    <ThemedText style={styles.calendarMetaText}>
+                      {t('lastUpdated')}: {DateTime.fromISO(clientCalendarStatus.updatedAt).toLocaleString(DateTime.DATETIME_MED)}
+                    </ThemedText>
+                  ) : null}
+                </View>
+                <Ionicons
+                  name={
+                    clientCalendarStatus?.connected
+                      ? 'checkmark-circle'
+                      : 'close-circle'
+                  }
+                  size={20}
+                  color={
+                    clientCalendarStatus?.connected
+                      ? theme.success
+                      : theme.mutedForeground
+                  }
+                />
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.calendarButtonsRow}>
+                <Button
+                  size='sm'
+                  onPress={() => connectClientCalendarMutation.mutate()}
+                  disabled={
+                    connectClientCalendarMutation.isPending ||
+                    loadingClientCalendarStatus
+                  }
+                >
+                  <ButtonText>
+                    {clientCalendarStatus?.connected
+                      ? t('googleCalendarReconnect')
+                      : t('googleCalendarConnect')}
+                  </ButtonText>
+                </Button>
+
+                <Button
+                  size='sm'
+                  variant='outline'
+                  onPress={() => disconnectClientCalendarMutation.mutate()}
+                  disabled={
+                    disconnectClientCalendarMutation.isPending ||
+                    loadingClientCalendarStatus ||
+                    !clientCalendarStatus?.connected
+                  }
+                >
+                  <ButtonText>{t('googleCalendarDisconnect')}</ButtonText>
+                </Button>
+
+                <Button
+                  size='sm'
+                  variant='ghost'
+                  onPress={() => refetchClientCalendarStatus()}
+                  disabled={loadingClientCalendarStatus}
+                >
+                  <ButtonText>{t('refreshStatus')}</ButtonText>
+                </Button>
+              </View>
+            </CardContent>
+          </Card>
+        </View>
 
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>{t('language')}</ThemedText>
@@ -286,6 +421,33 @@ const styles = StyleSheet.create({
   languageLabel: {
     fontSize: 16,
     color: theme.foreground,
+  },
+  calendarStatusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  calendarStatusInfo: {
+    flex: 1,
+    gap: 2,
+    paddingRight: 12,
+  },
+  calendarStatusLabel: {
+    fontSize: 14,
+    color: theme.foreground,
+  },
+  calendarMetaText: {
+    fontSize: 12,
+    color: theme.mutedForeground,
+  },
+  calendarButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexWrap: 'wrap',
   },
   appInfo: {
     alignItems: 'center',

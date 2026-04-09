@@ -15,10 +15,11 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { getAvailabilityAction } from '../actions/get-availability.action';
 import { AvailableSlot } from '../interfaces/available-slot.interface';
-import { AvailabilityRequest } from '../schemas/availability.schema';
+import { AvailabilityFormValues } from '../schemas/availability.schema';
+import { normalizeAvailabilitySlots } from '../utils/slot-normalization';
 
 interface AvailabilitySlotsProps {
-  form: UseFormReturn<AvailabilityRequest>;
+  form: UseFormReturn<AvailabilityFormValues>;
   userTimeZone: string;
 
   onChange?: (slot: AvailableSlot) => void;
@@ -64,9 +65,19 @@ const AvailabilitySlots = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceId, staffId, date]);
 
+  const normalizedSlots = useMemo(() => {
+    if (!data || data.length === 0) {
+      return [] as AvailableSlot[];
+    }
+
+    return normalizeAvailabilitySlots(data);
+  }, [data]);
+
   // Group slots by time of day
   const groupedSlots = useMemo(() => {
-    if (!data) return { morning: [], afternoon: [], evening: [] };
+    if (normalizedSlots.length === 0) {
+      return { morning: [], afternoon: [], evening: [] };
+    }
 
     const groups = {
       morning: [] as AvailableSlot[],
@@ -74,7 +85,7 @@ const AvailabilitySlots = ({
       evening: [] as AvailableSlot[],
     };
 
-    data.forEach((slot) => {
+    normalizedSlots.forEach((slot) => {
       const hour = DateTime.fromISO(slot.startTimeUTC).setZone(
         userTimeZone,
       ).hour;
@@ -89,7 +100,7 @@ const AvailabilitySlots = ({
     });
 
     return groups;
-  }, [data, userTimeZone]);
+  }, [normalizedSlots, userTimeZone]);
 
   if (isError) {
     return (
@@ -106,7 +117,7 @@ const AvailabilitySlots = ({
     return <Loader message={t('checkingAvailability')} />;
   }
 
-  if (data && data.length === 0) {
+  if (normalizedSlots.length === 0) {
     return (
       <Alert style={{ width: '100%' }} variant='warning'>
         {t('noAppointmentsAvailableForDay')}
@@ -143,7 +154,8 @@ const AvailabilitySlots = ({
           style={{
             flexDirection: 'row',
             flexWrap: 'wrap',
-            gap: 10,
+            justifyContent: 'space-between',
+            rowGap: 10,
           }}
         >
           {slots.map((slot) => (
@@ -159,7 +171,7 @@ const AvailabilitySlots = ({
                 setSelectedSlot(slot);
                 onChange?.(slot);
               }}
-              style={{ flex: 1, minWidth: 120, maxWidth: 150 }}
+              style={{ width: '48%' }}
             >
               <ButtonIcon name='time-outline' />
               <ButtonText>
