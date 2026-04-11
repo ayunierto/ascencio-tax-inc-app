@@ -119,12 +119,14 @@ export const SignInForm = () => {
 
         {/* Google Sign-In Button */}
         <Button
-          variant='outline'
-          disabled={isGoogleLoading || isAppleLoading || isPending || !isGoogleReady}
+          variant="outline"
+          disabled={
+            isGoogleLoading || isAppleLoading || isPending || !isGoogleReady
+          }
           isLoading={isGoogleLoading}
           onPress={handleGoogleSignIn}
         >
-          <ButtonIcon name='logo-google' />
+          <ButtonIcon name="logo-google" />
           <ButtonText>{t('continueWithGoogle')}</ButtonText>
         </Button>
 
@@ -143,12 +145,12 @@ export const SignInForm = () => {
           />
         ) : (
           <Button
-            variant='outline'
+            variant="outline"
             disabled={isAppleLoading || isPending || !isIOS}
             isLoading={isAppleLoading}
             onPress={handleAppleSignIn}
           >
-            <ButtonIcon name='logo-apple' />
+            <ButtonIcon name="logo-apple" />
             <ButtonText>
               {isIOS ? t('continueWithApple') : t('appleSignInOnlyIOS')}
             </ButtonText>
@@ -166,18 +168,18 @@ export const SignInForm = () => {
 
         <Controller
           control={control}
-          name='email'
+          name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              leadingIcon='at-outline'
+              leadingIcon="at-outline"
               label={t('email')}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              keyboardType='email-address'
-              autoCapitalize='none'
-              autoComplete='email'
-              returnKeyType='next'
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              returnKeyType="next"
               onSubmitEditing={() => passwordInputRef.current?.focus()}
               error={!!formErrors.email}
               errorMessage={getErrorMessage(formErrors.email)}
@@ -187,19 +189,19 @@ export const SignInForm = () => {
 
         <Controller
           control={control}
-          name='password'
+          name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               ref={passwordInputRef}
-              leadingIcon='lock-closed-outline'
+              leadingIcon="lock-closed-outline"
               label={t('password')}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
               secureTextEntry={true}
-              autoComplete='password'
-              autoCapitalize='none'
-              returnKeyType='done'
+              autoComplete="password"
+              autoCapitalize="none"
+              returnKeyType="done"
               onSubmitEditing={handleSubmit(onSignIn)}
               error={!!formErrors.password}
               errorMessage={getErrorMessage(formErrors.password)}
