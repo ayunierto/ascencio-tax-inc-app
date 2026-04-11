@@ -1,12 +1,13 @@
 import { useRef } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { toast } from 'sonner-native';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { useCountryCodes } from '@/core/hooks';
-import { useGoogleSignIn, useSignUp } from '../hooks';
+import { useAppleSignIn, useGoogleSignIn, useSignUp } from '../hooks';
 import { SignUpRequest } from '@ascencio/shared';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
 import { ErrorBox } from './ErrorBox';
@@ -32,6 +33,13 @@ export default function SignUpForm() {
     isLoading: isGoogleLoading,
     isReady: isGoogleReady,
   } = useGoogleSignIn();
+  const {
+    signInWithApple,
+    isLoading: isAppleLoading,
+    isAvailable: isAppleAvailable,
+  } = useAppleSignIn();
+  const isIOS = Platform.OS === 'ios';
+  const canShowNativeAppleButton = isIOS && isAppleAvailable;
 
   // Refs for input navigation
   const lastNameRef = useRef<TextInput>(null);
@@ -78,6 +86,24 @@ export default function SignUpForm() {
     }
   };
 
+  const handleAppleSignUp = async () => {
+    try {
+      const signedIn = await signInWithApple();
+
+      if (!signedIn) {
+        return;
+      }
+
+      toast.success(t('signUpSuccess'));
+      router.replace('/(app)/(dashboard)');
+    } catch (error: unknown) {
+      const errorMessageKey =
+        error instanceof Error ? error.message : 'appleSignInError';
+      toast.error(t(errorMessageKey));
+      console.error('Apple Sign-Up Error:', error);
+    }
+  };
+
   return (
     <>
       <View style={authStyles.fieldsContainer}>
@@ -85,13 +111,45 @@ export default function SignUpForm() {
 
         <Button
           variant='outline'
-          disabled={isGoogleLoading || signUp.isPending || !isGoogleReady}
-          isLoading={isGoogleLoading || signUp.isPending}
+          disabled={
+            isGoogleLoading ||
+            isAppleLoading ||
+            signUp.isPending ||
+            !isGoogleReady
+          }
+          isLoading={isGoogleLoading}
           onPress={handleGoogleSignUp}
         >
           <ButtonIcon name='logo-google' />
           <ButtonText>{t('signUpWithGoogle')}</ButtonText>
         </Button>
+
+        {/* Apple Sign-In Button */}
+        {canShowNativeAppleButton ? (
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={
+              AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+            }
+            buttonStyle={
+              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={8}
+            style={styles.appleButton}
+            onPress={handleAppleSignUp}
+          />
+        ) : (
+          <Button
+            variant='outline'
+            disabled={isAppleLoading || signUp.isPending || !isIOS}
+            isLoading={isAppleLoading}
+            onPress={handleAppleSignUp}
+          >
+            <ButtonIcon name='logo-apple' />
+            <ButtonText>
+              {isIOS ? t('continueWithApple') : t('appleSignInOnlyIOS')}
+            </ButtonText>
+          </Button>
+        )}
 
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
@@ -263,5 +321,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 14,
     color: theme.muted,
+  },
+  appleButton: {
+    width: '100%',
+    height: 50,
   },
 });

@@ -14,6 +14,17 @@ export interface ClientCalendarConnectResponse {
 
 export interface ClientCalendarConnectQuery {
   redirectUrl?: string;
+  calendarId?: string;
+}
+
+export interface ClientCalendarListItem {
+  id: string;
+  summary: string;
+  primary: boolean;
+  accessRole?: string;
+  timeZone?: string;
+  backgroundColor?: string;
+  foregroundColor?: string;
 }
 
 export const getClientCalendarStatusAction = async () => {
@@ -40,5 +51,11 @@ export const disconnectClientCalendarAction = async () => {
     await api.post<{ disconnected: boolean }>(
       '/calendar/oauth/client/me/disconnect',
     )
+  ).data;
+};
+
+export const getClientCalendarsAction = async () => {
+  return (
+    await api.get<ClientCalendarListItem[]>('/calendar/oauth/client/calendars')
   ).data;
 };

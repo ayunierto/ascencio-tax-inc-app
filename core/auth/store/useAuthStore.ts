@@ -7,6 +7,7 @@ import {
   forgotPasswordAction,
   resetPasswordAction,
   signInAction,
+  signInWithAppleAction,
   signInWithGoogleAction,
   signUpAction,
   verifyCodeAction,
@@ -51,6 +52,13 @@ export interface AuthState {
   ) => Promise<VerifyEmailCodeResponse>;
   signIn: (credentials: SignInRequest) => Promise<SignInResponse>;
   signInWithGoogle: (idToken: string) => Promise<SignInResponse>;
+  signInWithApple: (
+    identityToken: string,
+    fullName?: {
+      givenName?: string | null;
+      familyName?: string | null;
+    } | null,
+  ) => Promise<SignInResponse>;
   checkAuthStatus: () => Promise<boolean>;
   deleteAccount: (data: DeleteAccountRequest) => Promise<DeleteAccountResponse>;
   logout: () => Promise<void>;
@@ -149,6 +157,29 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   signInWithGoogle: async (idToken: string) => {
     try {
       const response = await signInWithGoogleAction(idToken);
+      await StorageAdapter.setItem('access_token', response.access_token);
+      set({
+        user: response.user,
+        access_token: response.access_token,
+        authStatus: 'authenticated',
+      });
+      return response;
+    } catch (error) {
+      await StorageAdapter.removeItem('access_token');
+      set({ user: null, access_token: null, authStatus: 'unauthenticated' });
+      throw error;
+    }
+  },
+
+  signInWithApple: async (
+    identityToken: string,
+    fullName?: {
+      givenName?: string | null;
+      familyName?: string | null;
+    } | null,
+  ) => {
+    try {
+      const response = await signInWithAppleAction({ identityToken, fullName });
       await StorageAdapter.setItem('access_token', response.access_token);
       set({
         user: response.user,

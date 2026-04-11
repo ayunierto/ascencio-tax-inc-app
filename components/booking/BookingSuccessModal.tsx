@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { DateTime } from 'luxon';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
-  Linking,
   Modal,
   StyleSheet,
   TouchableOpacity,
@@ -13,7 +12,7 @@ import {
 } from 'react-native';
 import { toast } from 'sonner-native';
 
-import { getAppointmentAddToCalendarDataAction } from '@/core/appointments/actions';
+import { postAppointmentAddToCalendarAction } from '@/core/appointments/actions';
 import { getClientCalendarStatusAction } from '@/core/calendar/actions';
 import { startClientCalendarOAuth } from '@/core/calendar/utils/client-calendar-oauth';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
@@ -26,6 +25,8 @@ interface BookingSuccessModalProps {
   appointment: Appointment;
   onClose: () => void;
   onViewAppointments: () => void;
+  autoAddedToCalendar?: boolean;
+  autoAddingToCalendar?: boolean;
 }
 
 export const BookingSuccessModal = ({
@@ -33,9 +34,13 @@ export const BookingSuccessModal = ({
   appointment,
   onClose,
   onViewAppointments,
+  autoAddedToCalendar = false,
+  autoAddingToCalendar = false,
 }: BookingSuccessModalProps) => {
   const { t } = useTranslation();
   const scaleAnim = useRef(new Animated.Value(0)).current;
+  const [isCalendarEventAdded, setIsCalendarEventAdded] =
+    useState(autoAddedToCalendar);
   const confettiAnims = useRef(
     Array.from({ length: 15 }, () => ({
       translateY: new Animated.Value(0),
@@ -80,6 +85,8 @@ export const BookingSuccessModal = ({
           }),
         ]).start();
       });
+
+      setIsCalendarEventAdded(autoAddedToCalendar);
     } else {
       scaleAnim.setValue(0);
       confettiAnims.forEach((anim) => {
@@ -90,9 +97,7 @@ export const BookingSuccessModal = ({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
-
-  // TODO: Implement add-to-calendar functionality (expo-calendar).
+  }, [autoAddedToCalendar, visible]);
 
   const {
     data: clientCalendarStatus,
@@ -126,15 +131,14 @@ export const BookingSuccessModal = ({
   });
 
   const addToCalendarMutation = useMutation({
-    mutationFn: async () =>
-      getAppointmentAddToCalendarDataAction(appointment.id),
-    onSuccess: async (result) => {
-      await Linking.openURL(result.googleCalendarUrl);
-      toast.success(t('calendarOpenGoogleSuccess'));
+    mutationFn: async () => postAppointmentAddToCalendarAction(appointment.id),
+    onSuccess: () => {
+      setIsCalendarEventAdded(true);
+      toast.success(t('calendarAutoAddSuccess'));
     },
     onError: () => {
       toast.error(t('error'), {
-        description: t('genericTryAgainLater'),
+        description: t('calendarAutoAddError'),
       });
     },
   });
@@ -286,26 +290,50 @@ export const BookingSuccessModal = ({
             <ThemedText style={styles.calendarHint}>
               {loadingClientCalendarStatus
                 ? t('checkingAvailability')
-                : clientCalendarStatus?.connected
-                  ? t('calendarConnectedAddEventHint')
-                  : t('calendarNotConnectedAddEventHint')}
+                : autoAddingToCalendar
+                  ? t('checkingAvailability')
+                  : isCalendarEventAdded
+                    ? t('calendarAlreadyAddedHint')
+                    : clientCalendarStatus?.connected
+                      ? t('calendarConnectedAddEventHint')
+                      : t('calendarNotConnectedAddEventHint')}
             </ThemedText>
 
-            {clientCalendarStatus?.connected ? (
+            {clientCalendarStatus?.connected && isCalendarEventAdded ? (
+              <View style={styles.calendarAddedRow}>
+                <Ionicons
+                  name='checkmark-circle'
+                  size={18}
+                  color={theme.success}
+                />
+                <ThemedText style={styles.calendarAddedText}>
+                  {t('calendarAlreadyAdded')}
+                </ThemedText>
+              </View>
+            ) : null}
+
+            {clientCalendarStatus?.connected && !isCalendarEventAdded ? (
               <Button
                 variant='outline'
                 onPress={() => addToCalendarMutation.mutate()}
-                isLoading={addToCalendarMutation.isPending}
+                isLoading={
+                  addToCalendarMutation.isPending || autoAddingToCalendar
+                }
+                disabled={
+                  addToCalendarMutation.isPending || autoAddingToCalendar
+                }
                 style={styles.button}
               >
                 <ButtonIcon name='calendar-outline' />
                 <ButtonText>
                   {addToCalendarMutation.isPending
                     ? t('addingToCalendar')
-                    : t('addToGoogleCalendar')}
+                    : t('addToGoogleCalendarAutomatically')}
                 </ButtonText>
               </Button>
-            ) : (
+            ) : null}
+
+            {!clientCalendarStatus?.connected ? (
               <Button
                 variant='outline'
                 onPress={() => connectCalendarMutation.mutate()}
@@ -319,7 +347,7 @@ export const BookingSuccessModal = ({
                     : t('connectGoogleCalendar')}
                 </ButtonText>
               </Button>
-            )}
+            ) : null}
           </View>
 
           {/* Action Buttons */}
@@ -445,6 +473,17 @@ const styles = StyleSheet.create({
   calendarHint: {
     fontSize: 13,
     color: theme.mutedForeground,
+  },
+  calendarAddedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 6,
+  },
+  calendarAddedText: {
+    fontSize: 13,
+    color: theme.success,
+    fontWeight: '600',
   },
   buttonsContainer: {
     width: '100%',

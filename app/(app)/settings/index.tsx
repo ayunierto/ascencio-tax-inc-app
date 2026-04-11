@@ -26,6 +26,7 @@ import {
 } from '@/i18n/language';
 import {
   disconnectClientCalendarAction,
+  getClientCalendarsAction,
   getClientCalendarStatusAction,
 } from '@/core/calendar/actions';
 import { startClientCalendarOAuth } from '@/core/calendar/utils/client-calendar-oauth';
@@ -46,8 +47,19 @@ export default function ProfileIndexScreen() {
     queryFn: getClientCalendarStatusAction,
   });
 
+  const {
+    data: clientCalendars,
+    isFetching: loadingClientCalendars,
+    refetch: refetchClientCalendars,
+  } = useQuery({
+    queryKey: ['client-calendars'],
+    queryFn: getClientCalendarsAction,
+    enabled: Boolean(clientCalendarStatus?.connected),
+  });
+
   const connectClientCalendarMutation = useMutation({
-    mutationFn: async () => startClientCalendarOAuth('/settings'),
+    mutationFn: async (calendarId?: string) =>
+      startClientCalendarOAuth('/settings', { calendarId }),
     onSuccess: async (result) => {
       if (result.status === 'success') {
         toast.success(t('googleCalendarConnectedNow'));
@@ -57,7 +69,10 @@ export default function ProfileIndexScreen() {
         });
       }
 
-      await refetchClientCalendarStatus();
+      await Promise.all([
+        refetchClientCalendarStatus(),
+        refetchClientCalendars(),
+      ]);
     },
     onError: (error) => {
       console.error('Error connecting client calendar', error);
@@ -231,7 +246,9 @@ export default function ProfileIndexScreen() {
               <View style={styles.calendarButtonsRow}>
                 <Button
                   size='sm'
-                  onPress={() => connectClientCalendarMutation.mutate()}
+                  onPress={() =>
+                    connectClientCalendarMutation.mutate(undefined)
+                  }
                   disabled={
                     connectClientCalendarMutation.isPending ||
                     loadingClientCalendarStatus
@@ -260,12 +277,88 @@ export default function ProfileIndexScreen() {
                 <Button
                   size='sm'
                   variant='ghost'
-                  onPress={() => refetchClientCalendarStatus()}
+                  onPress={() => {
+                    void Promise.all([
+                      refetchClientCalendarStatus(),
+                      refetchClientCalendars(),
+                    ]);
+                  }}
                   disabled={loadingClientCalendarStatus}
                 >
                   <ButtonText>{t('refreshStatus')}</ButtonText>
                 </Button>
               </View>
+
+              {clientCalendarStatus?.connected ? (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.calendarListContainer}>
+                    <ThemedText style={styles.calendarListTitle}>
+                      {t('selectCalendarDestination')}
+                    </ThemedText>
+
+                    {loadingClientCalendars ? (
+                      <ThemedText style={styles.calendarMetaText}>
+                        {t('loadingCalendars')}
+                      </ThemedText>
+                    ) : clientCalendars == null ||
+                      clientCalendars.length === 0 ? (
+                      <ThemedText style={styles.calendarMetaText}>
+                        {t('noCalendarsFound')}
+                      </ThemedText>
+                    ) : (
+                      clientCalendars.map((calendar) => {
+                        const isSelected =
+                          clientCalendarStatus.calendarId === calendar.id;
+
+                        return (
+                          <View
+                            key={calendar.id}
+                            style={styles.calendarOptionRow}
+                          >
+                            <View style={styles.calendarOptionInfo}>
+                              <ThemedText style={styles.calendarOptionTitle}>
+                                {calendar.summary}
+                                {calendar.primary
+                                  ? ` (${t('primaryCalendarLabel')})`
+                                  : ''}
+                              </ThemedText>
+                              {calendar.timeZone ? (
+                                <ThemedText style={styles.calendarMetaText}>
+                                  {calendar.timeZone}
+                                </ThemedText>
+                              ) : null}
+                            </View>
+
+                            {isSelected ? (
+                              <Ionicons
+                                name='checkmark-circle'
+                                size={20}
+                                color={theme.success}
+                              />
+                            ) : (
+                              <Button
+                                size='sm'
+                                variant='outline'
+                                onPress={() =>
+                                  connectClientCalendarMutation.mutate(
+                                    calendar.id,
+                                  )
+                                }
+                                disabled={
+                                  connectClientCalendarMutation.isPending
+                                }
+                              >
+                                <ButtonText>{t('useThisCalendar')}</ButtonText>
+                              </Button>
+                            )}
+                          </View>
+                        );
+                      })
+                    )}
+                  </View>
+                </>
+              ) : null}
             </CardContent>
           </Card>
         </View>
@@ -451,6 +544,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     flexWrap: 'wrap',
+  },
+  calendarListContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  calendarListTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.foreground,
+  },
+  calendarOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  calendarOptionInfo: {
+    flex: 1,
+    gap: 2,
+    paddingRight: 8,
+  },
+  calendarOptionTitle: {
+    fontSize: 13,
+    color: theme.foreground,
   },
   appInfo: {
     alignItems: 'center',

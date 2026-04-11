@@ -11,7 +11,7 @@ Crear proyecto en Firebase Console y configurar la app para usar Firebase Authen
 - Registrar SHA-1/SHA-256 en Firebase Console (app Android).
 - Agregar SHA de Play App Signing (si aplica) en Firebase.
 - Configurar OAuth Client Android y Web (Google Cloud Console).
-- Configurar Web Client ID en backend (setting `mobile.googleWebClientId` o env `MOBILE_GOOGLE_WEB_CLIENT_ID`) para que la app lo consuma desde `/api/v1/mobile-config`.
+- Configurar Web Client ID en backend (setting `mobile.googleWebClientId` o env `MOBILE_GOOGLE_WEB_CLIENT_ID`) para que la app lo consuma desde `/mobile-config`.
 - Subir `google-services.json` y `GoogleService-Info.plist` al proyecto.
 - Habilitar Google Sign-In en Firebase Authentication.
 - Configurar OAuth consent screen y políticas (privacy/terms).

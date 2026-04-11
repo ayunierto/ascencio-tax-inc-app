@@ -47,7 +47,7 @@ En Firebase del mismo proyecto:
 
 ## 4) Backend y config movil
 
-La app movil toma el `webClientId` desde `GET /api/v1/mobile-config` (`googleWebClientId`).
+La app movil toma el `webClientId` desde `GET/mobile-config` (`googleWebClientId`).
 
 Debes configurar en API el mismo OAuth Web Client ID creado en Google Cloud:
 

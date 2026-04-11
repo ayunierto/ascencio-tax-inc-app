@@ -3,13 +3,13 @@ import * as SecureStore from 'expo-secure-store';
 
 const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL;
 // Normaliza para asegurar que incluya la versión /v1 al final.
-const baseURL = rawBaseUrl
-  ? `${rawBaseUrl.replace(/\/$/, '')}${rawBaseUrl.endsWith('/v1') ? '' : '/v1'}`
-  : 'http://localhost:3000/api/v1';
+if (!rawBaseUrl) {
+  throw new Error('EXPO_PUBLIC_API_URL is not set in environment variables');
+}
 
-const api = axios.create({
-  baseURL,
-});
+const baseURL = `${rawBaseUrl.replace(/\/$/, '')}`;
+
+const api = axios.create({ baseURL });
 
 api.interceptors.request.use(async (config) => {
   const access_token = await SecureStore.getItemAsync('access_token');

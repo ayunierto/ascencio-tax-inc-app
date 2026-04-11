@@ -23,12 +23,16 @@ const getErrorFromCallbackUrl = (url: string): string | undefined => {
 
 export const startClientCalendarOAuth = async (
   redirectPath: string,
+  options?: { calendarId?: string },
 ): Promise<ClientCalendarOAuthResult> => {
   const redirectUrl = ExpoLinking.createURL(redirectPath, {
     queryParams: { calendar_oauth: '1' },
   });
 
-  const { url } = await getClientCalendarConnectUrlAction({ redirectUrl });
+  const { url } = await getClientCalendarConnectUrlAction({
+    redirectUrl,
+    calendarId: options?.calendarId,
+  });
   const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
 
   if (result.type === 'success') {

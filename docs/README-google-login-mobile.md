@@ -137,7 +137,7 @@ Luego:
 
 ## Paso 6 - Configurar backend (mobile-config)
 
-La app mobile obtiene el Web Client ID desde el backend en `GET /api/v1/mobile-config` (`googleWebClientId`).
+La app mobile obtiene el Web Client ID desde el backend en `GET /mobile-config` (`googleWebClientId`).
 
 Debes establecer en API uno de estos:
 

@@ -4,6 +4,7 @@ export * from './forgot-password.action';
 export * from './resend-code.action';
 export * from './reset-password.action';
 export * from './sign-in.action';
+export * from './sign-in-with-apple.action';
 export * from './sign-in-with-google.action';
 export * from './sign-up.action';
 export * from './verify-code.action';

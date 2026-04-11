@@ -1,23 +1,39 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { BookingProgressStepper } from '@/components/booking/BookingProgressStepper';
 import { BookingSuccessModal } from '@/components/booking/BookingSuccessModal';
 import { Card, CardContent } from '@/components/ui';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
 import { theme } from '@/components/ui/theme';
 import { ThemedText } from '@/components/themed-text';
-import { bookAppointment } from '@/core/appointments/actions';
+import {
+  bookAppointment,
+  postAppointmentAddToCalendarAction,
+} from '@/core/appointments/actions';
 import { Appointment } from '@/core/appointments/interfaces';
 import { AppointmentRequest } from '@/core/appointments/interfaces/appointment-request.interface';
+import {
+  bookingSummaryOptionsSchema,
+  BookingSummaryOptionsValues,
+} from '@/core/appointments/schemas/booking-summary-options.schema';
 import { EmptyContent } from '@/core/components';
+import { getClientCalendarStatusAction } from '@/core/calendar/actions';
 import { ServerException } from '@/core/interfaces/server-exception.response';
 import { useBookingStore } from '@/core/services/store/useBookingStore';
 import { Ionicons } from '@expo/vector-icons';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { DateTime } from 'luxon';
 import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, TouchableOpacity, View, StyleSheet } from 'react-native';
+import {
+  ScrollView,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Switch,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 
@@ -36,6 +52,14 @@ export default function BookingSummaryScreen() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [bookedAppointment, setBookedAppointment] =
     useState<Appointment | null>(null);
+  const [autoAddedToCalendar, setAutoAddedToCalendar] = useState(false);
+
+  const summaryOptionsForm = useForm<BookingSummaryOptionsValues>({
+    resolver: zodResolver(bookingSummaryOptionsSchema),
+    defaultValues: {
+      addToCalendar: false,
+    },
+  });
 
   const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending } = useMutation<
@@ -54,6 +78,17 @@ export default function BookingSummaryScreen() {
     },
   });
 
+  const { data: clientCalendarStatus, isLoading: loadingCalendarStatus } =
+    useQuery({
+      queryKey: ['client-calendar-status'],
+      queryFn: getClientCalendarStatusAction,
+    });
+
+  const autoAddToCalendarMutation = useMutation({
+    mutationFn: (appointmentId: string) =>
+      postAppointmentAddToCalendarAction(appointmentId),
+  });
+
   if (!service || !staffMember || !startTimeUTC || !timeZone || !endTimeUTC) {
     return (
       <EmptyContent
@@ -63,29 +98,46 @@ export default function BookingSummaryScreen() {
     );
   }
 
-  const handleConfirm = async () => {
-    await mutate(
-      {
-        serviceId: service.id,
-        staffId: staffMember.id,
-        startTimeUTC,
-        endTimeUTC,
-        timeZone,
-        comments: comments || '',
-      },
-      {
-        onSuccess(appointment) {
-          setBookedAppointment(appointment);
-          setShowSuccessModal(true);
+  const handleConfirm = summaryOptionsForm.handleSubmit(
+    async (values: BookingSummaryOptionsValues) => {
+      await mutate(
+        {
+          serviceId: service.id,
+          staffId: staffMember.id,
+          startTimeUTC,
+          endTimeUTC,
+          timeZone,
+          comments: comments || '',
         },
-        onError(error) {
-          toast.error(error.response?.data.message || error.message, {
-            description: t('error'),
-          });
+        {
+          onSuccess: (appointment) => {
+            setAutoAddedToCalendar(false);
+            setBookedAppointment(appointment);
+            setShowSuccessModal(true);
+
+            if (values.addToCalendar && clientCalendarStatus?.connected) {
+              autoAddToCalendarMutation.mutate(appointment.id, {
+                onSuccess: () => {
+                  setAutoAddedToCalendar(true);
+                  toast.success(t('calendarAutoAddSuccess'));
+                },
+                onError: () => {
+                  toast.error(t('error'), {
+                    description: t('calendarAutoAddError'),
+                  });
+                },
+              });
+            }
+          },
+          onError(error) {
+            toast.error(error.response?.data.message || error.message, {
+              description: t('error'),
+            });
+          },
         },
-      },
-    );
-  };
+      );
+    },
+  );
 
   const handleEdit = (section: string) => {
     if (section === 'service' || section === 'staff' || section === 'time') {
@@ -276,6 +328,55 @@ export default function BookingSummaryScreen() {
             </Card>
           )}
 
+          <Card>
+            <CardContent style={styles.cardContent}>
+              <View style={styles.autoAddCalendarRow}>
+                <View style={styles.autoAddCalendarInfo}>
+                  <View style={styles.cardLabelRow}>
+                    <Ionicons
+                      name='calendar-outline'
+                      size={20}
+                      color={theme.primary}
+                    />
+                    <ThemedText style={styles.cardLabel}>
+                      {t('calendarIntegration')}
+                    </ThemedText>
+                  </View>
+
+                  <ThemedText style={styles.autoAddCalendarTitle}>
+                    {t('autoAddToCalendarLabel')}
+                  </ThemedText>
+
+                  <Link href={'/settings'}>
+                    <ThemedText style={styles.autoAddCalendarHint}>
+                      {loadingCalendarStatus
+                        ? t('checkingAvailability')
+                        : clientCalendarStatus?.connected
+                          ? t('autoAddToCalendarDescription')
+                          : t('autoAddToCalendarUnavailable')}
+                    </ThemedText>
+                  </Link>
+                </View>
+
+                <Controller
+                  control={summaryOptionsForm.control}
+                  name='addToCalendar'
+                  render={({ field: { onChange, value } }) => (
+                    <Switch
+                      value={value}
+                      onValueChange={onChange}
+                      disabled={
+                        loadingCalendarStatus ||
+                        !clientCalendarStatus?.connected
+                      }
+                      trackColor={{ false: theme.muted, true: theme.primary }}
+                    />
+                  )}
+                />
+              </View>
+            </CardContent>
+          </Card>
+
           <View style={styles.actions}>
             <Button
               onPress={handleBack}
@@ -310,6 +411,8 @@ export default function BookingSummaryScreen() {
           onClose={handleModalClose}
           onViewAppointments={handleModalClose}
           appointment={bookedAppointment}
+          autoAddedToCalendar={autoAddedToCalendar}
+          autoAddingToCalendar={autoAddToCalendarMutation.isPending}
         />
       )}
     </>
@@ -378,6 +481,26 @@ const styles = StyleSheet.create({
   detailText: {
     fontSize: 13,
     color: theme.mutedForeground,
+  },
+  autoAddCalendarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  autoAddCalendarInfo: {
+    flex: 1,
+    gap: 6,
+  },
+  autoAddCalendarTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  autoAddCalendarHint: {
+    fontSize: 13,
+    color: theme.primary,
+    lineHeight: 18,
+    textDecorationLine: 'underline',
   },
   actions: {
     flexDirection: 'row',
