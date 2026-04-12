@@ -50,6 +50,9 @@ importers:
       axios:
         specifier: ^1.12.2
         version: 1.15.0
+      babel-preset-expo:
+        specifier: ~55.0.17
+        version: 55.0.17(@babel/core@7.29.0)(@babel/runtime@7.29.2)(expo@55.0.14)(react-refresh@0.14.2)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
