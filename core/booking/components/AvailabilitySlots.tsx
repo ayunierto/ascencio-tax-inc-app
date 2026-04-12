@@ -53,6 +53,15 @@ const AvailabilitySlots = ({
         timeZone: userTimeZone,
       });
     },
+    retry: (failureCount, error) => {
+      const statusCode = error.response?.status;
+
+      if (statusCode != null && statusCode < 500) {
+        return false;
+      }
+
+      return failureCount < 2;
+    },
     enabled: Boolean(serviceId && date), // permitir consulta solo por servicio+fecha
     staleTime: 0, // Siempre considerar datos obsoletos (no cache)
     gcTime: 0, // No mantener en memoria después de desmontar
@@ -103,12 +112,17 @@ const AvailabilitySlots = ({
   }, [normalizedSlots, userTimeZone]);
 
   if (isError) {
+    if (__DEV__) {
+      console.warn('[AvailabilitySlots] Failed to load availability', {
+        statusCode: availabilityError.response?.status,
+        response: availabilityError.response?.data,
+      });
+    }
+
     return (
       <EmptyContent
         title={t('failedCheckAvailability')}
-        subtitle={
-          availabilityError.response?.data.message || availabilityError.message
-        }
+        subtitle={t('genericTryAgainLater')}
       />
     );
   }
@@ -119,7 +133,7 @@ const AvailabilitySlots = ({
 
   if (normalizedSlots.length === 0) {
     return (
-      <Alert style={{ width: '100%' }} variant='warning'>
+      <Alert style={{ width: '100%' }} variant="warning">
         {t('noAppointmentsAvailableForDay')}
       </Alert>
     );
@@ -160,7 +174,7 @@ const AvailabilitySlots = ({
         >
           {slots.map((slot) => (
             <Button
-              size='sm'
+              size="sm"
               key={slot.startTimeUTC}
               variant={
                 selectedSlot?.startTimeUTC === slot.startTimeUTC
@@ -173,7 +187,7 @@ const AvailabilitySlots = ({
               }}
               style={{ width: '48%' }}
             >
-              <ButtonIcon name='time-outline' />
+              <ButtonIcon name="time-outline" />
               <ButtonText>
                 {convertUtcDateToLocalTime(
                   slot.startTimeUTC,
