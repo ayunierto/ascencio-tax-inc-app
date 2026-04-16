@@ -1,21 +1,20 @@
-import React, { useRef } from 'react';
-import { TextInput, View, StyleSheet, Platform } from 'react-native';
-import { router } from 'expo-router';
-import { Controller } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner-native';
-import * as AppleAuthentication from 'expo-apple-authentication';
+import React, { useRef } from "react";
+import { TextInput, View, StyleSheet, Platform } from "react-native";
+import { router } from "expo-router";
+import { Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner-native";
 
-import { SignInRequest } from '@ascencio/shared';
-import { useAppleSignIn, useGoogleSignIn, useSignIn } from '../hooks';
-import { ErrorBox } from './ErrorBox';
-import { Input } from '@/components/ui/Input';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/Button';
-import { authStyles } from '../styles/authStyles';
-import { resendCode } from '../actions';
-import { getErrorMessage } from '@/utils/getErrorMessage';
-import { theme } from '@/components/ui/theme';
+import { SignInRequest } from "@ascencio/shared";
+import { useAppleSignIn, useGoogleSignIn, useSignIn } from "../hooks";
+import { ErrorBox } from "./ErrorBox";
+import { Input } from "@/components/ui/Input";
+import { ThemedText } from "@/components/ui/ThemedText";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/Button";
+import { authStyles } from "../styles/authStyles";
+import { resendCode } from "../actions";
+import { getErrorMessage } from "@/utils/getErrorMessage";
+import { theme } from "@/components/ui/theme";
 
 export const SignInForm = () => {
   const { t } = useTranslation();
@@ -27,37 +26,35 @@ export const SignInForm = () => {
     isReady: isGoogleReady,
     // error: googleError,
   } = useGoogleSignIn();
-  const {
-    signInWithApple,
-    isLoading: isAppleLoading,
-    isAvailable: isAppleAvailable,
-  } = useAppleSignIn();
-  const isIOS = Platform.OS === 'ios';
-  const canShowNativeAppleButton = isIOS && isAppleAvailable;
+  const { signInWithApple, isLoading: isAppleLoading } = useAppleSignIn();
+  const isIOS = Platform.OS === "ios";
+
+  const isAnySignInLoading = isGoogleLoading || isAppleLoading || isPending;
+  const isAppleButtonDisabled = isAnySignInLoading || !isIOS;
 
   const passwordInputRef = useRef<TextInput>(null);
 
   const onForgotPassword = () => {
     if (!isPending) {
-      router.push('/forgot-password');
+      router.push("/forgot-password");
     }
   };
 
   const onSignIn = (values: SignInRequest) => {
     signIn.mutateAsync(values, {
       onSuccess: () => {
-        toast.success(t('signInSuccess'));
-        router.replace('/(app)/(dashboard)');
+        toast.success(t("signInSuccess"));
+        router.replace("/(app)/(dashboard)");
       },
       onError: (error, variables) => {
         // If the response indicates that the email is not verified,
         // redirect to the verification page
-        if (error.response?.data.message === 'emailNotVerified') {
+        if (error.response?.data.message === "emailNotVerified") {
           toast.info(
-            t(error.response?.data.message || 'Please verify your email.'),
+            t(error.response?.data.message || "Please verify your email."),
           );
           resendCode(variables.email);
-          router.push('/verify-email');
+          router.push("/verify-email");
           return;
         }
 
@@ -65,12 +62,12 @@ export const SignInForm = () => {
         const errorMessageKey =
           error.response?.data.message ||
           error.message ||
-          'An unexpected error occurred.';
+          "An unexpected error occurred.";
 
         if (error.response?.status === 401) {
           // Set error in root to display above the form
-          setError('root', {
-            type: 'manual',
+          setError("root", {
+            type: "manual",
             message: t(errorMessageKey),
           });
         } else {
@@ -84,13 +81,13 @@ export const SignInForm = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      toast.success(t('signInSuccess'));
-      router.replace('/(app)/(dashboard)');
+      toast.success(t("signInSuccess"));
+      router.replace("/(app)/(dashboard)");
     } catch (error: unknown) {
       const errorMessageKey =
-        error instanceof Error ? error.message : 'googleSignInError';
+        error instanceof Error ? error.message : "googleSignInError";
       toast.error(t(errorMessageKey));
-      console.error('Google Sign-In Error:', error);
+      console.error("Google Sign-In Error:", error);
     }
   };
 
@@ -102,13 +99,13 @@ export const SignInForm = () => {
         return;
       }
 
-      toast.success(t('signInSuccess'));
-      router.replace('/(app)/(dashboard)');
+      toast.success(t("signInSuccess"));
+      router.replace("/(app)/(dashboard)");
     } catch (error: unknown) {
       const errorMessageKey =
-        error instanceof Error ? error.message : 'appleSignInError';
+        error instanceof Error ? error.message : "appleSignInError";
       toast.error(t(errorMessageKey));
-      console.error('Apple Sign-In Error:', error);
+      console.error("Apple Sign-In Error:", error);
     }
   };
 
@@ -127,41 +124,27 @@ export const SignInForm = () => {
           onPress={handleGoogleSignIn}
         >
           <ButtonIcon name="logo-google" />
-          <ButtonText>{t('continueWithGoogle')}</ButtonText>
+          <ButtonText>{t("continueWithGoogle")}</ButtonText>
         </Button>
 
         {/* Apple Sign-In Button */}
-        {canShowNativeAppleButton ? (
-          <AppleAuthentication.AppleAuthenticationButton
-            buttonType={
-              AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-            }
-            buttonStyle={
-              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-            }
-            cornerRadius={8}
-            style={styles.appleButton}
-            onPress={handleAppleSignIn}
-          />
-        ) : (
-          <Button
-            variant="outline"
-            disabled={isAppleLoading || isPending || !isIOS}
-            isLoading={isAppleLoading}
-            onPress={handleAppleSignIn}
-          >
-            <ButtonIcon name="logo-apple" />
-            <ButtonText>
-              {isIOS ? t('continueWithApple') : t('appleSignInOnlyIOS')}
-            </ButtonText>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          disabled={isAppleButtonDisabled}
+          isLoading={isAppleLoading}
+          onPress={handleAppleSignIn}
+        >
+          <ButtonIcon name="logo-apple" />
+          <ButtonText>
+            {isIOS ? t("continueWithApple") : t("appleSignInOnlyIOS")}
+          </ButtonText>
+        </Button>
 
         {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
           <ThemedText style={styles.dividerText}>
-            {t('orContinueWith')}
+            {t("orContinueWith")}
           </ThemedText>
           <View style={styles.dividerLine} />
         </View>
@@ -172,7 +155,7 @@ export const SignInForm = () => {
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               leadingIcon="at-outline"
-              label={t('email')}
+              label={t("email")}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
@@ -194,7 +177,7 @@ export const SignInForm = () => {
             <Input
               ref={passwordInputRef}
               leadingIcon="lock-closed-outline"
-              label={t('password')}
+              label={t("password")}
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
@@ -211,7 +194,7 @@ export const SignInForm = () => {
       </View>
 
       <ThemedText style={authStyles.linkText} onPress={onForgotPassword}>
-        {t('forgotPassword')}
+        {t("forgotPassword")}
       </ThemedText>
 
       <Button
@@ -219,7 +202,7 @@ export const SignInForm = () => {
         onPress={handleSubmit(onSignIn)}
         isLoading={isPending}
       >
-        <ButtonText>{isPending ? t('signingIn') : t('signIn')}</ButtonText>
+        <ButtonText>{isPending ? t("signingIn") : t("signIn")}</ButtonText>
       </Button>
     </>
   );
@@ -227,8 +210,8 @@ export const SignInForm = () => {
 
 const styles = StyleSheet.create({
   dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 20,
   },
   dividerLine: {
@@ -240,9 +223,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 14,
     color: theme.muted,
-  },
-  appleButton: {
-    width: '100%',
-    height: 50,
   },
 });
