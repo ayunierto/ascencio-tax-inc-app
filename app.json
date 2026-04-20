@@ -10,7 +10,7 @@
     "backgroundColor": "#002e5d",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ayunierto.ascenciotaxinc",
+      "bundleIdentifier": "com.ayunierto.ascenciotaxinc.dev",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -23,7 +23,14 @@
         "backgroundColor": "#ffffff"
       },
       "backgroundColor": "#002e5d",
-      "package": "com.ascenciotax.ascenciotaxinc"
+      "package": "com.ascenciotax.ascenciotaxinc.dev",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -51,7 +58,6 @@
           "iosUrlScheme": "com.googleusercontent.apps.519032916581-5boec27sn68bochdu5cvc7paptfcl5dd"
         }
       ],
-
       "expo-apple-authentication",
       "expo-localization",
       [
@@ -75,7 +81,9 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photo library so you can select and upload photos of receipts for tax reporting.",
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save receipt images processed within the app to your photo library.",
           "isAccessMediaLocationEnabled": false,
-          "granularPermissions": ["photo"]
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ]
     ],
@@ -89,6 +97,12 @@
       "eas": {
         "projectId": "47aef967-befa-4704-8ca3-520e9ea6c34d"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/47aef967-befa-4704-8ca3-520e9ea6c34d"
     }
   }
 }
