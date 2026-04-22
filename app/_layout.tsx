@@ -5,9 +5,10 @@ import * as NavigationBar from 'expo-navigation-bar';
 import * as SystemUI from 'expo-system-ui';
 import 'react-native-reanimated';
 // ⚠️ TEMPORARY: Commented out for testing
-import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 // import Purchases from 'react-native-purchases';
+import * as Updates from 'expo-updates';
 
 import { CustomTheme } from '@/theme/CustomTheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -41,6 +42,8 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const loadMobileConfig = useMobileConfigStore((state) => state.loadConfig);
+  const isCheckingForUpdatesRef = useRef(false);
+  const lastUpdateCheckAtRef = useRef(0);
 
   useEffect(() => {
     void loadMobileConfig();
@@ -58,6 +61,50 @@ export default function RootLayout() {
     NavigationBar.setStyle('dark');
   }, []);
 
+  const onFetchUpdateAsync = useCallback(async () => {
+    if (__DEV__ || !Updates.isEnabled || isCheckingForUpdatesRef.current) {
+      return;
+    }
+
+    const now = Date.now();
+    const minIntervalMs = 60 * 1000;
+    if (now - lastUpdateCheckAtRef.current < minIntervalMs) {
+      return;
+    }
+
+    isCheckingForUpdatesRef.current = true;
+    lastUpdateCheckAtRef.current = now;
+
+    try {
+      const update = await Updates.checkForUpdateAsync();
+
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (error) {
+      console.log('Error fetching latest Expo update:', error);
+    } finally {
+      isCheckingForUpdatesRef.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    void onFetchUpdateAsync();
+  }, [onFetchUpdateAsync]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        void onFetchUpdateAsync();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [onFetchUpdateAsync]);
+
   // ⚠️ TEMPORARY: Commented out for testing - RevenueCat initialization disabled
   // useEffect(() => {
   //   // Initialize RevenueCat
@@ -72,9 +119,7 @@ export default function RootLayout() {
   // }, []);
 
   return (
-    <GestureHandlerRootView
-      style={{ flex: 1, backgroundColor: CustomTheme.colors.background }}
-    >
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: CustomTheme.colors.background }}>
       <QueryClientProvider client={queryClient}>
         <SubscriptionProvider>
           <SafeAreaProvider>
@@ -91,10 +136,7 @@ export default function RootLayout() {
                 <Stack.Screen name='(auth)' options={{ headerShown: false }} />
 
                 {/* Public routes - accessible without authentication */}
-                <Stack.Screen
-                  name='(public)'
-                  options={{ headerShown: false }}
-                />
+                <Stack.Screen name='(public)' options={{ headerShown: false }} />
 
                 {/* Protected routes - requires authentication */}
                 <Stack.Screen name='(app)' options={{ headerShown: false }} />

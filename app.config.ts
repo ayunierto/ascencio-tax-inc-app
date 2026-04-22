@@ -1,7 +1,9 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const env = process.env.APP_ENV;
+  const env = process.env.APP_ENV ?? 'development';
+  console.log('APP_ENV =>', process.env.APP_ENV);
+  const projectId = '47aef967-befa-4704-8ca3-520e9ea6c34d';
 
   const isProd = env === 'production';
   const isPreview = env === 'preview';
@@ -112,12 +114,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         origin: false,
       },
       eas: {
-        projectId: '47aef967-befa-4704-8ca3-520e9ea6c34d',
+        projectId,
       },
     },
 
-     updates: {
-      url: `https://u.expo.dev/${config.extra?.eas?.projectId}`,
+    updates: {
+      url: `https://u.expo.dev/${projectId}`,
     },
     runtimeVersion: {
       policy: 'appVersion',
