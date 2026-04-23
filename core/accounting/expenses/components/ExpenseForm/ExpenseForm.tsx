@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ScrollView, View, Linking, Platform } from 'react-native';
+import { ScrollView, View, Linking, Platform, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,12 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Loader from '@/components/Loader';
 
 import { Input } from '@/components/ui/Input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/Select';
 import DateTimePicker from '@/components/ui/DateTimePicker/DateTimePicker';
 import { Category } from '@/core/accounting/categories/interfaces/category.interface';
 import {
@@ -34,17 +29,8 @@ import {
   canAnalyzeReceiptReference,
   resolveReceiptImageUrl,
 } from '@/core/accounting/expenses/utils/receipt-image.utils';
-import {
-  CreateExpenseInput,
-  createExpenseSchema,
-  Expense,
-  Subcategory,
-} from '@ascencio/shared';
-import {
-  createExpenseMutation,
-  deleteExpenseMutation,
-  updateExpenseMutation,
-} from '../../hooks';
+import { CreateExpenseInput, createExpenseSchema, Expense, Subcategory } from '@ascencio/shared';
+import { createExpenseMutation, deleteExpenseMutation, updateExpenseMutation } from '../../hooks';
 
 interface ExpenseFormProps {
   expense: Omit<Expense, 'tax'> & { tax?: number | null };
@@ -60,29 +46,20 @@ export default function ExpenseForm({
   const { t } = useTranslation();
   const imageUploaderRef = useRef<ImageUploaderRef>(null);
   const hasOpenedCameraRef = useRef(false);
-  const [isBootstrappingCamera, setIsBootstrappingCamera] = useState(
-    autoOpenCameraOnMount,
-  );
+  const [isBootstrappingCamera, setIsBootstrappingCamera] = useState(autoOpenCameraOnMount);
   const lastScannedImageRef = useRef<string | undefined>(undefined);
   const hasAutoScannedRef = useRef<boolean>(false);
-  const [totalInput, setTotalInput] = useState<string>(
-    expense.total?.toString() || '',
-  );
-  const [taxInput, setTaxInput] = useState<string>(
-    expense.tax?.toString() || '',
-  );
+  const [totalInput, setTotalInput] = useState<string>(expense.total?.toString() || '');
+  const [taxInput, setTaxInput] = useState<string>(expense.tax?.toString() || '');
   const [subcategories, setSubcategories] = useState<Subcategory[]>(
-    categories.find((cat) => cat.id === expense.category?.id)?.subcategories ||
-      [],
+    categories.find((cat) => cat.id === expense.category?.id)?.subcategories || [],
   );
 
   const sanitizeDecimalInput = (text: string) => {
     const normalized = text.replace(',', '.').replace(/[^\d.]/g, '');
     const [integerPart, ...decimalParts] = normalized.split('.');
 
-    return decimalParts.length > 0
-      ? `${integerPart}.${decimalParts.join('')}`
-      : integerPart;
+    return decimalParts.length > 0 ? `${integerPart}.${decimalParts.join('')}` : integerPart;
   };
 
   const { getReceiptValuesMutation } = useReceiptPipeline();
@@ -180,11 +157,7 @@ export default function ExpenseForm({
       }
     } catch (error: any) {
       console.error('Error saving expense:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          t('unknownErrorOccurred'),
-      );
+      toast.error(error?.response?.data?.message || error?.message || t('unknownErrorOccurred'));
     }
   };
 
@@ -196,9 +169,7 @@ export default function ExpenseForm({
           setTimeout(() => router.back(), 500);
         },
         onError: (error) => {
-          toast.error(
-            t(error.response?.data?.message || error.message || 'canNotDelete'),
-          );
+          toast.error(t(error.response?.data?.message || error.message || 'canNotDelete'));
         },
       });
     } catch (error) {
@@ -234,16 +205,13 @@ export default function ExpenseForm({
 
         toastId = toast.loading(t('extractingReceiptValues'));
 
-        const extractedValues = await getReceiptValuesMutation.mutateAsync(
-          imageUrl,
-          {
-            onError: (error) => {
-              toast.error(t('errorGettingReceiptValues'), {
-                description: error.response?.data.message || error.message,
-              });
-            },
+        const extractedValues = await getReceiptValuesMutation.mutateAsync(imageUrl, {
+          onError: (error) => {
+            toast.error(t('errorGettingReceiptValues'), {
+              description: error.response?.data.message || error.message,
+            });
           },
-        );
+        });
 
         // Update form with extracted values
         if (extractedValues.merchant) {
@@ -253,31 +221,21 @@ export default function ExpenseForm({
           // Convert YYYY-MM-DD to ISO datetime (add time component)
           const dateStr = extractedValues.date;
           // Check if it's just a date or already has time
-          const isoDateTime = dateStr.includes('T')
-            ? dateStr
-            : `${dateStr}T00:00:00.000Z`;
+          const isoDateTime = dateStr.includes('T') ? dateStr : `${dateStr}T00:00:00.000Z`;
           setValue('date', isoDateTime);
         }
-        if (
-          extractedValues.total !== undefined &&
-          extractedValues.total !== null
-        ) {
+        if (extractedValues.total !== undefined && extractedValues.total !== null) {
           // Ensure it's a number or string, handle empty strings
-          const totalValue =
-            extractedValues.total === '' ? 0 : extractedValues.total;
+          const totalValue = extractedValues.total === '' ? 0 : extractedValues.total;
           setValue('total', totalValue);
           setTotalInput(totalValue.toString());
         }
         if (extractedValues.tax !== undefined && extractedValues.tax !== null) {
           // Tax is optional: keep it undefined when OCR doesn't provide a value.
-          const rawTaxValue =
-            extractedValues.tax === '' ? undefined : extractedValues.tax;
-          const numericTaxValue =
-            rawTaxValue !== undefined ? Number(rawTaxValue) : undefined;
+          const rawTaxValue = extractedValues.tax === '' ? undefined : extractedValues.tax;
+          const numericTaxValue = rawTaxValue !== undefined ? Number(rawTaxValue) : undefined;
           const taxValue =
-            numericTaxValue !== undefined &&
-            !Number.isNaN(numericTaxValue) &&
-            numericTaxValue > 0
+            numericTaxValue !== undefined && !Number.isNaN(numericTaxValue) && numericTaxValue > 0
               ? numericTaxValue
               : undefined;
           setValue('tax', taxValue);
@@ -286,9 +244,7 @@ export default function ExpenseForm({
         if (extractedValues.categoryId) {
           setValue('categoryId', extractedValues.categoryId);
           // Update subcategories list when category is set
-          const category = categories.find(
-            (cat) => cat.id === extractedValues.categoryId,
-          );
+          const category = categories.find((cat) => cat.id === extractedValues.categoryId);
           if (category) {
             setSubcategories(category.subcategories || []);
           }
@@ -324,10 +280,7 @@ export default function ExpenseForm({
 
     const isInitialRender = previousImageUrl === currentImageUrl;
     const shouldAutoScanInitialCreate =
-      isInitialRender &&
-      expense.id === 'new' &&
-      !hasAutoScannedRef.current &&
-      !!currentImageUrl;
+      isInitialRender && expense.id === 'new' && !hasAutoScannedRef.current && !!currentImageUrl;
 
     // Don't scan if it's the same image we already scanned
     if (lastScannedImageRef.current === currentImageUrl) return;
@@ -338,8 +291,7 @@ export default function ExpenseForm({
 
     // Don't scan if this is the first render and image was already there
     // (opening existing expense with image)
-    if (previousImageUrl === undefined && expense.imageUrl === currentImageUrl)
-      return;
+    if (previousImageUrl === undefined && expense.imageUrl === currentImageUrl) return;
 
     // Mark this image as scanned
     lastScannedImageRef.current = currentImageUrl;
@@ -440,38 +392,32 @@ export default function ExpenseForm({
             <View style={{ flexDirection: 'row', gap: 16 }}>
               {watch('imageUrl') && (
                 <HeaderButton onPress={handleDownloadReceipt}>
-                  <Ionicons
-                    name='download-outline'
-                    size={24}
-                    color={theme.primary}
-                  />
+                  <Ionicons name='download-outline' size={24} color={theme.primary} />
                 </HeaderButton>
               )}
 
               <HeaderButton
                 onPress={handleSaveButton}
                 disabled={
-                  createMutation.isPending ||
-                  updateMutation.isPending ||
-                  deleteMutation.isPending
+                  createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
                 }
               >
-                <Ionicons name='save-outline' size={24} color={theme.primary} />
+                {createMutation.isPending ||
+                updateMutation.isPending ||
+                deleteMutation.isPending ? (
+                  <ActivityIndicator size='small' color={theme.primary} />
+                ) : (
+                  <Ionicons name='save-outline' size={24} color={theme.primary} />
+                )}
               </HeaderButton>
 
               {expense.id !== 'new' && (
                 <DeleteConfirmationDialog onDelete={handleDelete}>
                   <HeaderButton
                     onPress={() => {}}
-                    disabled={
-                      updateMutation.isPending || deleteMutation.isPending
-                    }
+                    disabled={updateMutation.isPending || deleteMutation.isPending}
                   >
-                    <Ionicons
-                      name='trash-outline'
-                      size={24}
-                      color={theme.destructive}
-                    />
+                    <Ionicons name='trash-outline' size={24} color={theme.destructive} />
                   </HeaderButton>
                 </DeleteConfirmationDialog>
               )}
@@ -633,9 +579,7 @@ export default function ExpenseForm({
                 value={value}
                 onValueChange={(id) => {
                   onChange(id); // setValue("categoryId", id);
-                  const sub =
-                    categories.find((cat) => cat.id === id)?.subcategories ||
-                    [];
+                  const sub = categories.find((cat) => cat.id === id)?.subcategories || [];
                   setSubcategories(sub);
                   setValue('subcategoryId', undefined);
                 }}
@@ -646,18 +590,11 @@ export default function ExpenseForm({
                   value: cat.id,
                 }))}
               >
-                <SelectTrigger
-                  placeholder={t('selectACategory')}
-                  labelText={t('category')}
-                />
+                <SelectTrigger placeholder={t('selectACategory')} labelText={t('category')} />
                 <SelectContent>
                   <ScrollView>
                     {categories.map((cat) => (
-                      <SelectItem
-                        key={cat.id}
-                        label={cat.name}
-                        value={cat.id}
-                      />
+                      <SelectItem key={cat.id} label={cat.name} value={cat.id} />
                     ))}
                   </ScrollView>
                 </SelectContent>
@@ -685,11 +622,7 @@ export default function ExpenseForm({
                   <SelectContent>
                     <ScrollView>
                       {subcategories.map((sub) => (
-                        <SelectItem
-                          key={sub.id}
-                          label={sub.name}
-                          value={sub.id}
-                        />
+                        <SelectItem key={sub.id} label={sub.name} value={sub.id} />
                       ))}
                     </ScrollView>
                   </SelectContent>

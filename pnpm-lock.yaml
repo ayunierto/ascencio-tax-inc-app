@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@ascencio/shared':
         specifier: github:ayunierto/ascencio-tax-shared#main
-        version: https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/56faf34a202f9947b944a92998a403d13cacea54
+        version: https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/a688fdb6e361e538f4fd6b1c21d85f40ed3241c5
       '@babel/plugin-transform-class-static-block':
         specifier: ^7.26.0
         version: 7.28.6(@babel/core@7.29.0)
@@ -271,8 +271,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@ascencio/shared@https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/56faf34a202f9947b944a92998a403d13cacea54':
-    resolution: {tarball: https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/56faf34a202f9947b944a92998a403d13cacea54}
+  '@ascencio/shared@https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/a688fdb6e361e538f4fd6b1c21d85f40ed3241c5':
+    resolution: {tarball: https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/a688fdb6e361e538f4fd6b1c21d85f40ed3241c5}
     version: 0.0.4
 
   '@babel/code-frame@7.29.0':
@@ -5571,7 +5571,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@ascencio/shared@https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/56faf34a202f9947b944a92998a403d13cacea54':
+  '@ascencio/shared@https://codeload.github.com/ayunierto/ascencio-tax-shared/tar.gz/a688fdb6e361e538f4fd6b1c21d85f40ed3241c5':
     dependencies:
       zod: 4.3.6
 

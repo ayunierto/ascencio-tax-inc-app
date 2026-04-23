@@ -6,9 +6,7 @@ interface HeaderButtonProps {
   children: React.ReactNode;
   style?: ViewStyle;
   disabled?: boolean;
-  hitSlop?:
-    | number
-    | { top?: number; bottom?: number; left?: number; right?: number };
+  hitSlop?: number | { top?: number; bottom?: number; left?: number; right?: number };
 }
 
 /**
@@ -37,9 +35,7 @@ export function HeaderButton({
       hitSlop={hitSlopValue}
       disabled={disabled}
     >
-      <View style={[style, { opacity: disabled ? 0.3 : isPressed ? 0.5 : 1 }]}>
-        {children}
-      </View>
+      <View style={[style, { opacity: disabled ? 0.3 : isPressed ? 0.5 : 1 }]}>{children}</View>
     </TouchableWithoutFeedback>
   );
 }
