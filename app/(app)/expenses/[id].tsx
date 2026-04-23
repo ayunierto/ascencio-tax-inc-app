@@ -132,8 +132,8 @@ export default function EditExpenseScreen() {
         imageUrl: imageUrl || expense.imageUrl,
         merchant: merchant || expense.merchant,
         date: date || expense.date,
-        total: total || expense.total,
-        tax: tax || expense.tax,
+        total: total ?? expense.total,
+        tax: tax ?? expense.tax,
         category:
           categories.find((cat) => cat.id === categoryId) || expense.category,
         subcategory:

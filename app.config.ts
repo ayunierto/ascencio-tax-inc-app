@@ -1,17 +1,14 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const env = process.env.APP_ENV ?? 'development';
-  console.log('APP_ENV =>', process.env.APP_ENV);
   const projectId = '47aef967-befa-4704-8ca3-520e9ea6c34d';
-
-  const isProd = env === 'production';
-  const isPreview = env === 'preview';
 
   return {
     ...config,
 
-    name: isProd ? 'Ascencio Tax' : isPreview ? 'Ascencio Tax Preview' : 'Ascencio Tax Dev',
+    name: 'Ascencio Tax',
+    // name: 'Ascencio Tax Preview',
+    // name:  'Ascencio Tax Dev',
     slug: 'ascencio-tax-inc',
     version: '1.1.0',
     orientation: 'portrait',
@@ -22,11 +19,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
     ios: {
       supportsTablet: true,
-      bundleIdentifier: isProd
-        ? 'com.ayunierto.ascenciotaxinc'
-        : isPreview
-          ? 'com.ayunierto.ascenciotaxinc.preview'
-          : 'com.ayunierto.ascenciotaxinc.dev',
+      bundleIdentifier: 'com.ayunierto.ascenciotaxinc',
+      // bundleIdentifier: 'com.ayunierto.ascenciotaxinc.preview',
+      // bundleIdentifier  : 'com.ayunierto.ascenciotaxinc.dev',
       usesAppleSignIn: true,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
@@ -40,11 +35,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         backgroundColor: '#ffffff',
       },
       backgroundColor: '#002e5d',
-      package: isProd
-        ? 'com.ascenciotax.ascenciotaxinc'
-        : isPreview
-          ? 'com.ascenciotax.ascenciotaxinc.preview'
-          : 'com.ascenciotax.ascenciotaxinc.dev',
+      package: 'com.ascenciotax.ascenciotaxinc',
+      // package: 'com.ascenciotax.ascenciotaxinc.preview',
+      // package: 'com.ascenciotax.ascenciotaxinc.dev',
     },
 
     web: {

@@ -35,7 +35,8 @@ export const useExpenses = () => {
     queryFn: ({ pageParam }) => getExpenses(10, pageParam * 10),
     staleTime: 1000 * 60 * 60,
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => allPages.length,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < 10 ? undefined : allPages.length,
     retry: false,
   });
 

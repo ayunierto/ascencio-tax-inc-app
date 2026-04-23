@@ -10,6 +10,8 @@ import Loader from '@/components/Loader';
 import { theme } from '@/components/ui';
 import { Expense } from '@ascencio/shared';
 
+type ExpenseDraft = Omit<Expense, 'tax'> & { tax?: number };
+
 export default function CreateExpenseScreen() {
   const { openCamera } = useLocalSearchParams<{ openCamera?: string }>();
   const shouldOpenCamera = openCamera === '1';
@@ -72,13 +74,13 @@ export default function CreateExpenseScreen() {
   }
 
   // Create a new expense with scanned details if available
-  const newExpense: Expense = {
+  const newExpense: ExpenseDraft = {
     id: 'new',
     imageUrl: imageUrl || '',
     merchant: merchant || '',
     date: date || new Date().toISOString(),
-    total: total || 0,
-    tax: tax || 0,
+    total: total ?? 0,
+    tax,
     category: categories.find((cat) => cat.id === categoryId) || undefined,
     subcategory:
       categories

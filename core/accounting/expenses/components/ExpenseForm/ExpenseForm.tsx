@@ -47,7 +47,7 @@ import {
 } from '../../hooks';
 
 interface ExpenseFormProps {
-  expense: Expense;
+  expense: Omit<Expense, 'tax'> & { tax?: number | null };
   categories: Category[];
   autoOpenCameraOnMount?: boolean;
 }
@@ -100,7 +100,7 @@ export default function ExpenseForm({
       date: expense.date.toString(),
       merchant: expense.merchant,
       total: expense.total,
-      tax: expense.tax,
+      tax: expense.tax ?? undefined,
       imageUrl: expense.imageUrl || undefined,
       notes: expense.notes || undefined,
       categoryId: expense.category?.id || undefined,
@@ -115,7 +115,7 @@ export default function ExpenseForm({
       date: expense.date.toString(),
       merchant: expense.merchant,
       total: expense.total,
-      tax: expense.tax,
+      tax: expense.tax ?? undefined,
       imageUrl: expense.imageUrl || undefined,
       notes: expense.notes || undefined,
       categoryId: expense.category?.id || undefined,
@@ -269,10 +269,19 @@ export default function ExpenseForm({
           setTotalInput(totalValue.toString());
         }
         if (extractedValues.tax !== undefined && extractedValues.tax !== null) {
-          // Ensure it's a number or string, handle empty strings
-          const taxValue = extractedValues.tax === '' ? 0 : extractedValues.tax;
+          // Tax is optional: keep it undefined when OCR doesn't provide a value.
+          const rawTaxValue =
+            extractedValues.tax === '' ? undefined : extractedValues.tax;
+          const numericTaxValue =
+            rawTaxValue !== undefined ? Number(rawTaxValue) : undefined;
+          const taxValue =
+            numericTaxValue !== undefined &&
+            !Number.isNaN(numericTaxValue) &&
+            numericTaxValue > 0
+              ? numericTaxValue
+              : undefined;
           setValue('tax', taxValue);
-          setTaxInput(taxValue.toString());
+          setTaxInput(taxValue !== undefined ? String(taxValue) : '');
         }
         if (extractedValues.categoryId) {
           setValue('categoryId', extractedValues.categoryId);
@@ -573,13 +582,19 @@ export default function ExpenseForm({
                 onBlur={() => {
                   onBlur();
                   if (!taxInput) {
-                    onChange(0);
+                    onChange(undefined);
                     return;
                   }
 
                   const num = Number(taxInput);
                   if (Number.isNaN(num)) {
-                    onChange(0);
+                    onChange(undefined);
+                    setTaxInput('');
+                    return;
+                  }
+
+                  if (num <= 0) {
+                    onChange(undefined);
                     setTaxInput('');
                     return;
                   }
@@ -591,7 +606,12 @@ export default function ExpenseForm({
                   const sanitized = sanitizeDecimalInput(text);
                   setTaxInput(sanitized);
 
-                  if (!sanitized || sanitized.endsWith('.')) return;
+                  if (!sanitized) {
+                    onChange(undefined);
+                    return;
+                  }
+
+                  if (sanitized.endsWith('.')) return;
 
                   const num = Number(sanitized);
                   if (!Number.isNaN(num)) {
