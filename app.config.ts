@@ -10,7 +10,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     // name: 'Ascencio Tax Preview',
     // name:  'Ascencio Tax Dev',
     slug: 'ascencio-tax-inc',
-    version: '1.1.0',
+    version: '1.1.1',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'ascenciotaxinc',
